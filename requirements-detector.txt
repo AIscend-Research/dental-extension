@@ -1,0 +1,18 @@
+# The heavy detector stack: HierarchicalDet = DiffusionDet + a MODIFIED
+# Detectron2, Swin-L backbone. This is the painful install (see SETUP.md) and
+# only ONE person needs it running while everyone else works off core.
+#
+# torch/torchvision are intentionally UNPINNED here: you MUST match whatever
+# CUDA build your machine (or the Kaggle image) already ships, or detectron2's
+# compiled ops will not load. Install torch FIRST, matching your CUDA, then the
+# rest. See SETUP.md for the exact ordering and the detectron2 gotcha.
+#
+# torch                  # install matching your CUDA, e.g. the Kaggle-preinstalled build
+# torchvision            # matching the torch version
+timm>=0.9                # Swin backbone
+fvcore
+iopath
+scipy
+opencv-python-headless
+pycocotools              # NOTE: HierarchicalDet vendors its own; may conflict -- see SETUP.md
+Pillow

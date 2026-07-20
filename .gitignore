@@ -1,0 +1,21 @@
+# data + weights are large and/or licensed -- never commit them
+data/dentex/
+models_weights/*.pkl
+models_weights/*.pth
+external/HierarchicalDet/
+
+# outputs
+*.png
+!figures/*.png
+outputs/
+*.pth
+*.log
+wandb/
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.ipynb_checkpoints/

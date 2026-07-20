@@ -1,0 +1,37 @@
+# Project config. Paths are relative to repo root.
+# Load this in your scripts; do not hardcode paths in modules.
+
+data:
+  # where scripts/download_dentex.py puts the DENTEX data
+  dentex_root: data/dentex
+  # the fully-labelled split is the only one with diagnosis (caries) labels
+  coco_annotations: data/dentex/annotations/disease.json
+  image_root: data/dentex/xrays
+  split:
+    val_frac: 0.15
+    test_frac: 0.15
+    seed: 0
+
+degradation:
+  # severity range each applied degradation draws from
+  severity_range: [0.3, 0.9]
+  max_simultaneous: 3
+  # set for reproducible augmented datasets; null = fresh randomness
+  seed: null
+
+model:
+  # which task setup: "caries_only" collapses diagnosis to caries vs bg,
+  # "diagnosis" keeps all four DENTEX diagnosis classes
+  task: caries_only
+  baseline_config: external/HierarchicalDet/configs/diffdet.custom.swinbase.nonpretrain.yaml
+  backbone_weights: models_weights/swin_base_patch4_window7_224_22k.pkl
+
+confidence:
+  # placeholder operating points -- TUNE these in Phase 4 with safe_deferral_rate
+  retake_below: 0.4
+  refer_below: 0.7
+
+eval:
+  target_accuracy: 0.95   # for the safe-deferral-rate headline number
+
+seed: 0

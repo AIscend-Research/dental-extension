@@ -74,10 +74,16 @@ plugs into it.
 ## Phase-by-phase mapping
 
 ### Phase 1 — Background and framing
-Not code. Read the HierarchicalDet paper, survey related work, write the delta
-statement, check IRB/ethics if any real photos of real films get collected, pick
-the target workshop and confirm the deadline/format. Keep notes in a `docs/` or
-a shared doc.
+Not code. First pass done — see `docs/phase1_background.md`: related-work
+survey (closest prior work is CheXphoto, ML4H 2020 -- same smartphone-photo
+robustness problem for chest X-rays), a draft delta statement, an IRB note
+(DENTEX itself needs no new review; a real phone-photo pilot set would),
+candidate workshops (recommend ML4H 2026 Findings track, Sep 10 2026 AoE --
+later and more achievable than the roadmap's original Aug 22 placeholder), and
+baseline models to benchmark against. This was a search-engine-summary pass,
+not a full paper read -- actually read CheXphoto and SelectiveNet in full
+before writing the real related-work section, and get the IRB note confirmed
+by your institution rather than treating it as settled.
 
 ### Phase 2 — Data and preprocessing
 - Degradation pipeline → Stream 1 (`src/data/degradation.py`, done, needs tuning)

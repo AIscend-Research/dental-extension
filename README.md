@@ -45,7 +45,11 @@ codebase is decoupled from it on purpose.
 Runs right now, no GPU, no detector:
 - `src/data/degradation.py` — the synthetic phone-artifact pipeline (Phase 2 core)
 - `src/data/dentex.py` — DENTEX COCO loading + patient-level split
-- `src/eval/metrics.py` — the safe-deferral / risk-coverage metrics (Phase 4 core)
+- `src/eval/metrics.py` — safe-deferral/risk-coverage metrics, detection
+  metrics (`coco_map`, `per_class_f1`), threshold sweep, ablation table
+  (Phase 4 core -- all implemented and tested, but need Phase 3's trained
+  detector for real numbers to plug in)
+- `src/eval/plots.py` — risk-coverage curve plotting (Phase 4)
 - `demo_degradation.py` — visual before/after grid
 - `tests/` — both suites pass
 

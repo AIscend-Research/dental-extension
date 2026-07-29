@@ -14,5 +14,6 @@ fvcore
 iopath
 scipy
 opencv-python-headless
-pycocotools              # NOTE: HierarchicalDet vendors its own; may conflict -- see SETUP.md
+# pycocotools already installed via requirements-core.txt for src/eval/metrics.py.
+# NOTE: HierarchicalDet also vendors its own copy; may conflict -- see SETUP.md
 Pillow

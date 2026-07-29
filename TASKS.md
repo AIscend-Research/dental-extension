@@ -74,13 +74,29 @@ All of this needs Stream 4 done first.
 - Size/latency/FLOPs benchmark: part of Stream 4
 
 ### Phase 4 — Evaluation and extensions
-- Accuracy/F1/mAP across severities: detection stubs in `metrics.py` +
-  `coco_3class_eval.py` from the baseline
+- Accuracy/F1/mAP across severities: `coco_map()` / `per_class_f1()` in
+  `metrics.py` are now real implementations (plain pycocotools + a pure-Python
+  IoU matcher, not `coco_3class_eval.py` -- that vendored evaluator hard-imports
+  torch/detectron2, so it can't run until Track B is installed anyway).
+  Validated against real DENTEX ground truth (705 train images, 3529 boxes) via
+  a perfect-self-prediction sanity check. **Still blocked**: real numbers need
+  Phase 3's trained detector to produce actual predictions -- nothing here can
+  substitute for that.
 - Safe deferral rate: `safe_deferral_rate()` (done)
-- Ablations (robustness-only / confidence-only / combined / +fusion): compose the
-  pieces
-- Clinician gut-check on deferred cases: qualitative, no code
-- Threshold tuning: use the risk-coverage curve on real validation output
+- Risk-coverage plotting: `src/eval/plots.py` (done, see
+  `figures/example_risk_coverage.png` -- simulated data, not real results)
+- Threshold sweep: `sweep_decision_thresholds()` grid-sweeps
+  `confidence_head.decide()`'s two thresholds against outcome arrays (done,
+  ready for real usability/detection-score/correctness arrays once they exist)
+- Ablations (robustness-only / confidence-only / combined / +fusion):
+  `ablation_table()` compares named arms on base accuracy / AURC / safe
+  deferral rate (done; needs each arm's real (correct, confidence) arrays from
+  Phase 3 runs to produce actual ablation numbers)
+- Clinician gut-check on deferred cases: qualitative, no code -- not started,
+  needs a human
+- Adjacent-field inspiration sweep (computational photography, speech
+  rejection, astronomy multi-exposure, triage tiers): not started, needs a
+  human literature pass
 
 ### Phase 5 — Writing
 Draft, internal review, limitations (label noise, synthetic-vs-real gap, dataset

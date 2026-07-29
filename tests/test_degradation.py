@@ -54,6 +54,18 @@ def test_burst_returns_requested_frames():
     assert all(s.image.shape == img.shape for s in shots)
 
 
+def test_apply_degradations_rejects_non_3channel_input():
+    # glare() silently corrupts a 2D (H, W) grayscale image into (H, W, H) via
+    # a numpy broadcasting accident instead of erroring -- apply_degradations
+    # must fail loudly on the bad shape rather than let that through.
+    grayscale = np.zeros((64, 64), dtype=np.uint8)
+    try:
+        apply_degradations(grayscale, seed=0)
+        assert False, "expected ValueError for non-3-channel input"
+    except ValueError:
+        pass
+
+
 if __name__ == "__main__":
     for fn in [
         test_output_shape_and_dtype_preserved,
@@ -61,6 +73,7 @@ if __name__ == "__main__":
         test_labels_align_to_registry,
         test_seed_is_reproducible,
         test_burst_returns_requested_frames,
+        test_apply_degradations_rejects_non_3channel_input,
     ]:
         fn()
         print("PASS", fn.__name__)

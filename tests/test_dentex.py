@@ -12,6 +12,7 @@ from src.data.dentex import (
     DIAGNOSIS_CLASSES,
     _patient_key,
     class_balance,
+    index_annotations,
     patient_level_split,
 )
 
@@ -72,6 +73,16 @@ def test_patient_level_split_covers_all_images_on_real_filenames():
     assert len(split["test"]) > 0
 
 
+def test_index_annotations_groups_by_image_and_preserves_count():
+    coco = _real_schema_coco()
+    by_image = index_annotations(coco)
+    assert sum(len(v) for v in by_image.values()) == len(coco["annotations"])
+    # image 3 has one annotation (category_id_3=0) in the fixture
+    assert len(by_image[3]) == 1
+    # an image_id with no annotations should just be absent, not a KeyError
+    assert by_image.get(999, []) == []
+
+
 def test_diagnosis_classes_match_real_categories_3_names_and_order():
     # Confirmed against the downloaded categories_3: id 0=Impacted, 1=Caries,
     # 2=Periapical Lesion, 3=Deep Caries. A lowercased/reordered constant here
@@ -92,6 +103,7 @@ if __name__ == "__main__":
         test_class_balance_still_supports_flat_coco_schema,
         test_patient_key_does_not_collapse_dentex_sequential_filenames,
         test_patient_level_split_covers_all_images_on_real_filenames,
+        test_index_annotations_groups_by_image_and_preserves_count,
         test_diagnosis_classes_match_real_categories_3_names_and_order,
         test_caries_only_map_keys_match_real_category_names,
     ]:

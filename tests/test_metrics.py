@@ -136,6 +136,15 @@ def test_coco_map_runs_and_returns_expected_keys():
     assert all(isinstance(v, float) for v in result.values())
 
 
+def test_coco_map_zero_predictions_does_not_crash():
+    # pycocotools.loadRes([]) raises IndexError on its own -- a detector
+    # predicting nothing is a real scenario (untrained/degenerate model), not
+    # something that should crash the eval loop.
+    _, ground_truth = _tiny_coco_fixture()
+    result = coco_map([], ground_truth)
+    assert result == {"mAP": 0.0, "mAP50": 0.0, "mAP75": 0.0}
+
+
 if __name__ == "__main__":
     for fn in [
         test_perfect_confidence_beats_random,
@@ -147,6 +156,7 @@ if __name__ == "__main__":
         test_sweep_decision_thresholds_high_retake_defers_everything,
         test_per_class_f1_matches_expected_tp_fp_fn,
         test_coco_map_runs_and_returns_expected_keys,
+        test_coco_map_zero_predictions_does_not_crash,
     ]:
         fn()
         print("PASS", fn.__name__)

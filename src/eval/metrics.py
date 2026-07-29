@@ -231,14 +231,24 @@ def coco_map(predictions: list[dict], ground_truth: dict) -> dict[str, float]:
 
     Returns:
         {"mAP": ..., "mAP50": ..., "mAP75": ...} (COCO's AP, AP@.5, AP@.75).
+        pycocotools returns -1.0 (not 0.0 or NaN) when a category has no
+        ground-truth instances to score against -- that's "undefined", not
+        "zero AP"; don't average it in with real scores without filtering it.
     """
+    if not predictions:
+        # pycocotools' loadRes([]) crashes (IndexError on anns[0]) rather than
+        # returning empty results -- a detector predicting nothing is a real
+        # scenario (untrained/degenerate model), so handle it directly: zero
+        # predictions means zero AP at every threshold, not a crash.
+        return {"mAP": 0.0, "mAP50": 0.0, "mAP75": 0.0}
+
     from pycocotools.coco import COCO
     from pycocotools.cocoeval import COCOeval
 
     coco_gt = COCO()
     coco_gt.dataset = ground_truth
     coco_gt.createIndex()
-    coco_dt = coco_gt.loadRes(predictions) if predictions else coco_gt.loadRes([])
+    coco_dt = coco_gt.loadRes(predictions)
     coco_eval = COCOeval(coco_gt, coco_dt, iouType="bbox")
     coco_eval.evaluate()
     coco_eval.accumulate()

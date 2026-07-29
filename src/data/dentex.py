@@ -3,10 +3,11 @@ DENTEX dataset access.
 
 DENTEX ships COCO-format annotations for panoramic dental X-rays. Only the
 fully-labelled third split (quadrant-enumeration-diagnosis) carries the
-diagnosis classes we care about: caries, deep_caries, periapical_lesion,
-impacted. For a caries-only detector you can either keep all four diagnosis
-classes or collapse to {caries, deep_caries} vs background -- decide this
-early in Phase 2, it changes the label maps everywhere downstream.
+diagnosis classes we care about: Caries, Deep Caries, Periapical Lesion,
+Impacted (see DIAGNOSIS_CLASSES for the exact names/order the data uses). For
+a caries-only detector you can either keep all four diagnosis classes or
+collapse to {Caries, Deep Caries} vs background -- decide this early in
+Phase 2, it changes the label maps everywhere downstream.
 
 This module deliberately does NOT depend on detectron2. It reads the COCO json
 into plain dicts so the degradation pipeline, the split logic, and quick
@@ -23,11 +24,16 @@ import json
 from collections import defaultdict
 from pathlib import Path
 
-# The four DENTEX diagnosis classes, in a fixed order. Keep this canonical.
-DIAGNOSIS_CLASSES = ["caries", "deep_caries", "periapical_lesion", "impacted"]
+# The four DENTEX diagnosis classes, in the exact id order the real
+# categories_3 list uses (confirmed against the downloaded annotation file:
+# id 0=Impacted, 1=Caries, 2=Periapical Lesion, 3=Deep Caries). Names match
+# the dataset's own capitalization -- do not lowercase/reorder these, or a
+# name-based lookup against real annotations will silently miss.
+DIAGNOSIS_CLASSES = ["Impacted", "Caries", "Periapical Lesion", "Deep Caries"]
 
-# If you go caries-only, this is the collapse map. Everything not listed -> bg.
-CARIES_ONLY_MAP = {"caries": 0, "deep_caries": 0}
+# If you go caries-only, this is the collapse map, keyed on the real
+# categories_3 names above. Everything not listed -> bg.
+CARIES_ONLY_MAP = {"Caries": 0, "Deep Caries": 0}
 
 
 def load_coco(json_path: str | Path) -> dict:

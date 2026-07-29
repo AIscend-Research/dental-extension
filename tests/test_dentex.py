@@ -7,7 +7,13 @@ DENTEX filenames (train_<n>.png) carry no patient id, so the old
 strip-trailing-number heuristic collapsed every image into one bucket.
 """
 
-from src.data.dentex import _patient_key, class_balance, patient_level_split
+from src.data.dentex import (
+    CARIES_ONLY_MAP,
+    DIAGNOSIS_CLASSES,
+    _patient_key,
+    class_balance,
+    patient_level_split,
+)
 
 
 def _real_schema_coco():
@@ -66,12 +72,28 @@ def test_patient_level_split_covers_all_images_on_real_filenames():
     assert len(split["test"]) > 0
 
 
+def test_diagnosis_classes_match_real_categories_3_names_and_order():
+    # Confirmed against the downloaded categories_3: id 0=Impacted, 1=Caries,
+    # 2=Periapical Lesion, 3=Deep Caries. A lowercased/reordered constant here
+    # would silently fail to match real annotation category names.
+    real_categories_3 = _real_schema_coco()["categories_3"]
+    expected = [c["name"] for c in sorted(real_categories_3, key=lambda c: c["id"])]
+    assert DIAGNOSIS_CLASSES == expected
+
+
+def test_caries_only_map_keys_match_real_category_names():
+    real_names = {c["name"] for c in _real_schema_coco()["categories_3"]}
+    assert set(CARIES_ONLY_MAP.keys()) <= real_names
+
+
 if __name__ == "__main__":
     for fn in [
         test_class_balance_reads_diagnosis_task_not_flat_schema,
         test_class_balance_still_supports_flat_coco_schema,
         test_patient_key_does_not_collapse_dentex_sequential_filenames,
         test_patient_level_split_covers_all_images_on_real_filenames,
+        test_diagnosis_classes_match_real_categories_3_names_and_order,
+        test_caries_only_map_keys_match_real_category_names,
     ]:
         fn()
         print("PASS", fn.__name__)

@@ -4,10 +4,27 @@
 data:
   # where scripts/download_dentex.py puts the DENTEX data
   dentex_root: data/dentex
-  # the fully-labelled split is the only one with diagnosis (caries) labels
-  coco_annotations: data/dentex/annotations/disease.json
-  image_root: data/dentex/xrays
+  # Real layout confirmed after download (differs from the HF page's
+  # top-level docs): scripts/download_dentex.py lands three zips
+  # (training_data.zip, validation_data.zip, test_data.zip) plus a top-level
+  # validation_triple.json. Only "quadrant-enumeration-disease" carries
+  # diagnosis labels, and its json uses category_id_3 / categories_3
+  # (multi-task schema), not a flat "categories" / "category_id" -- see
+  # src/data/dentex.py:class_balance. Unzip the relevant subfolder(s) before
+  # pointing here:
+  #   unzip "training_data/quadrant-enumeration-disease/*" \
+  #     data/dentex/DENTEX/training_data.zip -d data/dentex/DENTEX/
+  #   unzip data/dentex/DENTEX/validation_data.zip -d data/dentex/DENTEX/
+  coco_annotations: data/dentex/DENTEX/training_data/quadrant-enumeration-disease/train_quadrant_enumeration_disease.json
+  image_root: data/dentex/DENTEX/training_data/quadrant-enumeration-disease/xrays
+  # validation ground truth ships separately (top-level, released after the
+  # challenge closed) -- same category_id_3/categories_3 schema as train.
+  val_annotations: data/dentex/DENTEX/validation_triple.json
+  val_image_root: data/dentex/DENTEX/validation_data/quadrant_enumeration_disease/xrays
   split:
+    # NOTE: DENTEX ships no patient id (see src/data/dentex.py:_patient_key) --
+    # this is an image-level split, not a verified patient-level one. State
+    # that as a limitation rather than assuming patient safety.
     val_frac: 0.15
     test_frac: 0.15
     seed: 0

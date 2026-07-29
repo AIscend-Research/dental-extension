@@ -18,11 +18,16 @@ missed, keeping the `[0,1]` severity contract and the label vector accurate.
 
 **Stream 2 — Data and splits (no detector needed).**
 File: `src/data/dentex.py`.
-Download DENTEX, confirm the layout, point the config at the real paths.
-Nail down the patient-id logic (there is a `TODO` on the heuristic — check it
-against the actual metadata so splits do not leak). Run `class_balance()` and
-decide how to handle imbalance (sampler weights vs class-balanced loss). Decide
-caries-only vs all-four-diagnosis and lock the label maps.
+Download DENTEX, confirm the layout, point the config at the real paths (done —
+see `configs/default.yaml`; the real layout is three zips + a top-level
+`validation_triple.json`, and the diagnosis json uses a `category_id_3` /
+`categories_3` multi-task schema, not flat COCO). Patient-id logic resolved:
+DENTEX ships no patient identifier at all, so `patient_level_split` is an
+image-level split — document this as a limitation rather than trying to fix
+it further. `class_balance()` now works against the real schema (Caries 62%,
+Impacted 17%, Deep Caries 16%, Periapical 4.5% on the training set) — still
+need to decide sampler weights vs class-balanced loss. Decide caries-only vs
+all-four-diagnosis and lock the label maps.
 
 **Stream 3 — Metrics and decision policy (no detector needed).**
 Files: `src/eval/metrics.py`, `src/models/confidence_head.py:decide`.

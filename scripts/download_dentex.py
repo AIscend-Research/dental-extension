@@ -1,9 +1,10 @@
 """
 Download the DENTEX dataset from Hugging Face into data/dentex.
 
-DENTEX is on HF at ibrahimhamamci/DENTEX (CC BY-SA 4.0). You need to accept the
-dataset terms on the HF page and be logged in (`huggingface-cli login`) before
-this works -- it is gated behind agreeing to the license.
+DENTEX is on HF at ibrahimhamamci/DENTEX (CC BY-NC-SA 4.0 -- non-commercial).
+You need to accept the dataset terms on the HF page and be logged in
+(`huggingface-cli login`) before this works -- it is gated behind agreeing to
+the license.
 
     pip install huggingface_hub
     huggingface-cli login

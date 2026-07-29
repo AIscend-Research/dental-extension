@@ -20,7 +20,6 @@ Get the data first:  python scripts/download_dentex.py
 from __future__ import annotations
 
 import json
-import re
 from collections import defaultdict
 from pathlib import Path
 
@@ -53,15 +52,23 @@ def index_annotations(coco: dict) -> dict[int, list[dict]]:
 def _patient_key(file_name: str) -> str:
     """Best-effort patient id from a filename.
 
-    DENTEX filenames do not always expose a clean patient id, so this is a
-    heuristic: strip the extension and any trailing _<number> that looks like a
-    per-shot index. TODO(phase2): confirm against the real metadata once the
-    data is downloaded -- if there is a proper patient field, use that instead.
-    A wrong key here leaks patients across train/val, which quietly inflates
-    every number in the paper, so this one is worth getting right.
+    CONFIRMED against the real download (Phase 2): DENTEX ships no patient
+    identifier anywhere -- not in the filename, not as a json field. Filenames
+    are just a per-split sequential index: train_673.png, val_15.png,
+    test_66.png. The original heuristic here stripped a trailing "_<number>"
+    assuming it was a multi-shot index (e.g. "patientA_1.png", "patientA_2.png"),
+    but for DENTEX that trailing number IS the unique image id, so stripping it
+    collapsed every image in a split into one fake patient bucket -- i.e.
+    patient_level_split silently put 100% of images in a single split and
+    0 in the other two. Confirmed by running it against the downloaded data.
+
+    Since there is no recoverable patient id, this now returns one key per
+    image (an image-level split). Whether that is also patient-safe depends on
+    whether DENTEX's 1005 fully-labelled images are one-per-patient, which
+    cannot be verified from the released data -- state this as a limitation in
+    the paper rather than assuming it.
     """
-    stem = Path(file_name).stem
-    return re.sub(r"_\d+$", "", stem)
+    return Path(file_name).stem
 
 
 def patient_level_split(
@@ -113,11 +120,23 @@ def class_balance(coco: dict) -> dict[str, int]:
     look at this before training and decide on RepeatFactorSampler weights or a
     class-balanced loss. HierarchicalDet already turns on USE_FED_LOSS for this
     reason.
+
+    The real quadrant-enumeration-diagnosis json has no flat "categories" /
+    "category_id" -- it's a multi-task schema with categories_1 (quadrant),
+    categories_2 (enumeration), categories_3 (diagnosis) and matching
+    category_id_1/2/3 per annotation. Diagnosis (what we care about) is task 3.
+    Confirmed against the actual downloaded file; the flat schema is kept as a
+    fallback for simple COCO-style fixtures.
     """
-    id_to_name = {c["id"]: c["name"] for c in coco.get("categories", [])}
+    if "categories" in coco:
+        id_to_name = {c["id"]: c["name"] for c in coco["categories"]}
+        key = "category_id"
+    else:
+        id_to_name = {c["id"]: c["name"] for c in coco.get("categories_3", [])}
+        key = "category_id_3"
     counts: dict[str, int] = defaultdict(int)
     for ann in coco.get("annotations", []):
-        counts[id_to_name.get(ann["category_id"], str(ann["category_id"]))] += 1
+        counts[id_to_name.get(ann.get(key), str(ann.get(key)))] += 1
     return dict(counts)
 
 

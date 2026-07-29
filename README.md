@@ -97,10 +97,10 @@ see SETUP.md.
 
 - Degradation severity is always in `[0, 1]`, and the eval code assumes it is
   monotonic. Keep that contract if you add new degradations.
-- Split by patient, never by image. `src/data/dentex.py` does this, but the
-  patient-id heuristic needs confirming against the real metadata (there is a
-  `TODO` on it). Getting it wrong leaks patients across splits and inflates
-  every number in the paper.
+- `patient_level_split` in `src/data/dentex.py` is actually an **image-level**
+  split: confirmed against the real download that DENTEX ships no patient id
+  anywhere (filenames are just a sequential per-split index). State this as a
+  limitation in the paper rather than assuming patient safety.
 - Call `src.utils.seed.set_seed()` at the top of every experiment.
 
 ## Credit

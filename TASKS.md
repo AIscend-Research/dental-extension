@@ -16,6 +16,29 @@ printed X-rays with a phone. Tune the parameter ranges so the synthetic images
 look like the real ones. Add degradations if real photos show something we
 missed, keeping the `[0,1]` severity contract and the label vector accurate.
 
+**Albumentations arm done** — `src/data/degradation_albumentations.py` (same
+five names, same `[0,1]` severity contract, same `DegradationResult` type, so
+either arm is a drop-in for the other) and `demo_degradation_compare.py`
+(side-by-side grid, see `figures/example_degradation_compare.png`). Ran on a
+real DENTEX panoramic at severity=0.7. Findings, reported honestly rather than
+tuned to agree:
+- **blur, jpeg**: the two arms look comparable.
+- **glare**: OpenCV's hand-built version is a diffuse brightness wash, closer
+  to a real lightbox/print reflection. Albumentations' `RandomSunFlare`
+  produces a distinct circular halo -- reads more like a camera lens flare
+  than the target artifact. Prefer the OpenCV arm for glare unless a real
+  phone photo shows the halo pattern is actually more accurate.
+- **angle**: albumentations' `Affine` can leave a bright replicated-edge wedge
+  in a corner under shear -- correct `BORDER_REPLICATE` behavior (it's
+  stretching real edge pixels, not a fill bug), but it looks artificial.
+- **low_light**: at the *same* nominal severity (0.7), albumentations is
+  dramatically darker than OpenCV's gamma-darkening. The two arms' severity
+  scales are not currently calibrated to mean the same perceptual thing --
+  do not average/compare severity-conditioned results across arms without
+  first recalibrating one to match the other, or note this as a caveat.
+Still needed (needs a human + a phone, not code): re-photographing a few
+printed X-rays to check which arm's artifacts actually match reality.
+
 **Stream 2 — Data and splits (no detector needed).**
 File: `src/data/dentex.py`.
 Download DENTEX, confirm the layout, point the config at the real paths (done —
@@ -25,9 +48,13 @@ see `configs/default.yaml`; the real layout is three zips + a top-level
 DENTEX ships no patient identifier at all, so `patient_level_split` is an
 image-level split — document this as a limitation rather than trying to fix
 it further. `class_balance()` now works against the real schema (Caries 62%,
-Impacted 17%, Deep Caries 16%, Periapical 4.5% on the training set) — still
-need to decide sampler weights vs class-balanced loss. Decide caries-only vs
-all-four-diagnosis and lock the label maps.
+Impacted 17%, Deep Caries 16%, Periapical 4.5% on the training set). Both
+imbalance strategies are implemented: `class_weights()` (effective-number and
+inverse-frequency class-balanced loss weights) and `repeat_factors()`
+(LVIS-style per-image oversampling, matching detectron2's
+RepeatFactorTrainingSampler algorithm) — pick one when wiring up training in
+Phase 3, both are ready. Decide caries-only vs all-four-diagnosis and lock the
+label maps.
 
 **Stream 3 — Metrics and decision policy (no detector needed).**
 Files: `src/eval/metrics.py`, `src/models/confidence_head.py:decide`.
@@ -58,7 +85,7 @@ a shared doc.
 - Burst simulation for fusion → `make_burst()` in `degradation.py` (done)
 - Small real pilot set to validate realism → Stream 1
 - Patient-level split → Stream 2 (`patient_level_split`, done, verify the id logic)
-- Class imbalance → Stream 2 (`class_balance`, done, act on it)
+- Class imbalance → Stream 2 (`class_balance`/`class_weights`/`repeat_factors`, done)
 - Degradation type/severity labels → produced automatically by `DegradationResult`
 
 ### Phase 3 — Model development

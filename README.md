@@ -44,14 +44,19 @@ codebase is decoupled from it on purpose.
 
 Runs right now, no GPU, no detector:
 - `src/data/degradation.py` — the synthetic phone-artifact pipeline (Phase 2 core)
-- `src/data/dentex.py` — DENTEX COCO loading + patient-level split
+- `src/data/degradation_albumentations.py` — the albumentations-preset
+  alternative, same interface, for the Phase 2 degradation-realism ablation
+- `src/data/dentex.py` — DENTEX COCO loading, image-level split (no patient id
+  in the data -- see the module), class balance, class weights, repeat factors
 - `src/eval/metrics.py` — safe-deferral/risk-coverage metrics, detection
   metrics (`coco_map`, `per_class_f1`), threshold sweep, ablation table
   (Phase 4 core -- all implemented and tested, but need Phase 3's trained
   detector for real numbers to plug in)
 - `src/eval/plots.py` — risk-coverage curve plotting (Phase 4)
 - `demo_degradation.py` — visual before/after grid
-- `tests/` — both suites pass
+- `demo_degradation_compare.py` — hand-built vs albumentations side by side
+  (see `figures/example_degradation_compare.png`)
+- `tests/` — all suites pass
 
 Needs the detector stack (Phase 3):
 - `src/models/detector.py` — wrapper around HierarchicalDet

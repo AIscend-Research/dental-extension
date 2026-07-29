@@ -12,8 +12,10 @@ from src.data.dentex import (
     DIAGNOSIS_CLASSES,
     _patient_key,
     class_balance,
+    class_weights,
     index_annotations,
     patient_level_split,
+    repeat_factors,
 )
 
 
@@ -97,6 +99,52 @@ def test_caries_only_map_keys_match_real_category_names():
     assert set(CARIES_ONLY_MAP.keys()) <= real_names
 
 
+def test_class_weights_mean_is_one_and_rare_class_weighted_higher():
+    coco = _real_schema_coco()  # Caries: 2, Impacted: 1, Deep Caries: 1
+    weights = class_weights(coco, scheme="effective_num")
+    assert set(weights.keys()) == {"Caries", "Impacted", "Deep Caries"}
+    assert weights["Caries"] < weights["Impacted"]  # more common -> lower weight
+    assert weights["Caries"] < weights["Deep Caries"]
+    assert abs(sum(weights.values()) / len(weights) - 1.0) < 1e-9  # normalized to mean 1
+
+
+def test_class_weights_effective_num_is_softer_than_inverse_freq_on_rare_class():
+    coco = _real_schema_coco()
+    eff = class_weights(coco, scheme="effective_num")
+    inv = class_weights(coco, scheme="inverse_freq")
+    # Impacted (count=1) is one of the rarest classes in this fixture --
+    # effective_num should pull its weight in less aggressively than raw
+    # inverse frequency (that's the whole point of the softer scheme).
+    assert eff["Impacted"] <= inv["Impacted"]
+
+
+def test_class_weights_rejects_unknown_scheme():
+    coco = _real_schema_coco()
+    try:
+        class_weights(coco, scheme="not_a_real_scheme")
+        assert False, "expected ValueError"
+    except ValueError:
+        pass
+
+
+def test_repeat_factors_covers_all_images_and_favors_rare_categories():
+    coco = _real_schema_coco()
+    factors = repeat_factors(coco)
+    assert set(factors.keys()) == {1, 2, 3, 4}
+    # images 1, 2 are the common category (Caries); images 3, 4 are rarer
+    # (Impacted, Deep Caries respectively, each appearing in only 1/4 images)
+    assert factors[3] > factors[1]
+    assert factors[4] > factors[2]
+    assert all(f >= 1.0 for f in factors.values())
+
+
+def test_repeat_factors_gives_unannotated_images_the_neutral_factor():
+    coco = _real_schema_coco()
+    coco["images"].append({"id": 5, "file_name": "train_5.png"})  # no annotations
+    factors = repeat_factors(coco)
+    assert factors[5] == 1.0
+
+
 if __name__ == "__main__":
     for fn in [
         test_class_balance_reads_diagnosis_task_not_flat_schema,
@@ -106,6 +154,11 @@ if __name__ == "__main__":
         test_index_annotations_groups_by_image_and_preserves_count,
         test_diagnosis_classes_match_real_categories_3_names_and_order,
         test_caries_only_map_keys_match_real_category_names,
+        test_class_weights_mean_is_one_and_rare_class_weighted_higher,
+        test_class_weights_effective_num_is_softer_than_inverse_freq_on_rare_class,
+        test_class_weights_rejects_unknown_scheme,
+        test_repeat_factors_covers_all_images_and_favors_rare_categories,
+        test_repeat_factors_gives_unannotated_images_the_neutral_factor,
     ]:
         fn()
         print("PASS", fn.__name__)

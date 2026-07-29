@@ -3,7 +3,7 @@
 # NONE of this needs a GPU or detectron2 -- install it and start working today.
 numpy>=1.24
 opencv-python-headless>=4.8
-albumentations>=1.4      # extra augmentations if you want them alongside the custom pipeline
+albumentations>=2.0      # src/data/degradation_albumentations.py -- the Phase 2 ablation arm
 scikit-learn>=1.3        # metric helpers
 pandas>=2.0
 matplotlib>=3.7

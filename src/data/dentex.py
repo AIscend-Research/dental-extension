@@ -119,31 +119,119 @@ def patient_level_split(
     }
 
 
+def _category_schema(coco: dict) -> tuple[str, dict[int, str]]:
+    """Figure out which category schema a coco dict uses.
+
+    Real DENTEX diagnosis jsons have no flat "categories" / "category_id" --
+    it's a multi-task schema with categories_1 (quadrant), categories_2
+    (enumeration), categories_3 (diagnosis) and matching category_id_1/2/3 per
+    annotation. Diagnosis (what we care about) is task 3. Confirmed against
+    the actual downloaded file; the flat schema is kept as a fallback for
+    simple COCO-style fixtures. class_balance, class_weights, and
+    repeat_factors all share this so the schema only needs handling in one
+    place.
+
+    Returns: (annotation field name to read, {category_id: category_name}).
+    """
+    if "categories" in coco:
+        return "category_id", {c["id"]: c["name"] for c in coco["categories"]}
+    return "category_id_3", {c["id"]: c["name"] for c in coco.get("categories_3", [])}
+
+
 def class_balance(coco: dict) -> dict[str, int]:
     """Count annotations per category name. Use this to check imbalance early.
 
     DENTEX is imbalanced (impacted and caries dominate; periapical is rare), so
     look at this before training and decide on RepeatFactorSampler weights or a
     class-balanced loss. HierarchicalDet already turns on USE_FED_LOSS for this
-    reason.
-
-    The real quadrant-enumeration-diagnosis json has no flat "categories" /
-    "category_id" -- it's a multi-task schema with categories_1 (quadrant),
-    categories_2 (enumeration), categories_3 (diagnosis) and matching
-    category_id_1/2/3 per annotation. Diagnosis (what we care about) is task 3.
-    Confirmed against the actual downloaded file; the flat schema is kept as a
-    fallback for simple COCO-style fixtures.
+    reason. See class_weights() / repeat_factors() for the two actual
+    handling strategies, built from these counts.
     """
-    if "categories" in coco:
-        id_to_name = {c["id"]: c["name"] for c in coco["categories"]}
-        key = "category_id"
-    else:
-        id_to_name = {c["id"]: c["name"] for c in coco.get("categories_3", [])}
-        key = "category_id_3"
+    key, id_to_name = _category_schema(coco)
     counts: dict[str, int] = defaultdict(int)
     for ann in coco.get("annotations", []):
         counts[id_to_name.get(ann.get(key), str(ann.get(key)))] += 1
     return dict(counts)
+
+
+def class_weights(coco: dict, scheme: str = "effective_num", beta: float = 0.999) -> dict[str, float]:
+    """Per-class loss weights from class_balance() counts.
+
+    For a class-balanced loss (the "class-balanced loss" option TASKS.md
+    calls out, alongside RepeatFactorSampler-style oversampling in
+    repeat_factors()). Weights are normalized to mean 1.0 so overall loss
+    magnitude doesn't shift when you turn this on.
+
+    Args:
+        scheme: "effective_num" (Cui et al. 2019, "Class-Balanced Loss Based
+            on Effective Number of Samples") -- softer than raw inverse
+            frequency on very rare classes, which matters here since
+            Periapical Lesion (4.5% of annotations) is rare enough that plain
+            inverse-frequency weighting would dominate the loss with it.
+            "inverse_freq" is the classic total / (n_classes * count) weighting.
+        beta: effective_num's hyperparameter, closer to 1.0 = closer to
+            inverse-frequency behavior. Cui et al.'s paper defaults (0.99-0.9999
+            depending on dataset size) motivate the 0.999 default here.
+
+    Returns:
+        {category_name: weight}, mean 1.0.
+    """
+    counts = class_balance(coco)
+    if not counts:
+        return {}
+
+    if scheme == "inverse_freq":
+        total = sum(counts.values())
+        n_classes = len(counts)
+        raw = {name: total / (n_classes * count) for name, count in counts.items()}
+    elif scheme == "effective_num":
+        raw = {name: (1 - beta) / (1 - beta ** count) for name, count in counts.items()}
+    else:
+        raise ValueError(f"unknown scheme: {scheme!r} (use 'effective_num' or 'inverse_freq')")
+
+    mean_w = sum(raw.values()) / len(raw)
+    return {name: w / mean_w for name, w in raw.items()}
+
+
+def repeat_factors(coco: dict, repeat_thresh: float = 0.5) -> dict[int, float]:
+    """Per-image oversampling factor for rare categories (LVIS-style).
+
+    Mirrors detectron2's RepeatFactorTrainingSampler algorithm (Gupta et al.,
+    "LVIS: A Dataset for Large Vocabulary Instance Segmentation"): for each
+    category c, category_repeat = max(1, sqrt(repeat_thresh / freq_c)), where
+    freq_c is the fraction of images containing at least one instance of c.
+    Each image's repeat factor is the max over the categories it contains, so
+    an image with a rare Periapical Lesion gets oversampled even if it also has
+    common Caries. Feed this straight into detectron2's
+    RepeatFactorTrainingSampler in Phase 3, or use it as manual sample weights.
+
+    Returns:
+        {image_id: repeat_factor}. Images with no annotations get 1.0
+        (never oversampled, never dropped).
+    """
+    key, _ = _category_schema(coco)
+    by_image = index_annotations(coco)
+    images = coco.get("images", [])
+    n_images = len(images)
+    if n_images == 0:
+        return {}
+
+    images_with_cat: dict[int, set] = defaultdict(set)
+    for img in images:
+        cats_here = {a.get(key) for a in by_image.get(img["id"], [])}
+        for c in cats_here:
+            images_with_cat[c].add(img["id"])
+
+    cat_repeat = {
+        c: max(1.0, (repeat_thresh / (len(imgs) / n_images)) ** 0.5)
+        for c, imgs in images_with_cat.items()
+    }
+
+    factors = {}
+    for img in images:
+        cats_here = {a.get(key) for a in by_image.get(img["id"], [])}
+        factors[img["id"]] = max((cat_repeat[c] for c in cats_here), default=1.0)
+    return factors
 
 
 # TODO(phase3): register_dentex_detectron2(split_ids, image_root) ->

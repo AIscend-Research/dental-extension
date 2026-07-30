@@ -95,16 +95,47 @@ by your institution rather than treating it as settled.
 - Degradation type/severity labels → produced automatically by `DegradationResult`
 
 ### Phase 3 — Model development
-All of this needs Stream 4 done first.
-- Adapt HierarchicalDet → caries-only baseline: `src/models/detector.py`
+**Stream 4 (the detector stack) is no longer a hard blocker for the other
+three items below** -- confirmed 2026-07-29 that official detectron2 installs
+and runs on CPU/MPS via the recipe now in SETUP.md (`--no-build-isolation`,
+plus an import-order trick so HierarchicalDet's vendored `detectron2/`/
+`pycocotools/` copies don't shadow the real installed ones). `build_model()`
+on the real Swin-L + DiffusionDet config (281.8M params) builds and runs a
+forward pass on CPU in ~2.7s. This confirms the architecture wires up; it does
+NOT confirm training time or quality on real hardware -- the actual GPU/Kaggle
+training run is still needed and still the risky, time-consuming part.
+
+- Adapt HierarchicalDet → caries-only baseline: `src/models/detector.py` --
+  still a stub; the label-map decision (caries-only vs all-four, see
+  `src/data/dentex.py`'s `DIAGNOSIS_CLASSES`/`CARIES_ONLY_MAP`) needs to be
+  locked before wiring `ROI_HEADS.NUM_CLASSES` and dataset registration here.
 - Robustness variant on degraded data: feed `degradation.py` through the dataset
   mapper
-- Fusion module: `src/models/fusion.py`
+- Fusion module: `src/models/fusion.py` -- **real nn.Module now**, not a stub.
+  Attention-weighted average over frame features, confirmed against the real
+  backbone's FPN p5 output (256 channels): fuses N frame feature maps into one
+  same-shape map + softmax attention weights. `cross_frame_agreement()` is
+  implemented but its entropy-based interpretation is an explicit, flagged
+  judgment call -- validate it against real burst data + correctness labels in
+  Phase 4, don't assume it's right. See `tests/test_models_torch.py`.
 - Confidence head with degradation labels as weak supervision:
-  `src/models/confidence_head.py`
+  `src/models/confidence_head.py` -- **real nn.Module now**. Pools a feature
+  map (default 256 channels, matching FPN p5), predicts a severity value per
+  `DEGRADATION_NAMES` and a scalar usability score, both in [0,1]. Confirmed
+  shapes/ranges against the real backbone. Still needs actual weak-supervision
+  training against `DegradationResult.label_vector()` -- the architecture
+  runs, but nothing has been trained yet.
 - Predict the degradation *type*, not just trust/don't: already the head's design
 - Decision thresholds: `decide()` (logic done, tune the operating points)
-- Size/latency/FLOPs benchmark: part of Stream 4
+- Size/latency/FLOPs benchmark: part of Stream 4 -- not done; 281.8M params is
+  the untrained-architecture parameter count, not a latency/FLOPs number.
+
+**Note on both new nn.Module implementations**: they guard `import torch` so
+`src/models/*.py` still import cleanly with no torch installed (the core env
+that `src/eval/metrics.py` runs in) -- see the top of each file. Test them via
+a *separate* venv following SETUP.md's Track B recipe
+(`source .venv-detector/bin/activate && python -m pytest tests/test_models_torch.py`),
+not the core venv.
 
 ### Phase 4 — Evaluation and extensions
 - Accuracy/F1/mAP across severities: `coco_map()` / `per_class_f1()` in

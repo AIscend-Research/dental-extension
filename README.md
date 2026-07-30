@@ -58,13 +58,21 @@ Runs right now, no GPU, no detector:
   (see `figures/example_degradation_compare.png`)
 - `tests/` — all suites pass
 
-Needs the detector stack (Phase 3):
-- `src/models/detector.py` — wrapper around HierarchicalDet
-- `src/models/confidence_head.py` — the quality/confidence head
-- `src/models/fusion.py` — the multi-shot fusion module
+Needs the detector stack (Phase 3), see SETUP.md for the confirmed-working
+install recipe (a separate `.venv-detector`, not the core venv):
+- `src/models/detector.py` — wrapper around HierarchicalDet, still a stub
+- `src/models/confidence_head.py` — **real, tested `nn.Module`** now (not a
+  stub): pools a feature map, predicts per-degradation severity + a usability
+  score, both in `[0,1]`. Confirmed against the actual backbone's real
+  feature-map shapes. Not yet trained.
+- `src/models/fusion.py` — **real, tested `nn.Module`** now: attention-weighted
+  burst fusion + a cross-frame-agreement signal (explicitly flagged as an
+  unvalidated design choice — see the module docstring). Not yet trained.
 
-The three model files are interface stubs with real signatures and `TODO(phase3)`
-markers, so the metric and decision code can be built against them in parallel.
+`detector.py` is still a stub (the caries-only vs all-four label-map decision
+needs to land first). The other two guard `import torch` so they still import
+cleanly with no torch installed; test them via `tests/test_models_torch.py`
+in the detector venv, not the core one.
 
 ## Layout
 

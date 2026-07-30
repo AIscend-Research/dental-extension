@@ -110,6 +110,70 @@ def safe_deferral_rate(
     return float(1.0 - best_coverage)
 
 
+def expected_calibration_error(
+    correct: np.ndarray, confidence: np.ndarray, n_bins: int = 10
+) -> float:
+    """Expected Calibration Error (Guo et al. 2017): |accuracy - confidence|.
+
+    AURC/safe_deferral_rate check whether confidence *ranks* correct
+    predictions above incorrect ones -- they say nothing about whether the
+    numeric confidence value is calibrated (whether a 0.9 usability score
+    really corresponds to ~90% observed accuracy). A model can rank perfectly
+    while being wildly overconfident or underconfident; that distinction
+    matters for a clinic deciding what "usability_score < 0.4" should mean in
+    practice, so track this alongside AURC, not instead of it.
+
+    Bins predictions into n_bins equal-width confidence bins, and returns the
+    bin-size-weighted average gap between each bin's mean confidence and its
+    actual accuracy. 0.0 is perfectly calibrated.
+    """
+    correct = np.asarray(correct, dtype=np.float64)
+    confidence = np.asarray(confidence, dtype=np.float64)
+    n = len(correct)
+    if n == 0:
+        return float("nan")
+
+    bin_edges = np.linspace(0.0, 1.0, n_bins + 1)
+    ece = 0.0
+    for i in range(n_bins):
+        lo, hi = bin_edges[i], bin_edges[i + 1]
+        mask = (confidence >= lo) & (confidence < hi if i < n_bins - 1 else confidence <= hi)
+        if not mask.any():
+            continue
+        bin_accuracy = correct[mask].mean()
+        bin_confidence = confidence[mask].mean()
+        ece += (mask.sum() / n) * abs(bin_accuracy - bin_confidence)
+    return float(ece)
+
+
+def reliability_diagram_bins(
+    correct: np.ndarray, confidence: np.ndarray, n_bins: int = 10
+) -> list[dict]:
+    """Per-bin (mean_confidence, accuracy, count) for plotting a reliability diagram.
+
+    A perfectly calibrated model has accuracy == mean_confidence in every bin
+    (the diagonal); systematic deviation above/below the diagonal shows over-
+    or under-confidence at that confidence range. See src/eval/plots.py for
+    the plotting function that consumes this.
+    """
+    correct = np.asarray(correct, dtype=np.float64)
+    confidence = np.asarray(confidence, dtype=np.float64)
+    bin_edges = np.linspace(0.0, 1.0, n_bins + 1)
+    rows = []
+    for i in range(n_bins):
+        lo, hi = bin_edges[i], bin_edges[i + 1]
+        mask = (confidence >= lo) & (confidence < hi if i < n_bins - 1 else confidence <= hi)
+        count = int(mask.sum())
+        rows.append({
+            "bin_lo": float(lo),
+            "bin_hi": float(hi),
+            "count": count,
+            "mean_confidence": float(confidence[mask].mean()) if count else float("nan"),
+            "accuracy": float(correct[mask].mean()) if count else float("nan"),
+        })
+    return rows
+
+
 def ablation_table(
     arms: dict[str, tuple[np.ndarray, np.ndarray]],
     target_accuracy: float = 0.95,

@@ -86,13 +86,25 @@ before writing the real related-work section, and get the IRB note confirmed
 by your institution rather than treating it as settled.
 
 ### Phase 2 — Data and preprocessing
-- Degradation pipeline → Stream 1 (`src/data/degradation.py`, done, needs tuning)
-- Base dataset usable on Kaggle → Stream 2 + 4
+- Degradation pipeline → Stream 1 (`src/data/degradation.py`, done; albumentations
+  ablation arm also done, see `src/data/degradation_albumentations.py`; GAN-based
+  arm scoped but deliberately deferred, see `docs/phase2_data_notes.md`)
+- Base dataset usable on Kaggle → **checked, see `docs/phase2_data_notes.md`**:
+  DENTEX (~11GB) is well within Kaggle's 200GB dataset limit, no size blocker.
+  Actual upload/attach as a Kaggle Dataset not yet done (needs a Kaggle account
+  action, not something buildable from this environment).
 - Burst simulation for fusion → `make_burst()` in `degradation.py` (done)
-- Small real pilot set to validate realism → Stream 1
-- Patient-level split → Stream 2 (`patient_level_split`, done, verify the id logic)
+- Small real pilot set to validate realism → Stream 1, still blocked (needs a
+  human + a phone + IRB clearance, see `docs/phase1_background.md`)
+- Patient-level split → resolved as an image-level split, DENTEX has no
+  patient id at all (see `src/data/dentex.py:_patient_key`)
 - Class imbalance → Stream 2 (`class_balance`/`class_weights`/`repeat_factors`, done)
 - Degradation type/severity labels → produced automatically by `DegradationResult`
+- Inter-rater label disagreement → **checked, see `docs/phase2_data_notes.md`**:
+  DENTEX reports no inter-annotator agreement statistic (single
+  student-annotator + one of three expert-dentist reviewers per image); the
+  DENTEX paper itself acknowledges this as a limitation -- cite it directly in
+  Phase 5's limitations section rather than trying to measure it ourselves.
 
 ### Phase 3 — Model development
 **Stream 4 (the detector stack) is no longer a hard blocker for the other
@@ -127,8 +139,18 @@ training run is still needed and still the risky, time-consuming part.
   runs, but nothing has been trained yet.
 - Predict the degradation *type*, not just trust/don't: already the head's design
 - Decision thresholds: `decide()` (logic done, tune the operating points)
-- Size/latency/FLOPs benchmark: part of Stream 4 -- not done; 281.8M params is
-  the untrained-architecture parameter count, not a latency/FLOPs number.
+- Size/latency/FLOPs benchmark: **done**, see `docs/phase3_model_benchmarks.md`.
+  281.9M params (~1075 MB fp32), backbone-only 508.1 GFLOPs @ 800x800, CPU
+  inference 2.52s/image. Important finding, not just a number: Swin-L is not
+  lightweight by any normal edge/mobile standard -- this needs an honest
+  framing decision (report the size as-is vs. swap to a smaller backbone)
+  before the paper can claim "lightweight, low-compute."
+- Training-time audit (explicit Phase 3 task): **done**, see the same doc.
+  Measured a real training step (forward+backward+optimizer, batch=2,
+  800x800, all three hierarchical loss heads) at 35.1s on CPU -> ~390h/16.3
+  days for the full 40k-iteration run, confirming GPU is mandatory. A rough,
+  UNVERIFIED extrapolation to Kaggle GPU hardware suggests ~11-28h, but this
+  needs to be re-measured on the actual Kaggle GPU before planning around it.
 
 **Note on both new nn.Module implementations**: they guard `import torch` so
 `src/models/*.py` still import cleanly with no torch installed (the core env
@@ -159,8 +181,17 @@ not the core venv.
 - Clinician gut-check on deferred cases: qualitative, no code -- not started,
   needs a human
 - Adjacent-field inspiration sweep (computational photography, speech
-  rejection, astronomy multi-exposure, triage tiers): not started, needs a
-  human literature pass
+  rejection, astronomy multi-exposure, triage tiers): **done**, see
+  `docs/phase4_adjacent_fields.md`. Concrete follow-ups it surfaced: benchmark
+  `BurstFusion` against plain frame averaging (both computational photography
+  and astronomy treat averaging as the baseline to beat, not a strawman); try
+  a content-agreement alternative to `cross_frame_agreement`'s entropy
+  formula; and — implemented, not just noted — a **calibration metric** was
+  a real gap the triage-tier analogy surfaced (existing metrics check
+  ranking, not whether confidence values are numerically calibrated), so
+  `expected_calibration_error()` and `reliability_diagram_bins()` are now in
+  `metrics.py`, with a plot in `plots.py` (see
+  `figures/example_reliability_diagram.png`).
 
 ### Phase 5 — Writing
 Draft, internal review, limitations (label noise, synthetic-vs-real gap, dataset

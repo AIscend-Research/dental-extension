@@ -19,7 +19,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-from src.eval.metrics import risk_coverage_curve
+from src.eval.metrics import reliability_diagram_bins, risk_coverage_curve
 
 
 def plot_risk_coverage(
@@ -66,6 +66,47 @@ def plot_risk_coverage_comparison(
     ax.set_ylim(0, 1.02)
     ax.set_xlim(0, 1.0)
     ax.set_title(title or "Risk-coverage curve")
+    ax.legend()
+    ax.grid(True, alpha=0.3)
+    fig.tight_layout()
+    fig.savefig(out_path, dpi=150)
+    plt.close(fig)
+    return out_path
+
+
+def plot_reliability_diagram(
+    correct: np.ndarray,
+    confidence: np.ndarray,
+    out_path: str,
+    n_bins: int = 10,
+    title: str | None = None,
+) -> str:
+    """Save a reliability diagram (per-bin accuracy vs. mean confidence).
+
+    The dashed diagonal is perfect calibration. Bars above the diagonal mean
+    underconfidence in that range (accuracy exceeds confidence); bars below
+    mean overconfidence -- the failure mode that matters most for a clinical
+    deferral threshold, since it means "usability_score >= 0.7" is admitting
+    worse cases than the number implies. See expected_calibration_error() for
+    the single-number summary this diagram visualizes.
+    """
+    bins = reliability_diagram_bins(correct, confidence, n_bins=n_bins)
+    centers = [(b["bin_lo"] + b["bin_hi"]) / 2 for b in bins]
+    accuracies = [b["accuracy"] for b in bins]
+    width = 1.0 / n_bins
+
+    fig, ax = plt.subplots(figsize=(5, 5))
+    ax.plot([0, 1], [0, 1], linestyle="--", color="gray", label="perfect calibration")
+    valid = [(c, a) for c, a in zip(centers, accuracies) if not np.isnan(a)]
+    if valid:
+        vc, va = zip(*valid)
+        ax.bar(vc, va, width=width * 0.9, alpha=0.7, edgecolor="black", label="observed")
+
+    ax.set_xlabel("mean predicted confidence (bin)")
+    ax.set_ylabel("observed accuracy (bin)")
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    ax.set_title(title or "Reliability diagram")
     ax.legend()
     ax.grid(True, alpha=0.3)
     fig.tight_layout()

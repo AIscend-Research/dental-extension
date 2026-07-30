@@ -11,6 +11,8 @@ from src.eval.metrics import (
     sweep_decision_thresholds,
     coco_map,
     per_class_f1,
+    expected_calibration_error,
+    reliability_diagram_bins,
 )
 
 
@@ -46,6 +48,32 @@ def test_accuracy_at_coverage_monotone_region():
     correct = np.array([1, 1, 0, 0], dtype=float)
     conf = np.array([0.9, 0.8, 0.2, 0.1])
     assert accuracy_at_coverage(correct, conf, 0.5) == 1.0
+
+
+def test_ece_near_zero_for_well_calibrated_confidence():
+    rng = np.random.default_rng(0)
+    n = 20000
+    # confidence IS the true probability of being correct, by construction
+    confidence = rng.uniform(0.0, 1.0, n)
+    correct = (rng.random(n) < confidence).astype(float)
+    assert expected_calibration_error(correct, confidence, n_bins=10) < 0.02
+
+
+def test_ece_high_for_overconfident_model():
+    n = 2000
+    confidence = np.full(n, 0.99)  # always "99% sure"
+    correct = np.zeros(n)
+    correct[: n // 2] = 1.0  # but only actually right half the time
+    ece = expected_calibration_error(correct, confidence, n_bins=10)
+    assert ece > 0.45  # should be close to |0.99 - 0.5| = 0.49
+
+
+def test_reliability_diagram_bins_counts_sum_to_n():
+    correct = np.array([1, 0, 1, 1, 0, 1], dtype=float)
+    confidence = np.array([0.1, 0.2, 0.5, 0.6, 0.9, 0.95])
+    bins = reliability_diagram_bins(correct, confidence, n_bins=5)
+    assert sum(b["count"] for b in bins) == len(correct)
+    assert len(bins) == 5
 
 
 def test_ablation_table_ranks_arms_by_confidence_quality():
@@ -151,6 +179,9 @@ if __name__ == "__main__":
         test_full_coverage_equals_base_accuracy,
         test_safe_deferral_bounds,
         test_accuracy_at_coverage_monotone_region,
+        test_ece_near_zero_for_well_calibrated_confidence,
+        test_ece_high_for_overconfident_model,
+        test_reliability_diagram_bins_counts_sum_to_n,
         test_ablation_table_ranks_arms_by_confidence_quality,
         test_sweep_decision_thresholds_low_retake_keeps_everything,
         test_sweep_decision_thresholds_high_retake_defers_everything,

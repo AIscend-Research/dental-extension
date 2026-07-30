@@ -49,10 +49,15 @@ Runs right now, no GPU, no detector:
 - `src/data/dentex.py` — DENTEX COCO loading, image-level split (no patient id
   in the data -- see the module), class balance, class weights, repeat factors
 - `src/eval/metrics.py` — safe-deferral/risk-coverage metrics, detection
-  metrics (`coco_map`, `per_class_f1`), threshold sweep, ablation table
+  metrics (`coco_map`, `per_class_f1`), threshold sweep, ablation table,
+  calibration (`expected_calibration_error`, `reliability_diagram_bins`)
   (Phase 4 core -- all implemented and tested, but need Phase 3's trained
   detector for real numbers to plug in)
-- `src/eval/plots.py` — risk-coverage curve plotting (Phase 4)
+- `src/eval/plots.py` — risk-coverage curve and reliability-diagram plotting
+  (Phase 4)
+- `docs/` — Phase 1 background/delta/workshop pick, Phase 2 data notes
+  (inter-rater disagreement, Kaggle usability), Phase 3 model benchmarks,
+  Phase 4 adjacent-field inspiration
 - `demo_degradation.py` — visual before/after grid
 - `demo_degradation_compare.py` — hand-built vs albumentations side by side
   (see `figures/example_degradation_compare.png`)

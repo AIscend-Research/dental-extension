@@ -117,10 +117,29 @@ forward pass on CPU in ~2.7s. This confirms the architecture wires up; it does
 NOT confirm training time or quality on real hardware -- the actual GPU/Kaggle
 training run is still needed and still the risky, time-consuming part.
 
+**Kaggle notebooks are ready**, see `kaggle/` (00 setup/sanity check, 01 train
+the detector with checkpoint/resume, 02 train the confidence head, 03
+evaluate). All four were built by actually running the code end to end
+locally (not guessed), and found + fixed several real bugs in the upstream
+HierarchicalDet repo and its config along the way -- see `kaggle/README.md`
+for the full list, the two most important being: the config's backbone
+weights filename is wrong (points at Swin-Base, needs Swin-Large -- silently
+loads with zero errors, just leaves ~90% of the backbone randomly
+initialized), and `hierarchialdet.dataset_mapper.DiffusionDetDatasetMapper`
+is broken for anyone but the original author (hardcoded personal file
+paths) -- the notebooks use a custom mapper instead.
+
 - Adapt HierarchicalDet → caries-only baseline: `src/models/detector.py` --
   still a stub; the label-map decision (caries-only vs all-four, see
   `src/data/dentex.py`'s `DIAGNOSIS_CLASSES`/`CARIES_ONLY_MAP`) needs to be
   locked before wiring `ROI_HEADS.NUM_CLASSES` and dataset registration here.
+  Dataset registration itself is done, though -- see
+  `src/data/dentex.py:register_dentex_detectron2`/`to_detectron2_dicts`,
+  exercised end to end in `kaggle/01_train_baseline_detector.ipynb`. Also
+  confirmed: `DiffusionDet.forward()` defaults to `k=0` at inference
+  (quadrant-level `pred_classes_1` only) -- diagnosis/caries predictions need
+  `model(batch, k=2)` for `pred_classes_3`, easy to miss since `k=0` doesn't
+  error, it just silently returns the wrong task's output.
 - Robustness variant on degraded data: feed `degradation.py` through the dataset
   mapper
 - Fusion module: `src/models/fusion.py` -- **real nn.Module now**, not a stub.

@@ -84,19 +84,34 @@ in the detector venv, not the core one.
 ```
 caries-confidence/
   setup_env.sh              bootstrap the startable half
-  SETUP.md                  detector stack install + the Detectron2/Kaggle gotcha
-  TASKS.md                  roadmap phases -> parallel workstreams
+  SETUP.md                  detector stack install -- confirmed working recipe
+  TASKS.md                  roadmap phases -> parallel workstreams, live status
   configs/default.yaml      paths, degradation params, decision thresholds
+  docs/                     Phase 1-4 writeups: background/delta/workshop,
+                            data notes, model benchmarks, adjacent-field
+                            inspiration, confidence-head training results
+  kaggle/                   4 notebooks for the GPU training run -- setup,
+                            train detector, train confidence head, evaluate
+                            (see kaggle/README.md)
   scripts/
     clone_baseline.sh       clone HierarchicalDet into external/
     download_dentex.py      pull DENTEX from Hugging Face
+    train_confidence_head_standalone.py  trains the confidence head without
+                            waiting on the full detector -- already run, see
+                            docs/phase3_confidence_head_training.md
   src/
     data/degradation.py     WORKING degradation pipeline + burst generator
-    data/dentex.py          DENTEX loading, patient-level split, class balance
-    models/detector.py      HierarchicalDet wrapper (stub)
-    models/confidence_head.py  quality head + decide() (stub + working decision logic)
-    models/fusion.py        burst fusion (stub)
-    eval/metrics.py         WORKING selective-prediction metrics + detection stubs
+    data/degradation_albumentations.py  the albumentations ablation arm
+    data/dentex.py          DENTEX loading, image-level split (no patient id
+                            in the data), class balance/weights/repeat
+                            factors, detectron2 dataset registration
+    models/detector.py      HierarchicalDet wrapper (stub -- label-map
+                            decision still needed)
+    models/confidence_head.py  real, tested nn.Module + decide()
+    models/fusion.py        real, tested nn.Module (burst fusion)
+    eval/metrics.py         selective-prediction + detection + calibration
+                            metrics, all real and tested
+    eval/plots.py           risk-coverage + reliability-diagram plotting
     utils/seed.py           reproducibility
   tests/                    runnable checks for the working pieces
   external/                 HierarchicalDet lands here (gitignored)

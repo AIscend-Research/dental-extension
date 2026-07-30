@@ -234,9 +234,111 @@ def repeat_factors(coco: dict, repeat_thresh: float = 0.5) -> dict[int, float]:
     return factors
 
 
-# TODO(phase3): register_dentex_detectron2(split_ids, image_root) ->
-# call DatasetCatalog.register / MetadataCatalog.set here so train_net.py can
-# consume "custom_train_class" / "custom_validation_class" the configs expect.
+def to_detectron2_dicts(
+    coco: dict, image_root: str | Path, image_ids: list[int] | None = None
+) -> list[dict]:
+    """Convert our COCO dict into detectron2's standard "dataset dicts" list.
+
+    Does NOT hard-depend on detectron2 at import time (lazy import of
+    BoxMode, matching the pattern in src/eval/metrics.py:coco_map) -- only
+    needs it installed when this is actually called, i.e. from the detector
+    venv (see SETUP.md), not the core one.
+
+    Each annotation keeps category_id_1/2/3 (not collapsed to a single
+    "category_id") since DiffusionDet's hierarchical loss needs all three --
+    a custom dataset mapper reads these into gt_classes_1/2/3 on the Instances
+    object. Do NOT use detectron2's stock annotations_to_instances() here, it
+    only knows about a single "category_id".
+
+    Also includes a flat "category_id" (aliased to category_id_3, the
+    diagnosis task) purely because detectron2's own
+    get_detection_dataset_dicts() calls print_instances_class_histogram()
+    internally, which unconditionally does `x["category_id"]` and raises
+    KeyError without it -- confirmed by running build_detection_train_loader
+    against this data. It's not used for anything but that summary printout;
+    the real training path reads category_id_1/2/3.
+
+    Args:
+        coco: a COCO-format dict, e.g. from load_coco().
+        image_root: directory the "xrays/" images live in.
+        image_ids: restrict to these image ids (e.g. one arm of a split from
+            patient_level_split); None means all images in coco.
+
+    Returns:
+        List of dicts: {"file_name", "image_id", "height", "width",
+        "annotations": [{"bbox", "bbox_mode", "category_id_1/2/3", "iscrowd"}]}.
+    """
+    from detectron2.structures import BoxMode
+
+    image_root = Path(image_root)
+    by_image = index_annotations(coco)
+    wanted = set(image_ids) if image_ids is not None else None
+
+    dicts = []
+    for img in coco.get("images", []):
+        if wanted is not None and img["id"] not in wanted:
+            continue
+        annos = []
+        for ann in by_image.get(img["id"], []):
+            annos.append({
+                "bbox": ann["bbox"],
+                "bbox_mode": BoxMode.XYWH_ABS,
+                "category_id_1": ann.get("category_id_1", 0),
+                "category_id_2": ann.get("category_id_2", 0),
+                "category_id_3": ann.get("category_id_3", 0),
+                "category_id": ann.get("category_id_3", 0),  # see docstring
+                "iscrowd": ann.get("iscrowd", 0),
+            })
+        dicts.append({
+            "file_name": str(image_root / img["file_name"]),
+            "image_id": img["id"],
+            "height": img["height"],
+            "width": img["width"],
+            "annotations": annos,
+        })
+    return dicts
+
+
+def register_dentex_detectron2(
+    coco: dict,
+    image_root: str | Path,
+    split_ids: dict[str, list[int]],
+    name_prefix: str = "custom",
+) -> None:
+    """Register DENTEX splits with detectron2's DatasetCatalog/MetadataCatalog.
+
+    Registers "{name_prefix}_train_class" and "{name_prefix}_validation_class"
+    (matching what HierarchicalDet's configs put in DATASETS.TRAIN/TEST) plus
+    a "{name_prefix}_test_class" if a "test" key is present in split_ids.
+    Needs detectron2 installed (lazy import) -- call this from the detector
+    venv, not the core one. Idempotent: re-registering the same name is a
+    detectron2 error, so this skips names already in DatasetCatalog.
+
+    Args:
+        coco: a COCO-format dict, e.g. from load_coco().
+        image_root: directory the "xrays/" images live in.
+        split_ids: {"train": [...], "val": [...], "test": [...]} of image_ids,
+            e.g. from patient_level_split().
+        name_prefix: dataset name prefix; "custom" matches the vendored
+            HierarchicalDet configs' DATASETS.TRAIN/TEST values exactly.
+    """
+    from detectron2.data import DatasetCatalog, MetadataCatalog
+
+    split_to_suffix = {"train": "train_class", "val": "validation_class", "test": "test_class"}
+    for split, suffix in split_to_suffix.items():
+        if split not in split_ids:
+            continue
+        name = f"{name_prefix}_{suffix}"
+        if name in DatasetCatalog.list():
+            continue
+        ids = split_ids[split]
+        DatasetCatalog.register(name, lambda ids=ids: to_detectron2_dicts(coco, image_root, ids))
+        MetadataCatalog.get(name).set(
+            thing_classes=DIAGNOSIS_CLASSES,
+            thing_classes_1=[c["name"] for c in coco.get("categories_1", [])],
+            thing_classes_2=[c["name"] for c in coco.get("categories_2", [])],
+            thing_classes_3=DIAGNOSIS_CLASSES,
+        )
 
 
 if __name__ == "__main__":

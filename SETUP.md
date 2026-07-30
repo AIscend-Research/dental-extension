@@ -136,13 +136,55 @@ pycocotools.mask` etc. before adding `external/HierarchicalDet` to
 `sys.path`). If you `pip install pycocotools` as well you can get a clash --
 resolved by the import-order trick above, not by uninstalling either copy.
 
-### Backbone weights
+### Backbone weights -- a real bug in the upstream config, confirmed and fixed
 
-The Swin-L weights are not in the repo. Grab
-`swin_base_patch4_window7_224_22k.pkl` and put it in `models_weights/`, then make
-sure `configs/default.yaml:model.backbone_weights` points at it. (The upstream
-DiffusionDet / Swin-Transformer repos document where these come from; the config
-in `external/HierarchicalDet/configs/` shows the exact filename it expects.)
+**The config's own weights filename is misleading and will silently give you
+the wrong checkpoint if followed literally.**
+`configs/diffdet.custom.swinbase.nonpretrain.yaml` sets `MODEL.WEIGHTS:
+"models/swin_base_patch4_window7_224_22k.pkl"` (implying Swin-**Base**) but
+also sets `MODEL.SWIN.SIZE: L-22k` (Swin-**Large**) -- these are inconsistent.
+DiffusionDet's own official release only ships Swin-Base weights under that
+exact filename (confirmed: 128-dim embeddings). Loading those into this
+config's actual architecture (confirmed built: 192-dim embeddings, 281.9M
+total params -- genuinely Large-scale, matching every benchmark number in
+`docs/phase3_model_benchmarks.md`) silently fails to load the majority of the
+backbone -- `DetectionCheckpointer` warns per-tensor ("will not be loaded")
+but does not raise an error, so this is easy to miss and would produce a
+near-useless model trained from mostly-random backbone weights.
+
+**Confirmed correct recipe (2026-07-29, verified zero shape mismatches):**
+
+```bash
+# 1. Get the RAW Swin-Large-22k classification checkpoint (Microsoft's
+#    official release, NOT DiffusionDet's -- DiffusionDet never shipped one)
+curl -sL "https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_large_patch4_window7_224_22k.pth" \
+  -o models_weights/swin_large_patch4_window7_224_22k_raw.pth
+
+# 2. Convert to detectron2's expected pkl format (just rewraps the state
+#    dict -- same pattern as e.g. FoundationVision/GenerateU's
+#    convert-pretrained-swin-model-to-d2.py)
+python -c "
+import torch, pickle
+ckpt = torch.load('models_weights/swin_large_patch4_window7_224_22k_raw.pth', map_location='cpu', weights_only=False)
+converted = {'model': ckpt['model'], '__author__': 'third_party', 'matching_heuristics': True}
+with open('models_weights/swin_large_patch4_window7_224_22k.pkl', 'wb') as f:
+    pickle.dump(converted, f)
+"
+```
+
+Then point `cfg.MODEL.WEIGHTS` at
+`models_weights/swin_large_patch4_window7_224_22k.pkl` (NOT the filename the
+config literally states). Confirmed on this machine: `DetectionCheckpointer`
+loads it with zero "will not be loaded" warnings on any `backbone.bottom_up.*`
+key -- the only "not found in checkpoint" keys afterward are things that were
+never going to be in an ImageNet classification checkpoint anyway (the FPN
+lateral/output convs, the DiffusionDet head, the diffusion schedule buffers) --
+that part is normal and expected, not a sign of a bad load.
+
+Do not use DiffusionDet's own `swin_base_patch4_window7_224_22k.pkl` release
+asset for this config -- it is real, downloads fine, and will load into the
+model with *zero errors* (`DetectionCheckpointer` doesn't hard-fail on shape
+mismatches, just warns per-key), which makes the bug easy to miss.
 
 ### Kaggle specifics
 

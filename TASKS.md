@@ -131,12 +131,17 @@ training run is still needed and still the risky, time-consuming part.
   judgment call -- validate it against real burst data + correctness labels in
   Phase 4, don't assume it's right. See `tests/test_models_torch.py`.
 - Confidence head with degradation labels as weak supervision:
-  `src/models/confidence_head.py` -- **real nn.Module now**. Pools a feature
-  map (default 256 channels, matching FPN p5), predicts a severity value per
-  `DEGRADATION_NAMES` and a scalar usability score, both in [0,1]. Confirmed
-  shapes/ranges against the real backbone. Still needs actual weak-supervision
-  training against `DegradationResult.label_vector()` -- the architecture
-  runs, but nothing has been trained yet.
+  `src/models/confidence_head.py` -- real `nn.Module`, and **now actually
+  trained**, standalone (didn't need to wait for the full detector): see
+  `docs/phase3_confidence_head_training.md` and
+  `scripts/train_confidence_head_standalone.py`. Trained against a small
+  stand-in CNN trunk (not the real, still-untrained Swin-L backbone) on 200
+  real DENTEX images + synthetic degradation labels. Real result: 69.3%
+  dominant-degradation accuracy (vs 20% chance), but measurably overconfident
+  on degraded images (predicts 0.696 mean usability where true mean is
+  0.321) -- a genuine finding, not just a proof it runs. Once the real
+  detector is trained, retrain this head against its actual FPN p5 features
+  instead of the stand-in trunk.
 - Predict the degradation *type*, not just trust/don't: already the head's design
 - Decision thresholds: `decide()` (logic done, tune the operating points)
 - Size/latency/FLOPs benchmark: **done**, see `docs/phase3_model_benchmarks.md`.

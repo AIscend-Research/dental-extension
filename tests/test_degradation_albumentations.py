@@ -1,14 +1,15 @@
-"""Runnable checks for the degradation pipeline. `pytest -q` or run directly."""
+"""Runnable checks for the albumentations degradation ablation arm.
+
+Mirrors tests/test_degradation.py's checks so both pipelines are held to the
+same contract (shape/dtype preserved, severity 0 is a no-op, seeded runs are
+reproducible), since that contract is what makes them swappable for the
+Phase 2 ablation comparison (see demo_degradation_compare.py).
+"""
 
 import numpy as np
 
-from src.data.degradation import (
-    DEGRADATION_NAMES,
-    apply_degradations,
-    make_burst,
-    blur,
-    jpeg,
-)
+from src.data.degradation import DEGRADATION_NAMES
+from src.data.degradation_albumentations import apply_degradations, blur, jpeg
 
 
 def _demo_image(size=256):
@@ -34,12 +35,14 @@ def test_labels_align_to_registry():
     r = apply_degradations(img, seed=1)
     vec = r.label_vector()
     assert len(vec) == len(DEGRADATION_NAMES)
-    # every applied degradation shows up as a positive severity in the vector
     for name, sev in r.severities.items():
         assert vec[DEGRADATION_NAMES.index(name)] == np.float32(sev)
 
 
 def test_seed_is_reproducible():
+    # albumentations transforms do NOT respect global random/np seeding --
+    # this locks in that apply_degradations' own seeding scheme (routing
+    # through A.Compose(..., seed=...) per call) actually works.
     img = _demo_image()
     a = apply_degradations(img, seed=42)
     b = apply_degradations(img, seed=42)
@@ -47,17 +50,7 @@ def test_seed_is_reproducible():
     assert a.severities == b.severities
 
 
-def test_burst_returns_requested_frames():
-    img = _demo_image()
-    shots = make_burst(img, n_shots=3, seed=7)
-    assert len(shots) == 3
-    assert all(s.image.shape == img.shape for s in shots)
-
-
-def test_apply_degradations_rejects_non_3channel_input():
-    # glare() silently corrupts a 2D (H, W) grayscale image into (H, W, H) via
-    # a numpy broadcasting accident instead of erroring -- apply_degradations
-    # must fail loudly on the bad shape rather than let that through.
+def test_rejects_non_3channel_input():
     grayscale = np.zeros((64, 64), dtype=np.uint8)
     try:
         apply_degradations(grayscale, seed=0)
@@ -72,8 +65,7 @@ if __name__ == "__main__":
         test_severity_zero_is_noop,
         test_labels_align_to_registry,
         test_seed_is_reproducible,
-        test_burst_returns_requested_frames,
-        test_apply_degradations_rejects_non_3channel_input,
+        test_rejects_non_3channel_input,
     ]:
         fn()
         print("PASS", fn.__name__)

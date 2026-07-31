@@ -53,7 +53,14 @@ def main():
 
     np.random.seed(0)
     base = load_or_synth(args.image)
-    base = cv2.resize(base, (384, 384))
+    # Preserve aspect ratio -- real DENTEX panoramics are ~2:1 wide, and
+    # squashing them to a square before judging "does this look like a real
+    # phone shot" (the Phase 2 deliverable this script is for) defeats the
+    # purpose.
+    h, w = base.shape[:2]
+    target_w = 384
+    target_h = max(1, round(target_w * h / w))
+    base = cv2.resize(base, (target_w, target_h))
 
     tiles = [label(base, "original")]
     for name, fn in DEGRADATIONS.items():

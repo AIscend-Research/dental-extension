@@ -176,6 +176,14 @@ def apply_degradations(
     Returns:
         DegradationResult with the degraded image and the per-type severities.
     """
+    if img.ndim != 3 or img.shape[2] != 3:
+        # glare() in particular silently corrupts a 2D (H, W) grayscale input
+        # into (H, W, H) via a numpy broadcasting accident ((H,W) + (H,W,1)
+        # broadcasts on the wrong axis) instead of erroring -- fail loudly
+        # here rather than let that propagate into a dataset unnoticed.
+        raise ValueError(
+            f"expected a 3-channel BGR uint8 image (H, W, 3), got shape {img.shape}"
+        )
     if seed is not None:
         random.seed(seed)
         np.random.seed(seed)

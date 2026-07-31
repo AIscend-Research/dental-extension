@@ -16,6 +16,7 @@ wandb/
 __pycache__/
 *.pyc
 .venv/
+.venv-detector/
 venv/
 .pytest_cache/
 .ipynb_checkpoints/

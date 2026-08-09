@@ -75,8 +75,8 @@ if _HAS_TORCH:
             return fused, attn
 
         @staticmethod
-        def cross_frame_agreement(attn_weights: "torch.Tensor") -> float:
-            """Turn frame weights into a [0, 1] confidence signal.
+        def cross_frame_agreement(attn_weights: "torch.Tensor") -> "torch.Tensor":
+            """Turn frame weights into a per-sample [0, 1] confidence signal.
 
             One defensible reading, not a validated one: normalized entropy of
             the attention distribution. Uniform weights (high entropy) mean
@@ -84,9 +84,21 @@ if _HAS_TORCH:
             "agreement" -- and this returns a value near 1.0. A peaked
             distribution (low entropy, one frame dominating) means the frames
             were treated very differently -- "disagreement" -- and this
+            returns a value near 0.0, even though the fused output might
+            still be fine if the dominant frame is genuinely clean.
 
-              returns a value near 0.0, even though the fused output might
-              still be fine if the dominant frame is genuinely clean.
+            Args:
+                attn_weights: (B, N) attention weights from forward(), or a
+                    bare (N,) vector for a single sample.
+
+            Returns:
+                (B,) tensor of agreement scores, each in [0, 1]. Entropy is
+                computed per sample and normalized by log(N) -- the number of
+                *frames*, not the number of elements in the batch. Flattening
+                the whole (B, N) batch into one distribution instead (the
+                original implementation) normalized by log(B*N) and returned
+                values above 1.0 for any B > 1, e.g. 1.23 for a uniform batch
+                of 2 -- silently breaking the documented [0, 1] contract.
 
             This is a real judgment call the original design note flagged as
             unresolved ("frames that disagree = low trust") -- it conflates
@@ -97,13 +109,15 @@ if _HAS_TORCH:
             (e.g. variance of the raw frame predictions, not the attention
             weights) entirely.
             """
-            p = attn_weights.reshape(-1).clamp(min=1e-8)
-            n = p.numel()
-            if n <= 1:
-                return 1.0
-            entropy = -(p * p.log()).sum().item()
-            max_entropy = torch.log(torch.tensor(float(n))).item()
-            return float(entropy / max_entropy) if max_entropy > 0 else 1.0
+            if attn_weights.dim() == 1:
+                attn_weights = attn_weights.unsqueeze(0)
+            p = attn_weights.clamp(min=1e-8)
+            n_frames = p.shape[-1]
+            if n_frames <= 1:
+                return torch.ones(p.shape[0], device=p.device, dtype=p.dtype)
+            entropy = -(p * p.log()).sum(dim=-1)  # (B,)
+            max_entropy = float(torch.log(torch.tensor(float(n_frames))))
+            return (entropy / max_entropy).clamp(0.0, 1.0)
 
 else:
 
@@ -121,7 +135,7 @@ else:
             )
 
         @staticmethod
-        def cross_frame_agreement(attn_weights) -> float:
+        def cross_frame_agreement(attn_weights):
             raise NotImplementedError(
                 "torch is not installed in this environment. See SETUP.md "
                 "Track B for the confirmed working install recipe."

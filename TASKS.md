@@ -8,6 +8,10 @@ needed" can start the moment `setup_env.sh` finishes.
 
 **Stream 1 — Degradation realism (no detector needed).**
 File: `src/data/degradation.py`, `demo_degradation.py`.
+Note before adding anything: degradations that move image content must remap
+ground-truth boxes too (`apply_degradations(..., boxes=...)`). `angle` is
+currently the only one. Getting this wrong is silent -- no crash, just a
+detector trained on misaligned labels.
 The pipeline already runs. The real Phase 2 work is judging whether the
 synthetic artifacts match actual phone shots, and this is the paper's main
 ablation. Compare degradation strategies: the current hand-built OpenCV
@@ -133,6 +137,11 @@ paths) -- the notebooks use a custom mapper instead.
   still a stub; the label-map decision (caries-only vs all-four, see
   `src/data/dentex.py`'s `DIAGNOSIS_CLASSES`/`CARIES_ONLY_MAP`) needs to be
   locked before wiring `ROI_HEADS.NUM_CLASSES` and dataset registration here.
+  Until it is, `configs/default.yaml` says `task: diagnosis` -- all four
+  classes, which is what `kaggle/01` actually trains. It previously said
+  `caries_only`, describing a collapse that exists nowhere in the code; the
+  config now states what runs, and flipping it is part of landing the
+  decision, not a substitute for it.
   Dataset registration itself is done, though -- see
   `src/data/dentex.py:register_dentex_detectron2`/`to_detectron2_dicts`,
   exercised end to end in `kaggle/01_train_baseline_detector.ipynb`. Also
@@ -140,8 +149,23 @@ paths) -- the notebooks use a custom mapper instead.
   (quadrant-level `pred_classes_1` only) -- diagnosis/caries predictions need
   `model(batch, k=2)` for `pred_classes_3`, easy to miss since `k=0` doesn't
   error, it just silently returns the wrong task's output.
-- Robustness variant on degraded data: feed `degradation.py` through the dataset
-  mapper
+- Robustness variant on degraded data: **wired up** --
+  `kaggle/01_train_baseline_detector.ipynb`'s `CariesDatasetMapper` now takes
+  `degrade_prob`, and the notebook's `TRAIN_ARM` switch selects `baseline`
+  (clean, `degrade_prob=0.0`) or `robustness` (`0.7`), writing to separate
+  `OUTPUT_DIR`s so the two arms can't overwrite each other. Verified locally
+  against real DENTEX images: the degraded path produces in-frame,
+  label-aligned boxes. **The GPU run itself is still not done** -- this is the
+  training *path*, not trained weights, and the arms only mean something
+  compared against each other.
+  - The non-obvious part, now handled: `angle` applies a rotation +
+    perspective warp, so it moves image content. Degrading pixels while
+    leaving ground truth in place doesn't error -- it silently trains the
+    detector on misaligned boxes. `apply_degradations(..., boxes=...)` remaps
+    them through the same homography (`transform_boxes()`), and the mapper
+    drops boxes warped out of frame along with their class labels so the two
+    can't desynchronize. Same contract implemented in the albumentations arm
+    via `bbox_params`. See `tests/test_degradation.py`.
 - Fusion module: `src/models/fusion.py` -- **real nn.Module now**, not a stub.
   Attention-weighted average over frame features, confirmed against the real
   backbone's FPN p5 output (256 channels): fuses N frame feature maps into one
@@ -149,18 +173,31 @@ paths) -- the notebooks use a custom mapper instead.
   implemented but its entropy-based interpretation is an explicit, flagged
   judgment call -- validate it against real burst data + correctness labels in
   Phase 4, don't assume it's right. See `tests/test_models_torch.py`.
+  Fixed since first written: it flattened the whole `(B, N)` batch into one
+  distribution and normalized by `log(B*N)`, so it returned values **above
+  1.0** for any batch (1.23 at B=2, 1.77 at B=4) despite documenting a `[0, 1]`
+  signal, and mixed unrelated samples together. Now per-sample, returning a
+  `(B,)` tensor normalized by `log(n_frames)`. The old B=1-only test couldn't
+  see it; there's a batched regression test now.
 - Confidence head with degradation labels as weak supervision:
   `src/models/confidence_head.py` -- real `nn.Module`, and **now actually
   trained**, standalone (didn't need to wait for the full detector): see
   `docs/phase3_confidence_head_training.md` and
   `scripts/train_confidence_head_standalone.py`. Trained against a small
-  stand-in CNN trunk (not the real, still-untrained Swin-L backbone) on 200
-  real DENTEX images + synthetic degradation labels. Real result: 69.3%
-  dominant-degradation accuracy (vs 20% chance), but measurably overconfident
-  on degraded images (predicts 0.696 mean usability where true mean is
-  0.321) -- a genuine finding, not just a proof it runs. Once the real
-  detector is trained, retrain this head against its actual FPN p5 features
-  instead of the stand-in trunk.
+  stand-in CNN trunk (not the real, still-untrained Swin-L backbone) on real
+  DENTEX images + synthetic degradation labels. Real results at the
+  best-validation-loss epoch: **66.7%** dominant-degradation accuracy at 200
+  training images and **77.0%** at 495 (vs 20% chance), with usability
+  correlation 0.894/0.933 and roughly calibrated usability scores. Once the
+  real detector is trained, retrain this head against its actual FPN p5
+  features instead of the stand-in trunk.
+  - **Correction**: this previously reported 69.3% and "measurably
+    overconfident on degraded images (0.696 predicted vs 0.321 true)". That
+    overconfidence was an artifact of reporting the *last* epoch when
+    validation loss is unstable (0.015-0.18 across epochs), not a property
+    of the model. Both the script and notebook 02 now select the best epoch
+    by val loss and print which one they used. See
+    `docs/phase3_confidence_head_training.md`.
 - Predict the degradation *type*, not just trust/don't: already the head's design
 - Decision thresholds: `decide()` (logic done, tune the operating points)
 - Size/latency/FLOPs benchmark: **done**, see `docs/phase3_model_benchmarks.md`.

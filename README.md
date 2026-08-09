@@ -43,7 +43,9 @@ You do not have to wait for the Detectron2 install to start working. Most of the
 codebase is decoupled from it on purpose.
 
 Runs right now, no GPU, no detector:
-- `src/data/degradation.py` — the synthetic phone-artifact pipeline (Phase 2 core)
+- `src/data/degradation.py` — the synthetic phone-artifact pipeline (Phase 2
+  core), including ground-truth box remapping for detector training
+  (`apply_degradations(..., boxes=...)`)
 - `src/data/degradation_albumentations.py` — the albumentations-preset
   alternative, same interface, for the Phase 2 degradation-realism ablation
 - `src/data/dentex.py` — DENTEX COCO loading, image-level split (no patient id
@@ -58,6 +60,12 @@ Runs right now, no GPU, no detector:
 - `docs/` — Phase 1 background/delta/workshop pick, Phase 2 data notes
   (inter-rater disagreement, Kaggle usability), Phase 3 model benchmarks,
   Phase 4 adjacent-field inspiration
+- `src/utils/config.py` — loads `configs/default.yaml` (paths, degradation
+  params, decision thresholds), so those live in one place instead of being
+  copy-pasted into each script
+- `src/utils/kaggle_env.py` — the Kaggle session bootstrap the notebooks share
+  (idempotent clone, dependency install that can't move numpy/torch, DENTEX
+  lookup, detectron2 import ordering)
 - `demo_degradation.py` — visual before/after grid
 - `demo_degradation_compare.py` — hand-built vs albumentations side by side
   (see `figures/example_degradation_compare.png`)
@@ -91,7 +99,8 @@ caries-confidence/
                             data notes, model benchmarks, adjacent-field
                             inspiration, confidence-head training results
   kaggle/                   4 notebooks for the GPU training run -- setup,
-                            train detector, train confidence head, evaluate
+                            train detector (baseline AND robustness arms),
+                            train confidence head, evaluate
                             (see kaggle/README.md)
   scripts/
     clone_baseline.sh       clone HierarchicalDet into external/
@@ -101,6 +110,7 @@ caries-confidence/
                             docs/phase3_confidence_head_training.md
   src/
     data/degradation.py     WORKING degradation pipeline + burst generator
+                            + box remapping for the geometric degradation
     data/degradation_albumentations.py  the albumentations ablation arm
     data/dentex.py          DENTEX loading, image-level split (no patient id
                             in the data), class balance/weights/repeat
@@ -112,6 +122,8 @@ caries-confidence/
     eval/metrics.py         selective-prediction + detection + calibration
                             metrics, all real and tested
     eval/plots.py           risk-coverage + reliability-diagram plotting
+    utils/config.py         loads configs/default.yaml
+    utils/kaggle_env.py     Kaggle session bootstrap shared by the notebooks
     utils/seed.py           reproducibility
   tests/                    runnable checks for the working pieces
   external/                 HierarchicalDet lands here (gitignored)
@@ -127,13 +139,22 @@ Neither is committed (both are large, DENTEX is licensed). Get them with:
 python scripts/download_dentex.py      # needs `huggingface-cli login` first
 ```
 
-Backbone weights (`swin_base_patch4_window7_224_22k.pkl`) are separate again —
-see SETUP.md.
+Backbone weights (`swin_large_patch4_window7_224_22k.pkl`) are separate again —
+see SETUP.md for the download-and-convert recipe. Note it is Swin-**Large**:
+the upstream config's `MODEL.WEIGHTS` names a Swin-*Base* file while building a
+Large model, and loading the Base file raises no error — it just leaves most of
+the backbone randomly initialized.
 
 ## Convention notes
 
 - Degradation severity is always in `[0, 1]`, and the eval code assumes it is
   monotonic. Keep that contract if you add new degradations.
+- Any degradation that **moves image content** must also remap ground-truth
+  boxes. Today `angle` is the only one, and
+  `apply_degradations(..., boxes=...)` handles it. Degrading pixels while
+  leaving boxes in place doesn't crash — it just trains the detector on
+  misaligned labels, so add box handling alongside any new geometric
+  degradation.
 - `patient_level_split` in `src/data/dentex.py` is actually an **image-level**
   split: confirmed against the real download that DENTEX ships no patient id
   anywhere (filenames are just a sequential per-split index). State this as a

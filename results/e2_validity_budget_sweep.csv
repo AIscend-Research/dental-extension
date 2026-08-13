@@ -1,0 +1,6 @@
+budget,stratified,stratified_violates,likelihood_ratio,likelihood_ratio_violates,marginal,marginal_violates,best_shot,best_shot_violates,greedy,greedy_violates
+1,0.0,False,0.0,False,0.0,False,0.0556,True,0.0556,True
+2,0.0,False,0.0,False,0.0,False,0.1034,True,0.0914,True
+3,0.0001,False,0.0004,False,0.0002,False,0.153,True,0.1059,True
+5,0.001,False,0.0022,False,0.0009,False,0.2366,True,0.1227,True
+8,0.002,False,0.008,False,0.0009,False,0.336,True,0.1276,True

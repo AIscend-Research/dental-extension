@@ -1,0 +1,241 @@
+{
+  "reader": {
+    "clean_auc": 0.88,
+    "clinic_auc": 0.7755501528957179
+  },
+  "n_null_sessions": 20000,
+  "budget": 4,
+  "alpha_sweep": [
+    {
+      "alpha": 0.5,
+      "stratified": 0.0745,
+      "stratified_ci_lo": 0.07094193388108858,
+      "stratified_violates": false,
+      "likelihood_ratio": 0.1673,
+      "likelihood_ratio_ci_lo": 0.1621911038809814,
+      "likelihood_ratio_violates": false,
+      "marginal": 0.0676,
+      "marginal_ci_lo": 0.06420289303520496,
+      "marginal_violates": false,
+      "best_shot": 0.93585,
+      "best_shot_ci_lo": 0.9323697892807841,
+      "best_shot_violates": true,
+      "greedy": 0.233,
+      "greedy_ci_lo": 0.22719270522202886,
+      "greedy_violates": false
+    },
+    {
+      "alpha": 0.3,
+      "stratified": 0.0292,
+      "stratified_ci_lo": 0.026955442823733643,
+      "stratified_violates": false,
+      "likelihood_ratio": 0.066,
+      "likelihood_ratio_ci_lo": 0.06264165348032447,
+      "likelihood_ratio_violates": false,
+      "marginal": 0.0208,
+      "marginal_ci_lo": 0.018912158330307738,
+      "marginal_violates": false,
+      "best_shot": 0.7533,
+      "best_shot_ci_lo": 0.7472771201836553,
+      "best_shot_violates": true,
+      "greedy": 0.18655,
+      "greedy_ci_lo": 0.18121149305736572,
+      "greedy_violates": false
+    },
+    {
+      "alpha": 0.2,
+      "stratified": 0.01515,
+      "stratified_ci_lo": 0.013547811303548806,
+      "stratified_violates": false,
+      "likelihood_ratio": 0.0268,
+      "likelihood_ratio_ci_lo": 0.024650990742247702,
+      "likelihood_ratio_violates": false,
+      "marginal": 0.0096,
+      "marginal_ci_lo": 0.008339635705887668,
+      "marginal_violates": false,
+      "best_shot": 0.57835,
+      "best_shot_ci_lo": 0.5714915547698365,
+      "best_shot_violates": true,
+      "greedy": 0.1665,
+      "greedy_ci_lo": 0.16140115833205135,
+      "greedy_violates": false
+    },
+    {
+      "alpha": 0.1,
+      "stratified": 0.00315,
+      "stratified_ci_lo": 0.00246302631650396,
+      "stratified_violates": false,
+      "likelihood_ratio": 0.0072,
+      "likelihood_ratio_ci_lo": 0.0061191766366082,
+      "likelihood_ratio_violates": false,
+      "marginal": 0.00205,
+      "marginal_ci_lo": 0.0015115726586445969,
+      "marginal_violates": false,
+      "best_shot": 0.36465,
+      "best_shot_ci_lo": 0.3580056634777708,
+      "best_shot_violates": true,
+      "greedy": 0.1495,
+      "greedy_ci_lo": 0.14462537176369086,
+      "greedy_violates": true
+    },
+    {
+      "alpha": 0.05,
+      "stratified": 0.0005,
+      "stratified_ci_lo": 0.0002716181902812996,
+      "stratified_violates": false,
+      "likelihood_ratio": 0.00125,
+      "likelihood_ratio_ci_lo": 0.0008468547348507647,
+      "likelihood_ratio_violates": false,
+      "marginal": 0.00015,
+      "marginal_ci_lo": 5.101389475340828e-05,
+      "marginal_violates": false,
+      "best_shot": 0.1919,
+      "best_shot_ci_lo": 0.18650165353450576,
+      "best_shot_violates": true,
+      "greedy": 0.11645,
+      "greedy_ci_lo": 0.11207791571792557,
+      "greedy_violates": true
+    },
+    {
+      "alpha": 0.02,
+      "stratified": 0.0,
+      "stratified_ci_lo": 0.0,
+      "stratified_violates": false,
+      "likelihood_ratio": 5e-05,
+      "likelihood_ratio_ci_lo": 8.82605523813606e-06,
+      "likelihood_ratio_violates": false,
+      "marginal": 0.0,
+      "marginal_ci_lo": 0.0,
+      "marginal_violates": false,
+      "best_shot": 0.0712,
+      "best_shot_ci_lo": 0.06771770227362625,
+      "best_shot_violates": true,
+      "greedy": 0.03975,
+      "greedy_ci_lo": 0.03712949766256612,
+      "greedy_violates": true
+    },
+    {
+      "alpha": 0.01,
+      "stratified": 0.0,
+      "stratified_ci_lo": 0.0,
+      "stratified_violates": false,
+      "likelihood_ratio": 0.0,
+      "likelihood_ratio_ci_lo": 0.0,
+      "likelihood_ratio_violates": false,
+      "marginal": 0.0,
+      "marginal_ci_lo": 0.0,
+      "marginal_violates": false,
+      "best_shot": 0.0372,
+      "best_shot_ci_lo": 0.03466473082280024,
+      "best_shot_violates": true,
+      "greedy": 0.02095,
+      "greedy_ci_lo": 0.019055171969590678,
+      "greedy_violates": true
+    }
+  ],
+  "budget_sweep": [
+    {
+      "budget": 1,
+      "stratified": 0.0,
+      "stratified_violates": false,
+      "likelihood_ratio": 0.0,
+      "likelihood_ratio_violates": false,
+      "marginal": 0.0,
+      "marginal_violates": false,
+      "best_shot": 0.0556,
+      "best_shot_violates": true,
+      "greedy": 0.0556,
+      "greedy_violates": true
+    },
+    {
+      "budget": 2,
+      "stratified": 0.0,
+      "stratified_violates": false,
+      "likelihood_ratio": 0.0,
+      "likelihood_ratio_violates": false,
+      "marginal": 0.0,
+      "marginal_violates": false,
+      "best_shot": 0.1034,
+      "best_shot_violates": true,
+      "greedy": 0.0914,
+      "greedy_violates": true
+    },
+    {
+      "budget": 3,
+      "stratified": 0.0001,
+      "stratified_violates": false,
+      "likelihood_ratio": 0.0004,
+      "likelihood_ratio_violates": false,
+      "marginal": 0.0002,
+      "marginal_violates": false,
+      "best_shot": 0.153,
+      "best_shot_violates": true,
+      "greedy": 0.1059,
+      "greedy_violates": true
+    },
+    {
+      "budget": 5,
+      "stratified": 0.001,
+      "stratified_violates": false,
+      "likelihood_ratio": 0.0022,
+      "likelihood_ratio_violates": false,
+      "marginal": 0.0009,
+      "marginal_violates": false,
+      "best_shot": 0.2366,
+      "best_shot_violates": true,
+      "greedy": 0.1227,
+      "greedy_violates": true
+    },
+    {
+      "budget": 8,
+      "stratified": 0.002,
+      "stratified_violates": false,
+      "likelihood_ratio": 0.008,
+      "likelihood_ratio_violates": false,
+      "marginal": 0.0009,
+      "marginal_violates": false,
+      "best_shot": 0.336,
+      "best_shot_violates": true,
+      "greedy": 0.1276,
+      "greedy_violates": true
+    }
+  ],
+  "scope_of_guarantee": [
+    {
+      "subpopulation": "matched (as calibrated)",
+      "crossing_rate": 0.0004,
+      "ci": [
+        0.0001555603210541602,
+        0.0010281449467301677
+      ],
+      "violates": false
+    },
+    {
+      "subpopulation": "hard cases only (difficulty ~ Beta(6,2))",
+      "crossing_rate": 0.0037,
+      "ci": [
+        0.002685632352621393,
+        0.005095538432809675
+      ],
+      "violates": false
+    },
+    {
+      "subpopulation": "hardest (difficulty = 0.95)",
+      "crossing_rate": 0.0059,
+      "ci": [
+        0.004577025249490057,
+        0.007602455881038837
+      ],
+      "violates": false
+    }
+  ],
+  "mean_shots": {
+    "stratified": 4.0,
+    "likelihood_ratio": 4.0,
+    "marginal": 4.0,
+    "best_shot": 4.0,
+    "greedy": 2.141
+  },
+  "figure": "/Users/welu28/Documents/GitHub/dental-extension/figures/e2_validity.png",
+  "generated_utc": "2026-08-13T04:32:10Z"
+}

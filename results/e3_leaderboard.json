@@ -1,0 +1,909 @@
+{
+  "reader": {
+    "clean_auc": 0.88,
+    "clinic_auc": 0.7755501528957179
+  },
+  "docket": {
+    "n_cases": 4000,
+    "budget": 4,
+    "prevalence": 0.354,
+    "burden": "convict=preponderance/discharge=clear_and_convincing",
+    "clinic_difficulty": 0.5
+  },
+  "headline": {
+    "conformal (provable)": [
+      {
+        "policy": "single_shot",
+        "n_cases": 4000,
+        "n_captures": 4000,
+        "mean_captures": 1.0,
+        "verdict_rate": 0.06625,
+        "verdicts_per_capture": 0.06625,
+        "verdict_accuracy": 0.8452830188679246,
+        "refer_rate": 0.93375,
+        "false_conviction_rate": 0.01586687306501548,
+        "false_conviction_ci": [
+          0.011717618988872785,
+          0.0214534993670575
+        ],
+        "alpha_convict": 0.5,
+        "convict_violation": false,
+        "false_discharge_rate": 0.0,
+        "false_discharge_ci": [
+          0.0,
+          0.0027056539264661635
+        ],
+        "alpha_discharge": 0.2,
+        "discharge_violation": false,
+        "guaranteed": true,
+        "sensitivity": 1.0,
+        "specificity": 0.5060240963855421,
+        "mean_final_usability": 0.5316348728352833
+      },
+      {
+        "policy": "fixed_retake",
+        "n_cases": 4000,
+        "n_captures": 16000,
+        "mean_captures": 4.0,
+        "verdict_rate": 0.378,
+        "verdicts_per_capture": 0.0945,
+        "verdict_accuracy": 0.8961640211640212,
+        "refer_rate": 0.622,
+        "false_conviction_rate": 0.05959752321981424,
+        "false_conviction_ci": [
+          0.05110656174254598,
+          0.06939602234142578
+        ],
+        "alpha_convict": 0.5,
+        "convict_violation": false,
+        "false_discharge_rate": 0.00211864406779661,
+        "false_discharge_ci": [
+          0.000720772978769033,
+          0.006210704448008716
+        ],
+        "alpha_discharge": 0.2,
+        "discharge_violation": false,
+        "guaranteed": true,
+        "sensitivity": 0.9963414634146341,
+        "specificity": 0.7774566473988439,
+        "mean_final_usability": 0.5192021731090957
+      },
+      {
+        "policy": "untargeted_evidential",
+        "n_cases": 4000,
+        "n_captures": 13959,
+        "mean_captures": 3.48975,
+        "verdict_rate": 0.38175,
+        "verdicts_per_capture": 0.10939179024285407,
+        "verdict_accuracy": 0.8925998690242305,
+        "refer_rate": 0.61825,
+        "false_conviction_rate": 0.062306501547987614,
+        "false_conviction_ci": [
+          0.053620722851426744,
+          0.07229177503870687
+        ],
+        "alpha_convict": 0.5,
+        "convict_violation": false,
+        "false_discharge_rate": 0.00211864406779661,
+        "false_discharge_ci": [
+          0.000720772978769033,
+          0.006210704448008716
+        ],
+        "alpha_discharge": 0.2,
+        "discharge_violation": false,
+        "guaranteed": true,
+        "sensitivity": 0.9963503649635036,
+        "specificity": 0.7716312056737589,
+        "mean_final_usability": 0.5258492093513969
+      },
+      {
+        "policy": "evidential_capture",
+        "n_cases": 4000,
+        "n_captures": 13720,
+        "mean_captures": 3.43,
+        "verdict_rate": 0.44525,
+        "verdicts_per_capture": 0.12981049562682215,
+        "verdict_accuracy": 0.8961257720381808,
+        "refer_rate": 0.5547500000000001,
+        "false_conviction_rate": 0.0696594427244582,
+        "false_conviction_ci": [
+          0.060469092180116146,
+          0.08012745746959968
+        ],
+        "alpha_convict": 0.5,
+        "convict_violation": false,
+        "false_discharge_rate": 0.0035310734463276836,
+        "false_discharge_ci": [
+          0.001509155621156753,
+          0.008239537472495385
+        ],
+        "alpha_discharge": 0.2,
+        "discharge_violation": false,
+        "guaranteed": true,
+        "sensitivity": 0.9946695095948828,
+        "specificity": 0.7864768683274022,
+        "mean_final_usability": 0.6227991887888354
+      },
+      {
+        "policy": "oracle_instruction",
+        "n_cases": 4000,
+        "n_captures": 13755,
+        "mean_captures": 3.43875,
+        "verdict_rate": 0.43375,
+        "verdicts_per_capture": 0.1261359505634315,
+        "verdict_accuracy": 0.9020172910662824,
+        "refer_rate": 0.5662499999999999,
+        "false_conviction_rate": 0.06308049535603716,
+        "false_conviction_ci": [
+          0.0543399794768102,
+          0.07311820807222684
+        ],
+        "alpha_convict": 0.5,
+        "convict_violation": false,
+        "false_discharge_rate": 0.0049435028248587575,
+        "false_discharge_ci": [
+          0.0023966428987338925,
+          0.010169265861792636
+        ],
+        "alpha_discharge": 0.2,
+        "discharge_violation": false,
+        "guaranteed": true,
+        "sensitivity": 0.9924160346695557,
+        "specificity": 0.7992610837438424,
+        "mean_final_usability": 0.6068516677372029
+      },
+      {
+        "policy": "greedy_diagnostic",
+        "n_cases": 4000,
+        "n_captures": 8499,
+        "mean_captures": 2.12475,
+        "verdict_rate": 0.978,
+        "verdicts_per_capture": 0.460289445817155,
+        "verdict_accuracy": 0.8185071574642127,
+        "refer_rate": 0.02200000000000002,
+        "false_conviction_rate": 0.1996904024767802,
+        "false_conviction_ci": [
+          0.18472712769513036,
+          0.21554528465035475
+        ],
+        "alpha_convict": 0.5,
+        "convict_violation": false,
+        "false_discharge_rate": 0.1370056497175141,
+        "false_discharge_ci": [
+          0.1200750019778532,
+          0.15590057163542875
+        ],
+        "alpha_discharge": 0.2,
+        "discharge_violation": false,
+        "guaranteed": false,
+        "sensitivity": 0.8612303290414879,
+        "specificity": 0.7947494033412887,
+        "mean_final_usability": 0.5717414404016683
+      },
+      {
+        "policy": "naive_best_shot",
+        "n_cases": 4000,
+        "n_captures": 16000,
+        "mean_captures": 4.0,
+        "verdict_rate": 0.2065,
+        "verdicts_per_capture": 0.051625,
+        "verdict_accuracy": 0.927360774818402,
+        "refer_rate": 0.7935,
+        "false_conviction_rate": 0.0228328173374613,
+        "false_conviction_ci": [
+          0.01774265366537186,
+          0.02933967162068892
+        ],
+        "alpha_convict": 0.5,
+        "convict_violation": false,
+        "false_discharge_rate": 0.0007062146892655367,
+        "false_discharge_ci": [
+          0.00012467190611631135,
+          0.003989589853787048
+        ],
+        "alpha_discharge": 0.2,
+        "discharge_violation": false,
+        "guaranteed": false,
+        "sensitivity": 0.9983633387888707,
+        "specificity": 0.7255813953488373,
+        "mean_final_usability": 0.6315495062603715
+      }
+    ],
+    "likelihood-ratio (estimated)": [
+      {
+        "policy": "single_shot",
+        "n_cases": 4000,
+        "n_captures": 4000,
+        "mean_captures": 1.0,
+        "verdict_rate": 0.118,
+        "verdicts_per_capture": 0.118,
+        "verdict_accuracy": 0.75,
+        "refer_rate": 0.882,
+        "false_conviction_rate": 0.0456656346749226,
+        "false_conviction_ci": [
+          0.03826859458732969,
+          0.05441157563638106
+        ],
+        "alpha_convict": 0.5,
+        "convict_violation": false,
+        "false_discharge_rate": 0.0,
+        "false_discharge_ci": [
+          0.0,
+          0.0027056539264661635
+        ],
+        "alpha_discharge": 0.2,
+        "discharge_violation": false,
+        "guaranteed": true,
+        "sensitivity": 1.0,
+        "specificity": 0.04065040650406504,
+        "mean_final_usability": 0.5316348728352833
+      },
+      {
+        "policy": "fixed_retake",
+        "n_cases": 4000,
+        "n_captures": 16000,
+        "mean_captures": 4.0,
+        "verdict_rate": 0.58025,
+        "verdicts_per_capture": 0.1450625,
+        "verdict_accuracy": 0.8526497199482982,
+        "refer_rate": 0.41974999999999996,
+        "false_conviction_rate": 0.12616099071207432,
+        "false_conviction_ci": [
+          0.11391111957445405,
+          0.13952077517520917
+        ],
+        "alpha_convict": 0.5,
+        "convict_violation": false,
+        "false_discharge_rate": 0.011299435028248588,
+        "false_discharge_ci": [
+          0.006967021861458195,
+          0.018276357400003086
+        ],
+        "alpha_discharge": 0.2,
+        "discharge_violation": false,
+        "guaranteed": true,
+        "sensitivity": 0.9844810863239574,
+        "specificity": 0.7472868217054264,
+        "mean_final_usability": 0.5192021731090957
+      },
+      {
+        "policy": "untargeted_evidential",
+        "n_cases": 4000,
+        "n_captures": 12474,
+        "mean_captures": 3.1185,
+        "verdict_rate": 0.5925,
+        "verdicts_per_capture": 0.18999518999519,
+        "verdict_accuracy": 0.839240506329114,
+        "refer_rate": 0.4075,
+        "false_conviction_rate": 0.14009287925696595,
+        "false_conviction_ci": [
+          0.1272437263912894,
+          0.15401058221863478
+        ],
+        "alpha_convict": 0.5,
+        "convict_violation": false,
+        "false_discharge_rate": 0.013418079096045197,
+        "false_discharge_ci": [
+          0.00860673305069905,
+          0.02086246971107382
+        ],
+        "alpha_discharge": 0.2,
+        "discharge_violation": false,
+        "guaranteed": true,
+        "sensitivity": 0.9816779170684667,
+        "specificity": 0.7284321080270068,
+        "mean_final_usability": 0.5325120978270534
+      },
+      {
+        "policy": "evidential_capture",
+        "n_cases": 4000,
+        "n_captures": 12126,
+        "mean_captures": 3.0315,
+        "verdict_rate": 0.6825,
+        "verdicts_per_capture": 0.22513607125185553,
+        "verdict_accuracy": 0.8424908424908425,
+        "refer_rate": 0.3175,
+        "false_conviction_rate": 0.15673374613003097,
+        "false_conviction_ci": [
+          0.14322686793057496,
+          0.17125976834577208
+        ],
+        "alpha_convict": 0.5,
+        "convict_violation": false,
+        "false_discharge_rate": 0.01765536723163842,
+        "false_discharge_ci": [
+          0.011986967749555932,
+          0.025933882012840102
+        ],
+        "alpha_discharge": 0.2,
+        "discharge_violation": false,
+        "guaranteed": true,
+        "sensitivity": 0.9781659388646288,
+        "specificity": 0.7444794952681388,
+        "mean_final_usability": 0.6173887044850657
+      },
+      {
+        "policy": "oracle_instruction",
+        "n_cases": 4000,
+        "n_captures": 12151,
+        "mean_captures": 3.03775,
+        "verdict_rate": 0.66375,
+        "verdicts_per_capture": 0.21850053493539626,
+        "verdict_accuracy": 0.8429378531073446,
+        "refer_rate": 0.33625000000000005,
+        "false_conviction_rate": 0.15247678018575853,
+        "false_conviction_ci": [
+          0.13913258521453534,
+          0.16685275793784307
+        ],
+        "alpha_convict": 0.5,
+        "convict_violation": false,
+        "false_discharge_rate": 0.016242937853107344,
+        "false_discharge_ci": [
+          0.010847557770854745,
+          0.024256076324666902
+        ],
+        "alpha_discharge": 0.2,
+        "discharge_violation": false,
+        "guaranteed": true,
+        "sensitivity": 0.9795918367346939,
+        "specificity": 0.7421465968586387,
+        "mean_final_usability": 0.6049401336600528
+      },
+      {
+        "policy": "greedy_diagnostic",
+        "n_cases": 4000,
+        "n_captures": 8499,
+        "mean_captures": 2.12475,
+        "verdict_rate": 0.978,
+        "verdicts_per_capture": 0.460289445817155,
+        "verdict_accuracy": 0.8185071574642127,
+        "refer_rate": 0.02200000000000002,
+        "false_conviction_rate": 0.1996904024767802,
+        "false_conviction_ci": [
+          0.18472712769513036,
+          0.21554528465035475
+        ],
+        "alpha_convict": 0.5,
+        "convict_violation": false,
+        "false_discharge_rate": 0.1370056497175141,
+        "false_discharge_ci": [
+          0.1200750019778532,
+          0.15590057163542875
+        ],
+        "alpha_discharge": 0.2,
+        "discharge_violation": false,
+        "guaranteed": false,
+        "sensitivity": 0.8612303290414879,
+        "specificity": 0.7947494033412887,
+        "mean_final_usability": 0.5717414404016683
+      },
+      {
+        "policy": "naive_best_shot",
+        "n_cases": 4000,
+        "n_captures": 16000,
+        "mean_captures": 4.0,
+        "verdict_rate": 0.2065,
+        "verdicts_per_capture": 0.051625,
+        "verdict_accuracy": 0.927360774818402,
+        "refer_rate": 0.7935,
+        "false_conviction_rate": 0.0228328173374613,
+        "false_conviction_ci": [
+          0.01774265366537186,
+          0.02933967162068892
+        ],
+        "alpha_convict": 0.5,
+        "convict_violation": false,
+        "false_discharge_rate": 0.0007062146892655367,
+        "false_discharge_ci": [
+          0.00012467190611631135,
+          0.003989589853787048
+        ],
+        "alpha_discharge": 0.2,
+        "discharge_violation": false,
+        "guaranteed": false,
+        "sensitivity": 0.9983633387888707,
+        "specificity": 0.7255813953488373,
+        "mean_final_usability": 0.6315495062603715
+      }
+    ]
+  },
+  "budget_sweep": [
+    {
+      "budget": 1,
+      "policy": "single_shot",
+      "verdicts_per_capture": 0.1175,
+      "verdict_rate": 0.1175,
+      "verdict_accuracy": 0.7829787234042553,
+      "mean_captures": 1.0,
+      "guaranteed": true,
+      "violated": false
+    },
+    {
+      "budget": 1,
+      "policy": "fixed_retake",
+      "verdicts_per_capture": 0.1175,
+      "verdict_rate": 0.1175,
+      "verdict_accuracy": 0.7829787234042553,
+      "mean_captures": 1.0,
+      "guaranteed": true,
+      "violated": false
+    },
+    {
+      "budget": 1,
+      "policy": "untargeted_evidential",
+      "verdicts_per_capture": 0.1175,
+      "verdict_rate": 0.1175,
+      "verdict_accuracy": 0.7829787234042553,
+      "mean_captures": 1.0,
+      "guaranteed": true,
+      "violated": false
+    },
+    {
+      "budget": 1,
+      "policy": "evidential_capture",
+      "verdicts_per_capture": 0.1175,
+      "verdict_rate": 0.1175,
+      "verdict_accuracy": 0.7829787234042553,
+      "mean_captures": 1.0,
+      "guaranteed": true,
+      "violated": false
+    },
+    {
+      "budget": 1,
+      "policy": "oracle_instruction",
+      "verdicts_per_capture": 0.1175,
+      "verdict_rate": 0.1175,
+      "verdict_accuracy": 0.7829787234042553,
+      "mean_captures": 1.0,
+      "guaranteed": true,
+      "violated": false
+    },
+    {
+      "budget": 1,
+      "policy": "greedy_diagnostic",
+      "verdicts_per_capture": 0.927,
+      "verdict_rate": 0.927,
+      "verdict_accuracy": 0.6591154261057174,
+      "mean_captures": 1.0,
+      "guaranteed": false,
+      "violated": false
+    },
+    {
+      "budget": 1,
+      "policy": "naive_best_shot",
+      "verdicts_per_capture": 0.927,
+      "verdict_rate": 0.927,
+      "verdict_accuracy": 0.6591154261057174,
+      "mean_captures": 1.0,
+      "guaranteed": false,
+      "violated": false
+    },
+    {
+      "budget": 2,
+      "policy": "single_shot",
+      "verdicts_per_capture": 0.1175,
+      "verdict_rate": 0.1175,
+      "verdict_accuracy": 0.7829787234042553,
+      "mean_captures": 1.0,
+      "guaranteed": true,
+      "violated": false
+    },
+    {
+      "budget": 2,
+      "policy": "fixed_retake",
+      "verdicts_per_capture": 0.15425,
+      "verdict_rate": 0.3085,
+      "verdict_accuracy": 0.8087520259319287,
+      "mean_captures": 2.0,
+      "guaranteed": true,
+      "violated": false
+    },
+    {
+      "budget": 2,
+      "policy": "untargeted_evidential",
+      "verdicts_per_capture": 0.16387782204515272,
+      "verdict_rate": 0.3085,
+      "verdict_accuracy": 0.8087520259319287,
+      "mean_captures": 1.8825,
+      "guaranteed": true,
+      "violated": false
+    },
+    {
+      "budget": 2,
+      "policy": "evidential_capture",
+      "verdicts_per_capture": 0.17237715803452855,
+      "verdict_rate": 0.3245,
+      "verdict_accuracy": 0.8151001540832049,
+      "mean_captures": 1.8825,
+      "guaranteed": true,
+      "violated": false
+    },
+    {
+      "budget": 2,
+      "policy": "oracle_instruction",
+      "verdicts_per_capture": 0.1702523240371846,
+      "verdict_rate": 0.3205,
+      "verdict_accuracy": 0.8143525741029641,
+      "mean_captures": 1.8825,
+      "guaranteed": true,
+      "violated": false
+    },
+    {
+      "budget": 2,
+      "policy": "greedy_diagnostic",
+      "verdicts_per_capture": 0.6119833386735021,
+      "verdict_rate": 0.955,
+      "verdict_accuracy": 0.7397905759162303,
+      "mean_captures": 1.5605,
+      "guaranteed": false,
+      "violated": false
+    },
+    {
+      "budget": 2,
+      "policy": "naive_best_shot",
+      "verdicts_per_capture": 0.26375,
+      "verdict_rate": 0.5275,
+      "verdict_accuracy": 0.7744075829383886,
+      "mean_captures": 2.0,
+      "guaranteed": false,
+      "violated": false
+    },
+    {
+      "budget": 3,
+      "policy": "single_shot",
+      "verdicts_per_capture": 0.1175,
+      "verdict_rate": 0.1175,
+      "verdict_accuracy": 0.7829787234042553,
+      "mean_captures": 1.0,
+      "guaranteed": true,
+      "violated": false
+    },
+    {
+      "budget": 3,
+      "policy": "fixed_retake",
+      "verdicts_per_capture": 0.15483333333333332,
+      "verdict_rate": 0.4645,
+      "verdict_accuracy": 0.8331539289558665,
+      "mean_captures": 3.0,
+      "guaranteed": true,
+      "violated": false
+    },
+    {
+      "budget": 3,
+      "policy": "untargeted_evidential",
+      "verdicts_per_capture": 0.182012432012432,
+      "verdict_rate": 0.4685,
+      "verdict_accuracy": 0.8260405549626467,
+      "mean_captures": 2.574,
+      "guaranteed": true,
+      "violated": false
+    },
+    {
+      "budget": 3,
+      "policy": "evidential_capture",
+      "verdicts_per_capture": 0.1982017200938233,
+      "verdict_rate": 0.507,
+      "verdict_accuracy": 0.8037475345167653,
+      "mean_captures": 2.558,
+      "guaranteed": true,
+      "violated": false
+    },
+    {
+      "budget": 3,
+      "policy": "oracle_instruction",
+      "verdicts_per_capture": 0.1988680718188915,
+      "verdict_rate": 0.5095,
+      "verdict_accuracy": 0.8047105004906772,
+      "mean_captures": 2.562,
+      "guaranteed": true,
+      "violated": false
+    },
+    {
+      "budget": 3,
+      "policy": "greedy_diagnostic",
+      "verdicts_per_capture": 0.5130434782608696,
+      "verdict_rate": 0.9735,
+      "verdict_accuracy": 0.7796610169491526,
+      "mean_captures": 1.8975,
+      "guaranteed": false,
+      "violated": false
+    },
+    {
+      "budget": 3,
+      "policy": "naive_best_shot",
+      "verdicts_per_capture": 0.1085,
+      "verdict_rate": 0.3255,
+      "verdict_accuracy": 0.8525345622119815,
+      "mean_captures": 3.0,
+      "guaranteed": false,
+      "violated": false
+    },
+    {
+      "budget": 4,
+      "policy": "single_shot",
+      "verdicts_per_capture": 0.1175,
+      "verdict_rate": 0.1175,
+      "verdict_accuracy": 0.7829787234042553,
+      "mean_captures": 1.0,
+      "guaranteed": true,
+      "violated": false
+    },
+    {
+      "budget": 4,
+      "policy": "fixed_retake",
+      "verdicts_per_capture": 0.146125,
+      "verdict_rate": 0.5845,
+      "verdict_accuracy": 0.8528656971770744,
+      "mean_captures": 4.0,
+      "guaranteed": true,
+      "violated": false
+    },
+    {
+      "budget": 4,
+      "policy": "untargeted_evidential",
+      "verdicts_per_capture": 0.1925615842859443,
+      "verdict_rate": 0.598,
+      "verdict_accuracy": 0.8377926421404682,
+      "mean_captures": 3.1055,
+      "guaranteed": true,
+      "violated": false
+    },
+    {
+      "budget": 4,
+      "policy": "evidential_capture",
+      "verdicts_per_capture": 0.2192723697148476,
+      "verdict_rate": 0.669,
+      "verdict_accuracy": 0.8146487294469357,
+      "mean_captures": 3.051,
+      "guaranteed": true,
+      "violated": false
+    },
+    {
+      "budget": 4,
+      "policy": "oracle_instruction",
+      "verdicts_per_capture": 0.21588861588861588,
+      "verdict_rate": 0.659,
+      "verdict_accuracy": 0.8148710166919575,
+      "mean_captures": 3.0525,
+      "guaranteed": true,
+      "violated": false
+    },
+    {
+      "budget": 4,
+      "policy": "greedy_diagnostic",
+      "verdicts_per_capture": 0.46539379474940334,
+      "verdict_rate": 0.975,
+      "verdict_accuracy": 0.8076923076923077,
+      "mean_captures": 2.095,
+      "guaranteed": false,
+      "violated": false
+    },
+    {
+      "budget": 4,
+      "policy": "naive_best_shot",
+      "verdicts_per_capture": 0.054125,
+      "verdict_rate": 0.2165,
+      "verdict_accuracy": 0.9214780600461894,
+      "mean_captures": 4.0,
+      "guaranteed": false,
+      "violated": false
+    },
+    {
+      "budget": 6,
+      "policy": "single_shot",
+      "verdicts_per_capture": 0.1175,
+      "verdict_rate": 0.1175,
+      "verdict_accuracy": 0.7829787234042553,
+      "mean_captures": 1.0,
+      "guaranteed": true,
+      "violated": false
+    },
+    {
+      "budget": 6,
+      "policy": "fixed_retake",
+      "verdicts_per_capture": 0.12291666666666666,
+      "verdict_rate": 0.7375,
+      "verdict_accuracy": 0.8691525423728813,
+      "mean_captures": 6.0,
+      "guaranteed": true,
+      "violated": false
+    },
+    {
+      "budget": 6,
+      "policy": "untargeted_evidential",
+      "verdicts_per_capture": 0.2032851511169514,
+      "verdict_rate": 0.7735,
+      "verdict_accuracy": 0.8409825468648998,
+      "mean_captures": 3.805,
+      "guaranteed": true,
+      "violated": false
+    },
+    {
+      "budget": 6,
+      "policy": "evidential_capture",
+      "verdicts_per_capture": 0.23855755894590847,
+      "verdict_rate": 0.86,
+      "verdict_accuracy": 0.8238372093023256,
+      "mean_captures": 3.605,
+      "guaranteed": true,
+      "violated": false
+    },
+    {
+      "budget": 6,
+      "policy": "oracle_instruction",
+      "verdicts_per_capture": 0.23285596254475352,
+      "verdict_rate": 0.8455,
+      "verdict_accuracy": 0.8225901833234772,
+      "mean_captures": 3.631,
+      "guaranteed": true,
+      "violated": false
+    },
+    {
+      "budget": 6,
+      "policy": "greedy_diagnostic",
+      "verdicts_per_capture": 0.43232013995189156,
+      "verdict_rate": 0.9885,
+      "verdict_accuracy": 0.8209408194233687,
+      "mean_captures": 2.2865,
+      "guaranteed": false,
+      "violated": false
+    },
+    {
+      "budget": 6,
+      "policy": "naive_best_shot",
+      "verdicts_per_capture": 0.020083333333333335,
+      "verdict_rate": 0.1205,
+      "verdict_accuracy": 0.975103734439834,
+      "mean_captures": 6.0,
+      "guaranteed": false,
+      "violated": false
+    },
+    {
+      "budget": 8,
+      "policy": "single_shot",
+      "verdicts_per_capture": 0.1175,
+      "verdict_rate": 0.1175,
+      "verdict_accuracy": 0.7829787234042553,
+      "mean_captures": 1.0,
+      "guaranteed": true,
+      "violated": false
+    },
+    {
+      "budget": 8,
+      "policy": "fixed_retake",
+      "verdicts_per_capture": 0.098,
+      "verdict_rate": 0.784,
+      "verdict_accuracy": 0.8979591836734694,
+      "mean_captures": 8.0,
+      "guaranteed": true,
+      "violated": false
+    },
+    {
+      "budget": 8,
+      "policy": "untargeted_evidential",
+      "verdicts_per_capture": 0.2053263583402687,
+      "verdict_rate": 0.8635,
+      "verdict_accuracy": 0.8413433700057904,
+      "mean_captures": 4.2055,
+      "guaranteed": true,
+      "violated": false
+    },
+    {
+      "budget": 8,
+      "policy": "evidential_capture",
+      "verdicts_per_capture": 0.24781645157085125,
+      "verdict_rate": 0.9505,
+      "verdict_accuracy": 0.8264071541294056,
+      "mean_captures": 3.8355,
+      "guaranteed": true,
+      "violated": false
+    },
+    {
+      "budget": 8,
+      "policy": "oracle_instruction",
+      "verdicts_per_capture": 0.23862760215882806,
+      "verdict_rate": 0.9285,
+      "verdict_accuracy": 0.8206785137318255,
+      "mean_captures": 3.891,
+      "guaranteed": true,
+      "violated": false
+    },
+    {
+      "budget": 8,
+      "policy": "greedy_diagnostic",
+      "verdicts_per_capture": 0.42019818680160237,
+      "verdict_rate": 0.9965,
+      "verdict_accuracy": 0.8283993978926242,
+      "mean_captures": 2.3715,
+      "guaranteed": false,
+      "violated": false
+    },
+    {
+      "budget": 8,
+      "policy": "naive_best_shot",
+      "verdicts_per_capture": 0.009875,
+      "verdict_rate": 0.079,
+      "verdict_accuracy": 0.9936708860759493,
+      "mean_captures": 8.0,
+      "guaranteed": false,
+      "violated": false
+    }
+  ],
+  "ladder": [
+    {
+      "standard": "preponderance",
+      "alpha_convict": 0.5,
+      "alpha_discharge": 0.5,
+      "verdicts_per_capture": 0.34629478827361565,
+      "verdict_rate": 0.8505,
+      "verdict_accuracy": 0.8465608465608465,
+      "refer_rate": 0.14949999999999997,
+      "false_conviction_rate": 0.13420245398773006,
+      "false_discharge_rate": 0.1235632183908046,
+      "violated": false
+    },
+    {
+      "standard": "headline (prep / clear+conv)",
+      "alpha_convict": 0.5,
+      "alpha_discharge": 0.2,
+      "verdicts_per_capture": 0.21859090162588274,
+      "verdict_rate": 0.6655,
+      "verdict_accuracy": 0.830954169797145,
+      "refer_rate": 0.3345,
+      "false_conviction_rate": 0.16180981595092025,
+      "false_discharge_rate": 0.020114942528735632,
+      "violated": false
+    },
+    {
+      "standard": "clear and convincing",
+      "alpha_convict": 0.2,
+      "alpha_discharge": 0.2,
+      "verdicts_per_capture": 0.135626674185817,
+      "verdict_rate": 0.481,
+      "verdict_accuracy": 0.9511434511434511,
+      "refer_rate": 0.519,
+      "false_conviction_rate": 0.023006134969325152,
+      "false_discharge_rate": 0.02442528735632184,
+      "violated": false
+    },
+    {
+      "standard": "clear+conv / beyond doubt",
+      "alpha_convict": 0.2,
+      "alpha_discharge": 0.05,
+      "verdicts_per_capture": 0.06934594168636722,
+      "verdict_rate": 0.264,
+      "verdict_accuracy": 0.9393939393939394,
+      "refer_rate": 0.736,
+      "false_conviction_rate": 0.023006134969325152,
+      "false_discharge_rate": 0.0028735632183908046,
+      "violated": false
+    },
+    {
+      "standard": "beyond reasonable doubt",
+      "alpha_convict": 0.05,
+      "alpha_discharge": 0.05,
+      "verdicts_per_capture": 0.03251106894370651,
+      "verdict_rate": 0.1285,
+      "verdict_accuracy": 0.980544747081712,
+      "refer_rate": 0.8714999999999999,
+      "false_conviction_rate": 0.0023006134969325155,
+      "false_discharge_rate": 0.0028735632183908046,
+      "violated": false
+    },
+    {
+      "standard": "near certainty",
+      "alpha_convict": 0.01,
+      "alpha_discharge": 0.01,
+      "verdicts_per_capture": 0.0031253906738342293,
+      "verdict_rate": 0.0125,
+      "verdict_accuracy": 1.0,
+      "refer_rate": 0.9875,
+      "false_conviction_rate": 0.0,
+      "false_discharge_rate": 0.0,
+      "violated": false
+    }
+  ],
+  "figure": "/Users/welu28/Documents/GitHub/dental-extension/figures/e3_leaderboard.png",
+  "generated_utc": "2026-08-13T04:33:41Z"
+}

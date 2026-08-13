@@ -1,0 +1,121 @@
+{
+  "persistence": {
+    "lag1_within_session": 0.9628433525019626,
+    "lag1_shuffled_across_sessions": 0.010561528915941181
+  },
+  "instruction_response": [
+    {
+      "factor": "glare",
+      "targeted_delta": -0.07268674165126889,
+      "untargeted_delta": 0.0008996374953201534,
+      "instruction_effect": -0.07358637914658904,
+      "compliance_rate": 0.6786666666666666
+    },
+    {
+      "factor": "tremor",
+      "targeted_delta": -0.10542293343027942,
+      "untargeted_delta": 0.0052099399989152025,
+      "instruction_effect": -0.11063287342919462,
+      "compliance_rate": 0.68
+    },
+    {
+      "factor": "darkness",
+      "targeted_delta": -0.12463039044834144,
+      "untargeted_delta": -0.0022010797121184314,
+      "instruction_effect": -0.12242931073622301,
+      "compliance_rate": 0.664
+    },
+    {
+      "factor": "tilt",
+      "targeted_delta": -0.1066224850651077,
+      "untargeted_delta": 0.001599169186113237,
+      "instruction_effect": -0.10822165425122093,
+      "compliance_rate": 0.676
+    }
+  ],
+  "measured_coupling": {
+    "glare": {
+      "tremor": 0.0030998570499696457,
+      "darkness": 0.02217122003367334,
+      "tilt": 0.0191436639596617
+    },
+    "tremor": {
+      "glare": 0.00582959984788968,
+      "darkness": 0.005446554947899422,
+      "tilt": 0.0008196562705669957
+    },
+    "darkness": {
+      "glare": 0.01331182773392964,
+      "tremor": 0.005833083879601361,
+      "tilt": 0.0024330865547503625
+    },
+    "tilt": {
+      "glare": 0.006780813467263872,
+      "tremor": 0.010462383903958246,
+      "darkness": 0.005391117092899481
+    }
+  },
+  "specified_coupling": {
+    "glare": {
+      "tilt": 0.35,
+      "darkness": 0.3,
+      "tremor": 0.1
+    },
+    "darkness": {
+      "glare": 0.4,
+      "tremor": 0.1,
+      "tilt": 0.05
+    },
+    "tilt": {
+      "tremor": 0.3,
+      "glare": 0.1,
+      "darkness": 0.05
+    },
+    "tremor": {
+      "darkness": 0.15,
+      "tilt": 0.05,
+      "glare": 0.05
+    }
+  },
+  "exchangeability": {
+    "statistic_last_minus_first": 0.1098288519785699,
+    "permutation_p_value": 0.0004997501249375312,
+    "null_sd": 0.0021004077348832366,
+    "mean_usability_by_position": [
+      0.5588197131667435,
+      0.6036346807428767,
+      0.6293758323185944,
+      0.6508148022400456,
+      0.6686485651453151
+    ]
+  },
+  "fatigue": {
+    "tremor_by_shot": [
+      0.3162577332077072,
+      0.3263764813387825,
+      0.33650292848130653,
+      0.34723378372200664,
+      0.36072941946573767,
+      0.3743132759192657,
+      0.39163724805871947,
+      0.406730744373862
+    ],
+    "fatigue_by_shot": [
+      0.0,
+      0.0800000000000013,
+      0.1600000000000026,
+      0.24000000000000604,
+      0.3200000000000052,
+      0.39999999999998587,
+      0.4800000000000121,
+      0.5599999999999713
+    ]
+  },
+  "figure": "/Users/welu28/Documents/GitHub/dental-extension/figures/e1_simulator.png",
+  "config": {
+    "n_sessions": 4000,
+    "n_shots": 5,
+    "clinic_difficulty": 0.5
+  },
+  "generated_utc": "2026-08-13T04:25:54Z"
+}

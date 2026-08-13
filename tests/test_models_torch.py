@@ -71,16 +71,45 @@ def test_cross_frame_agreement_is_bounded():
     with torch.no_grad():
         _, attn = fusion(frames)
     agreement = BurstFusion.cross_frame_agreement(attn)
-    assert 0.0 <= agreement <= 1.0
+    assert agreement.shape == (1,)
+    assert torch.all(agreement >= 0.0) and torch.all(agreement <= 1.0)
 
     # a fully peaked distribution should read as near-zero agreement, per the
     # documented (unvalidated) entropy interpretation
     peaked = torch.tensor([[0.999, 0.0005, 0.0005]])
-    assert BurstFusion.cross_frame_agreement(peaked) < 0.1
+    assert BurstFusion.cross_frame_agreement(peaked)[0] < 0.1
 
     # a uniform distribution should read as near-maximal agreement
     uniform = torch.tensor([[1 / 3, 1 / 3, 1 / 3]])
-    assert BurstFusion.cross_frame_agreement(uniform) > 0.99
+    assert BurstFusion.cross_frame_agreement(uniform)[0] > 0.99
+
+    # a bare (N,) vector is treated as a single sample
+    assert BurstFusion.cross_frame_agreement(torch.tensor([1 / 3, 1 / 3, 1 / 3])).shape == (1,)
+
+
+def test_cross_frame_agreement_is_per_sample_not_batch_flattened():
+    """Regression: entropy must be per-row, normalized by log(n_frames).
+
+    Flattening (B, N) into one distribution and normalizing by log(B*N)
+    returned >1.0 for any batch (1.23 at B=2, 1.77 at B=4), breaking the
+    documented [0, 1] contract, and mixed unrelated samples together.
+    """
+    uniform_batch = torch.full((4, 3), 1 / 3)
+    agreement = BurstFusion.cross_frame_agreement(uniform_batch)
+    assert agreement.shape == (4,)
+    assert torch.all(agreement <= 1.0)
+    assert torch.allclose(agreement, torch.ones(4), atol=1e-5)
+
+    # rows are independent: a peaked row and a uniform row in the same batch
+    # must score separately, not get averaged into one number
+    mixed = torch.tensor([[0.999, 0.0005, 0.0005], [1 / 3, 1 / 3, 1 / 3]])
+    mixed_agreement = BurstFusion.cross_frame_agreement(mixed)
+    assert mixed_agreement[0] < 0.1
+    assert mixed_agreement[1] > 0.99
+
+    # batching must not change any individual sample's score
+    single = BurstFusion.cross_frame_agreement(mixed[:1])
+    assert torch.allclose(single, mixed_agreement[:1], atol=1e-6)
 
 
 if __name__ == "__main__":
@@ -90,6 +119,7 @@ if __name__ == "__main__":
         test_confidence_head_batched_input,
         test_burst_fusion_output_shape_and_attn_sums_to_one,
         test_cross_frame_agreement_is_bounded,
+        test_cross_frame_agreement_is_per_sample_not_batch_flattened,
     ]:
         fn()
         print("PASS", fn.__name__)

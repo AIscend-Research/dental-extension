@@ -12,6 +12,11 @@ outputs/
 *.log
 wandb/
 
+# local editor/tooling state -- never part of the project
+.claude/
+.vscode/
+.idea/
+
 # python
 __pycache__/
 *.pyc

@@ -38,10 +38,19 @@ degradation:
 
 model:
   # which task setup: "caries_only" collapses diagnosis to caries vs bg,
-  # "diagnosis" keeps all four DENTEX diagnosis classes
-  task: caries_only
+  # "diagnosis" keeps all four DENTEX diagnosis classes.
+  # CURRENTLY "diagnosis" because that is what actually runs: the caries_only
+  # collapse is NOT wired up yet (src/models/detector.py is still a stub, and
+  # kaggle/01 trains all four classes). Flip this to caries_only only when the
+  # collapse actually exists end to end -- see TASKS.md Phase 3.
+  task: diagnosis
   baseline_config: external/HierarchicalDet/configs/diffdet.custom.swinbase.nonpretrain.yaml
-  backbone_weights: models_weights/swin_base_patch4_window7_224_22k.pkl
+  # Swin-LARGE, not Base. The upstream config's own MODEL.WEIGHTS names
+  # swin_base_patch4_window7_224_22k.pkl while setting MODEL.SWIN.SIZE: L-22k
+  # -- loading the Base file "succeeds" with zero errors and silently leaves
+  # ~90% of the backbone randomly initialized. SETUP.md has the download +
+  # convert recipe for the correct file.
+  backbone_weights: models_weights/swin_large_patch4_window7_224_22k.pkl
 
 confidence:
   # placeholder operating points -- TUNE these in Phase 4 with safe_deferral_rate

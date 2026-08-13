@@ -72,11 +72,16 @@ correctness on review). Two takeaways:
    and the risk-coverage curve in `src/eval/metrics.py` measure whether
    confidence *ranks* correct predictions above incorrect ones, but don't
    check whether the usability score's numeric value is calibrated (whether
-   a 0.9 usability score really does correspond to ~90% accuracy). Once real
-   model outputs exist, add a calibration check (e.g. a reliability diagram /
-   expected calibration error) alongside the existing selective-prediction
-   metrics -- a real gap in the current metric suite, not present in
-   `src/eval/metrics.py` today.
+   a 0.9 usability score really does correspond to ~90% accuracy). This was
+   a genuine gap in the metric suite when this pass was written --
+   **since closed**: `expected_calibration_error()` and
+   `reliability_diagram_bins()` are now in `src/eval/metrics.py`, with
+   `plot_reliability_diagram()` in `src/eval/plots.py` (see
+   `figures/example_reliability_diagram.png`, simulated data). What still
+   needs real model outputs is *running* them on a trained model -- the
+   standalone confidence head's measured overconfidence on degraded images
+   (`docs/phase3_confidence_head_training.md`) is the first thing to point
+   them at.
 
 ## Summary of concrete follow-ups this pass surfaced
 
@@ -89,7 +94,9 @@ correctness on review). Two takeaways:
   `cross_frame_agreement` (astronomy analogy) -- already flagged as
   unvalidated in `fusion.py`'s docstring, this gives a concrete alternative
   to try.
-- **Add a calibration metric (reliability diagram / ECE) to
-  `src/eval/metrics.py`** once real model outputs exist -- a genuine gap the
-  triage-tier analogy surfaced, since the existing metrics check ranking, not
-  calibration.
+- ~~**Add a calibration metric (reliability diagram / ECE) to
+  `src/eval/metrics.py`**~~ -- **done**, this is the one follow-up from this
+  pass that was implemented rather than just noted. A genuine gap the
+  triage-tier analogy surfaced (the existing metrics check ranking, not
+  calibration); `expected_calibration_error()` / `reliability_diagram_bins()`
+  now exist and are tested. Still to do: run them against real model outputs.

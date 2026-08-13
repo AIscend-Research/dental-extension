@@ -37,10 +37,17 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from src.data.degradation import DEGRADATION_NAMES, apply_degradations
 from src.data.dentex import load_coco, patient_level_split
 from src.models.confidence_head import ConfidenceHead
+from src.utils.config import load_config, resolve_path
 from src.utils.seed import set_seed
 
-IMAGE_ROOT = Path("data/dentex/DENTEX/training_data/quadrant-enumeration-disease/xrays")
-COCO_JSON = "data/dentex/DENTEX/training_data/quadrant-enumeration-disease/train_quadrant_enumeration_disease.json"
+# Paths and degradation params come from configs/default.yaml rather than being
+# duplicated here -- that file is the single place they're recorded, and a copy
+# in this script is a copy that silently goes stale.
+_CFG = load_config()
+IMAGE_ROOT = resolve_path(_CFG.data.image_root)
+COCO_JSON = resolve_path(_CFG.data.coco_annotations)
+SEVERITY_RANGE = tuple(_CFG.degradation.severity_range)
+MAX_SIMULTANEOUS = _CFG.degradation.max_simultaneous
 IMG_SIZE = 256
 VARIANTS_PER_IMAGE = 4  # 3 degraded severities + 1 clean
 N_TRAIN_IMAGES = 200
@@ -83,7 +90,12 @@ def build_examples(file_names: list[str], seed: int) -> list[tuple[np.ndarray, n
         # one clean example (all-zero severities) per image
         examples.append((base, np.zeros(len(DEGRADATION_NAMES), dtype=np.float32)))
         for _ in range(VARIANTS_PER_IMAGE - 1):
-            result = apply_degradations(base, seed=rng.randint(0, 1_000_000))
+            result = apply_degradations(
+                base,
+                severity_range=SEVERITY_RANGE,
+                max_simultaneous=MAX_SIMULTANEOUS,
+                seed=rng.randint(0, 1_000_000),
+            )
             examples.append((result.image, result.label_vector()))
     return examples
 
@@ -130,6 +142,17 @@ def main():
     batch_size = 16
     n_train = train_x.shape[0]
 
+    # Validation loss on this task is genuinely unstable epoch to epoch (small
+    # dataset, no augmentation beyond the degradation itself -- see
+    # docs/phase3_confidence_head_training.md). Reporting whatever the LAST
+    # epoch happens to produce therefore makes the headline numbers a coin
+    # flip: an unlucky final epoch reports a model 10x worse on val loss than
+    # one seen mid-run, which reads as a broken pipeline rather than a noisy
+    # one. Keep the best-by-val-loss weights and report those, and say so.
+    best_val_loss = float("inf")
+    best_epoch = -1
+    best_state = None
+
     print("training...")
     for epoch in range(n_epochs):
         trunk.train()
@@ -160,9 +183,27 @@ def main():
             val_mae_severity = (val_severity_pred - val_y).abs().mean().item()
             val_mae_usability = (val_usability_pred - val_usability_target).abs().mean().item()
 
+        marker = ""
+        if val_loss < best_val_loss:
+            best_val_loss, best_epoch = val_loss, epoch + 1
+            best_state = (
+                {k: v.detach().clone() for k, v in trunk.state_dict().items()},
+                {k: v.detach().clone() for k, v in head.state_dict().items()},
+            )
+            marker = "  <- best so far"
+
         print(f"epoch {epoch+1:2d}/{n_epochs}  train_loss={epoch_loss:.4f}  "
               f"val_loss={val_loss:.4f}  val_severity_MAE={val_mae_severity:.4f}  "
-              f"val_usability_MAE={val_mae_usability:.4f}")
+              f"val_usability_MAE={val_mae_usability:.4f}{marker}")
+
+    # Restore the best-by-val-loss weights before reporting. This is early
+    # stopping, so the reported numbers are model-selected on val -- state
+    # that alongside them rather than presenting them as held-out-clean.
+    if best_state is not None:
+        trunk.load_state_dict(best_state[0])
+        head.load_state_dict(best_state[1])
+    print(f"\nreporting epoch {best_epoch}/{n_epochs} (best val_loss={best_val_loss:.4f}); "
+          f"final epoch was {val_loss:.4f}")
 
     # Quantitative summary over the FULL val set, not just a handful of
     # examples -- this is the honest number to report, not cherry-picked rows.

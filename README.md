@@ -33,8 +33,16 @@ Three contributions, no new photography required:
 Results, including five refuted predictions of our own design, are in
 [docs/experiments_results.md](docs/experiments_results.md).
 
+**The visuals.** Start with [figures/q1_capture_session.png](figures/q1_capture_session.png):
+one real carious tooth photographed four times, with the instructions the system
+issued and the evidence crossing its burden of proof. The mechanism is drawn in
+[figures/diagram_firewall.svg](figures/diagram_firewall.svg) and
+[figures/diagram_verdict_loop.svg](figures/diagram_verdict_loop.svg). All eleven
+exhibits are collected in a browsable dossier artifact:
+<https://claude.ai/code/artifact/827ba957-b91e-4a0a-a6f0-14ee0a8b9258>
+
 ```bash
-.venv/bin/python -m experiments.run_all      # ~9 min, CPU only
+.venv/bin/python -m experiments.run_all      # ~13 min, CPU only
 ```
 
 ---
@@ -100,7 +108,9 @@ entirely without the detector stack: numpy + opencv + matplotlib, CPU only.
   clinic AUC
 - `src/models/real_channel.py`, `src/data/dentex_crops.py` — the real-image
   arm: DENTEX tooth crops, a learned reader, and a learned degradation head
-- `experiments/e1..e6` — the six experiments; `experiments/run_all.py` runs them
+- `experiments/e1..e7` — six quantitative experiments plus E7, which renders the
+  qualitative figures on real radiographs; `experiments/run_all.py` runs them all
+- `scripts/render_diagrams.py` — rasterises the hand-authored SVG method diagrams
 
 Also runs right now, no GPU, no detector:
 - `src/data/degradation.py` — the synthetic phone-artifact pipeline (Phase 2

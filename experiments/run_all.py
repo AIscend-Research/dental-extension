@@ -3,9 +3,9 @@
     .venv/bin/python -m experiments.run_all           # everything
     .venv/bin/python -m experiments.run_all e2 e3     # a subset
 
-Total runtime is roughly 9 minutes on a laptop CPU. E6 is the only one that
-needs data on disk; it is skipped with a clear message if the DENTEX validation
-split has not been fetched, so the rest of the suite still completes.
+Total runtime is roughly 13 minutes on a laptop CPU. E6 and E7 are the only
+ones that need data on disk; they are skipped with a clear message if the
+DENTEX validation split has not been fetched, so the rest still completes.
 """
 
 from __future__ import annotations
@@ -21,6 +21,7 @@ from experiments import (
     e4_ablations,
     e5_sensitivity,
     e6_real_images,
+    e7_qualitative,
 )
 
 EXPERIMENTS = {
@@ -30,6 +31,7 @@ EXPERIMENTS = {
     "e4": ("ablations", e4_ablations.main),
     "e5": ("sensitivity", e5_sensitivity.main),
     "e6": ("real DENTEX images", e6_real_images.main),
+    "e7": ("qualitative figures", e7_qualitative.main),
 }
 
 

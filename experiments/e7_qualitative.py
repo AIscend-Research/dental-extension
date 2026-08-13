@@ -36,7 +36,7 @@ from src.evidence.verdict import DEGRADATION_TO_FACTOR, VerdictMachine, VerdictO
 from src.models.diagnostic import Case
 from src.models.real_channel import train_real_channel
 from src.sim.instructions import instruction_for_factor
-from src.sim.render import render_severities
+from src.sim.render import render_capture, render_severities
 from src.sim.session import CaptureSession
 from src.sim.state import FACTORS, SceneState
 
@@ -265,15 +265,25 @@ def figure_degradation_atlas() -> str:
 
     severities = [0.0, 0.35, 0.7, 1.0]
     names = list(DEGRADATION_NAMES)
+    # A detail column at full severity. Without it `jpeg` looks like a no-op:
+    # block artifacts live at a spatial scale the whole-panoramic view throws
+    # away, and jpeg is the artifact the paper leans on most (it is the one no
+    # retake can fix), so it cannot be the one the figure fails to show.
+    h, w = pano.shape[:2]
+    detail = (slice(int(0.42 * h), int(0.80 * h)), slice(int(0.52 * w), int(0.78 * w)))
+
     fig, axes = plt.subplots(
-        len(names), len(severities),
-        figsize=(3.05 * len(severities), 1.62 * len(names)), facecolor=PAPER,
+        len(names), len(severities) + 1,
+        figsize=(2.75 * (len(severities) + 1), 1.62 * len(names)), facecolor=PAPER,
     )
     for r, name in enumerate(names):
+        full_severity_image = None
         for c, sev in enumerate(severities):
             ax = axes[r, c]
             rng = np.random.default_rng(11)
             out = render_severities(pano, {name: sev}, rng=rng)
+            if sev == 1.0:
+                full_severity_image = out.image
             ax.imshow(_rgb(out.image))
             ax.set_xticks([]); ax.set_yticks([])
             for spine in ax.spines.values():
@@ -287,17 +297,26 @@ def figure_degradation_atlas() -> str:
                 ax.set_ylabel(name, fontsize=11, color=INK, rotation=0,
                               ha="right", va="center", labelpad=14)
 
+        ax = axes[r, -1]
+        patch = full_severity_image[detail[0], detail[1]]
+        ax.imshow(_rgb(cv2.resize(patch, None, fx=2.4, fy=2.4, interpolation=cv2.INTER_NEAREST)))
+        ax.set_xticks([]); ax.set_yticks([])
+        for spine in ax.spines.values():
+            spine.set_edgecolor(ACCENT); spine.set_linewidth(1.4)
+        if r == 0:
+            ax.set_title("detail, severity 1.00", fontsize=10, color=ACCENT, pad=6)
+
     fig.suptitle(
         "The artifact vocabulary, rendered on a real panoramic radiograph",
-        fontsize=13.5, color=INK, y=0.985,
+        fontsize=14.5, color=INK, y=0.995, va="top",
     )
     fig.text(
         0.5, 0.955,
-        "Four of these are scene properties a retake can change. `jpeg` is the messaging app "
-        "the photo travels through — no instruction fixes it, which is why some cases must escalate.",
-        ha="center", fontsize=8.5, color=MUTED,
+        "The first four are scene properties a retake can change. `jpeg` is the messaging app the photo travels\n"
+        "through — no instruction fixes it, which is why some cases must escalate however large the budget.",
+        ha="center", va="top", fontsize=9.5, color=MUTED, linespacing=1.6,
     )
-    fig.tight_layout(rect=[0.0, 0.0, 1.0, 0.945])
+    fig.tight_layout(rect=[0.0, 0.0, 1.0, 0.915])
     path = figure_path("q2_degradation_atlas.png")
     fig.savefig(path, dpi=150, facecolor=PAPER)
     plt.close(fig)
@@ -317,7 +336,7 @@ def figure_glare_geometry(crop) -> str:
 
     azimuths = [0.0, 0.08, 0.16, 0.28, 0.5]
     intensity = 0.85
-    fig, axes = plt.subplots(1, len(azimuths) + 1, figsize=(3.0 * (len(azimuths) + 1), 3.9),
+    fig, axes = plt.subplots(1, len(azimuths) + 1, figsize=(3.0 * (len(azimuths) + 1), 4.9),
                              facecolor=PAPER)
 
     effective = []
@@ -329,7 +348,9 @@ def figure_glare_geometry(crop) -> str:
         eff = scene.effective_glare()
         effective.append(eff)
         rng = np.random.default_rng(4)
-        out = render_severities(crop.image, {"glare": eff}, rng=rng)
+        # positioned_glare so the picture shows what the model means: the
+        # highlight keeps its brightness and moves, rather than dimming in place
+        out = render_capture(crop.image, scene, rng=rng, positioned_glare=True)
         ax = axes[i]
         ax.imshow(_rgb(out.image))
         ax.set_xticks([]); ax.set_yticks([])
@@ -362,15 +383,15 @@ def figure_glare_geometry(crop) -> str:
 
     fig.suptitle(
         'Why "REDUCE_GLARE" has two physically different solutions',
-        fontsize=13.5, color=INK, y=0.99,
+        fontsize=14.5, color=INK, y=0.985, va="top",
     )
     fig.text(
-        0.5, 0.925,
-        "The reflection is equally bright in all five photographs. Turning the film moves the hotspot "
-        "off the tooth, which fixes the image without dimming anything — a scalar severity cannot express this.",
-        ha="center", fontsize=8.5, color=MUTED,
+        0.5, 0.915,
+        "The reflection is equally bright in all five photographs — only its position changes. Turning the film moves the\n"
+        "hotspot off the tooth, fixing the image without dimming anything, which a scalar severity cannot express.",
+        ha="center", va="top", fontsize=9.5, color=MUTED, linespacing=1.6,
     )
-    fig.tight_layout(rect=[0.0, 0.0, 1.0, 0.90])
+    fig.tight_layout(rect=[0.0, 0.0, 1.0, 0.845])
     path = figure_path("q3_glare_geometry.png")
     fig.savefig(path, dpi=150, facecolor=PAPER)
     plt.close(fig)

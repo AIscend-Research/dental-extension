@@ -1,8 +1,15 @@
 # Experimental results
 
 Every number below is reproduced by `.venv/bin/python -m experiments.run_all`
-(~9 min, CPU only). Raw output lives in `results/*.json` and `results/*.csv`;
-figures in `figures/e[1-6]_*.png`.
+(~13 min, CPU only). Raw output lives in `results/*.json` and `results/*.csv`;
+figures in `figures/`.
+
+**Figures.** The quantitative panels are `e1`&ndash;`e6`. Three qualitative
+figures on real radiographs come from E7 (`q1` capture session, `q2` artifact
+atlas, `q3` glare geometry), and two hand-authored method diagrams live as SVG
+(`diagram_firewall`, `diagram_verdict_loop`; rasterise with
+`scripts/render_diagrams.py`). A browsable dossier of all eleven is published as
+an artifact &mdash; see the README.
 
 Operating regime for all simulated experiments: reader anchored at clean-image
 AUC 0.88 and clinic AUC 0.776; clinic difficulty 0.5; prevalence 0.35;

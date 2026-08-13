@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 680" width="1180" height="680" font-family="Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#4a4a4a"/>
+    </marker>
+    <marker id="arrowBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#1f6feb"/>
+    </marker>
+    <marker id="arrowRed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#d1451b"/>
+    </marker>
+    <marker id="arrowGreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#1a7f37"/>
+    </marker>
+    <!-- Subscripts are drawn with tspan dy rather than Unicode subscript
+         codepoints: the latter are absent from most sans faces and rasterise
+         as tofu boxes, which is exactly the kind of thing that survives into
+         a submitted PDF unnoticed. -->
+    <style>
+      .sub { font-size: 0.68em; }
+      .mono { font-family: "DejaVu Sans Mono", Menlo, monospace; }
+    </style>
+  </defs>
+
+  <rect width="1180" height="680" fill="#ffffff"/>
+
+  <text x="590" y="40" text-anchor="middle" font-size="25" fill="#1a1a1a">The measurability firewall</text>
+  <text x="590" y="68" text-anchor="middle" font-size="14.5" fill="#6b6b6b">Every capture is read twice. Only one of the two readings may decide how much to bet, when to stop, and what to ask for.</text>
+
+  <!-- the capture -->
+  <rect x="36" y="270" width="150" height="118" rx="9" fill="#f4f4f6" stroke="#1a1a1a" stroke-width="1.6"/>
+  <text x="111" y="305" text-anchor="middle" font-size="16" fill="#1a1a1a">capture t</text>
+  <text x="111" y="330" text-anchor="middle" font-size="12.5" fill="#6b6b6b">one photograph</text>
+  <text x="111" y="349" text-anchor="middle" font-size="12.5" fill="#6b6b6b">of the film</text>
+  <rect x="70" y="358" width="82" height="18" rx="3" fill="#d9dce2"/>
+
+  <path d="M 190 305 L 258 214" stroke="#1f6feb" stroke-width="2.2" fill="none" marker-end="url(#arrowBlue)"/>
+  <path d="M 190 353 L 258 444" stroke="#d1451b" stroke-width="2.2" fill="none" marker-end="url(#arrowRed)"/>
+
+  <!-- degradation channel -->
+  <rect x="262" y="140" width="268" height="150" rx="9" fill="#eaf1fd" stroke="#1f6feb" stroke-width="2"/>
+  <text x="396" y="170" text-anchor="middle" font-size="17" fill="#1f6feb" font-weight="bold">DEGRADATION channel</text>
+  <text x="396" y="194" text-anchor="middle" font-size="15" fill="#1f6feb" font-style="italic">D(t)</text>
+  <text x="396" y="223" text-anchor="middle" font-size="13.5" fill="#20324a">per-artifact severities</text>
+  <text x="396" y="245" text-anchor="middle" font-size="13.5" fill="#20324a">scalar usability</text>
+  <text x="396" y="273" text-anchor="middle" font-size="12.5" fill="#5a7290">"how good is this photograph?"</text>
+
+  <!-- diagnosis channel -->
+  <rect x="262" y="372" width="268" height="150" rx="9" fill="#fdeeea" stroke="#d1451b" stroke-width="2"/>
+  <text x="396" y="402" text-anchor="middle" font-size="17" fill="#d1451b" font-weight="bold">DIAGNOSIS channel</text>
+  <text x="396" y="426" text-anchor="middle" font-size="15" fill="#d1451b" font-style="italic">S(t)</text>
+  <text x="396" y="455" text-anchor="middle" font-size="13.5" fill="#4a1f12">caries score</text>
+  <text x="396" y="484" text-anchor="middle" font-size="12.5" fill="#8a5545">"what does this photograph say</text>
+  <text x="396" y="502" text-anchor="middle" font-size="12.5" fill="#8a5545">about the disease?"</text>
+
+  <!-- the firewall -->
+  <line x1="596" y1="118" x2="596" y2="536" stroke="#9aa0a6" stroke-width="2.4" stroke-dasharray="9 7"/>
+  <text x="596" y="110" text-anchor="middle" font-size="13" fill="#6b6b6b" font-weight="bold">firewall</text>
+
+  <!-- allowed path -->
+  <path d="M 530 215 L 668 215" stroke="#1f6feb" stroke-width="2.4" fill="none" marker-end="url(#arrowBlue)"/>
+  <text x="556" y="205" text-anchor="middle" font-size="12" fill="#1f6feb">allowed</text>
+
+  <!-- blocked path -->
+  <path d="M 530 447 L 566 447" stroke="#d1451b" stroke-width="2.4" fill="none"/>
+  <circle cx="596" cy="447" r="17" fill="#ffffff" stroke="#d1451b" stroke-width="2.6"/>
+  <line x1="585" y1="436" x2="607" y2="458" stroke="#d1451b" stroke-width="2.6"/>
+  <line x1="607" y1="436" x2="585" y2="458" stroke="#d1451b" stroke-width="2.6"/>
+  <text x="596" y="497" text-anchor="middle" font-size="12" fill="#d1451b" font-weight="bold">blocked</text>
+  <text x="596" y="514" text-anchor="middle" font-size="11" fill="#d1451b">until shot t+1</text>
+
+  <!-- decisions box -->
+  <rect x="672" y="140" width="290" height="180" rx="9" fill="#eaf1fd" stroke="#1f6feb" stroke-width="2"/>
+  <text x="817" y="169" text-anchor="middle" font-size="15.5" fill="#1f6feb" font-weight="bold">decisions fixed before the bet</text>
+  <text x="692" y="200" font-size="13.5" fill="#20324a">&#8226; calibration stratum Z(t) = &#950;(D(t))</text>
+  <text x="692" y="228" font-size="13.5" fill="#20324a">&#8226; stake &#955;(t) in [0, 1]</text>
+  <text x="692" y="256" font-size="13.5" fill="#20324a">&#8226; stop, or subpoena another shot</text>
+  <text x="692" y="284" font-size="13.5" fill="#20324a">&#8226; which instruction to issue</text>
+  <text x="817" y="308" text-anchor="middle" font-size="12" fill="#5a7290" font-style="italic">all measurable with respect to G(t)</text>
+
+  <!-- the bet -->
+  <rect x="672" y="372" width="290" height="150" rx="9" fill="#f4f4f6" stroke="#1a1a1a" stroke-width="1.8"/>
+  <text x="817" y="400" text-anchor="middle" font-size="15.5" fill="#1a1a1a" font-weight="bold">only then is the bet settled</text>
+  <text x="817" y="433" text-anchor="middle" font-size="15.5" fill="#1a1a1a" class="mono">W(t) = W(t-1) &#215; (1 + &#955;(t)&#183;[E(t) &#8722; 1])</text>
+  <text x="817" y="462" text-anchor="middle" font-size="12.5" fill="#6b6b6b">E(t) is the e-value of the diagnosis score,</text>
+  <text x="817" y="481" text-anchor="middle" font-size="12.5" fill="#6b6b6b">read within stratum Z(t)</text>
+  <text x="817" y="507" text-anchor="middle" font-size="12.5" fill="#1a7f37">E[ E(t) | G(t) ] &#8804; 1 under the null</text>
+
+  <path d="M 817 324 L 817 366" stroke="#1f6feb" stroke-width="2.4" fill="none" marker-end="url(#arrowBlue)"/>
+  <path d="M 966 447 L 1012 447" stroke="#4a4a4a" stroke-width="2.2" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- consequence -->
+  <rect x="1000" y="140" width="146" height="180" rx="9" fill="#eaf6ec" stroke="#1a7f37" stroke-width="2"/>
+  <text x="1073" y="170" text-anchor="middle" font-size="15" fill="#1a7f37" font-weight="bold">Ville</text>
+  <text x="1073" y="197" text-anchor="middle" font-size="12.5" fill="#1d4a2b">W is a nonnegative</text>
+  <text x="1073" y="215" text-anchor="middle" font-size="12.5" fill="#1d4a2b">supermartingale,</text>
+  <text x="1073" y="243" text-anchor="middle" font-size="12.5" fill="#1d4a2b">so for any</text>
+  <text x="1073" y="261" text-anchor="middle" font-size="12.5" fill="#1d4a2b">stopping time &#964;:</text>
+  <text x="1073" y="292" text-anchor="middle" font-size="12.5" fill="#1a7f37" font-weight="bold">P(some t &#8804; &#964;</text>
+  <text x="1073" y="310" text-anchor="middle" font-size="12.5" fill="#1a7f37" font-weight="bold">has W &#8805; 1/&#945;) &#8804; &#945;</text>
+
+  <path d="M 1073 366 L 1073 326" stroke="#1a7f37" stroke-width="2.2" fill="none" marker-end="url(#arrowGreen)"/>
+  <rect x="1000" y="372" width="146" height="150" rx="9" fill="#ffffff" stroke="#9aa0a6" stroke-width="1.6"/>
+  <text x="1073" y="400" text-anchor="middle" font-size="14" fill="#1a1a1a" font-weight="bold">verdict</text>
+  <text x="1073" y="427" text-anchor="middle" font-size="12.5" fill="#1a1a1a">convict / discharge</text>
+  <text x="1073" y="451" text-anchor="middle" font-size="12.5" fill="#1f6feb">or subpoena</text>
+  <text x="1073" y="475" text-anchor="middle" font-size="12.5" fill="#6b6b6b">or escalate</text>
+  <text x="1073" y="503" text-anchor="middle" font-size="11.5" fill="#6b6b6b" font-style="italic">retakes cost nothing</text>
+  <text x="1073" y="517" text-anchor="middle" font-size="11.5" fill="#6b6b6b" font-style="italic">in error rate</text>
+
+  <!-- filtration note -->
+  <rect x="36" y="556" width="1110" height="94" rx="8" fill="#fafafa" stroke="#dcdcdc" stroke-width="1.3"/>
+  <text x="56" y="583" font-size="14.5" fill="#1a1a1a" font-weight="bold" class="mono">G(t) = &#963;( D(1) &#8230; D(t),  S(1) &#8230; S(t-1) )</text>
+  <text x="56" y="609" font-size="13" fill="#4a4a4a">The current shot's <tspan fill="#1f6feb" font-weight="bold">quality</tspan> is known before betting; the current shot's <tspan fill="#d1451b" font-weight="bold">diagnosis</tspan> is not. Betting on S(t) using S(t) is betting</text>
+  <text x="56" y="631" font-size="13" fill="#4a4a4a">on a horse after the race. That is exactly what the unsound baselines do, and it inflates the false-conviction rate from 0.001 to 0.19 at &#945; = 0.05 (E2).</text>
+
+  <text x="1146" y="670" text-anchor="end" font-size="11" fill="#9aa0a6">enforced by type in src/evidence/view.py, not by convention</text>
+</svg>

@@ -259,21 +259,22 @@ def make_figure(rows) -> str:
 
     # (a) persistence: the headline ablation
     ax = axes[0]
+    # The claim this ablation makes is about the *gain from targeting*, not
+    # about absolute VPC -- plotting four near-identical bar groups buried it.
     pr = [r for r in rows if r["ablation"] == "persistence"]
     labels = [r["setting"].split(" (")[0] for r in pr]
     x = np.arange(len(pr))
-    width = 0.2
-    for k, (key, name) in enumerate([
-        ("vpc_single_shot", "single_shot"),
-        ("vpc_fixed_retake", "fixed_retake"),
-        ("vpc_untargeted", "untargeted_evidential"),
-        ("verdicts_per_capture", "evidential_capture"),
-    ]):
-        ax.bar(x + (k - 1.5) * width, [r[key] for r in pr], width, label=name)
+    colors = ["tab:red" if r.get("iid_scene_per_shot") else "tab:blue" for r in pr]
+    bars = ax.bar(x, [r["targeting_gain"] for r in pr], 0.6, color=colors)
+    for b, r in zip(bars, pr):
+        ax.annotate(
+            f"{r['targeting_gain']:+.4f}", (b.get_x() + b.get_width() / 2, b.get_height()),
+            ha="center", va="bottom", fontsize=7,
+        )
     ax.set_xticks(x, [l.replace(" ", "\n") for l in labels], fontsize=6.5)
-    ax.set_ylabel("verdicts per capture")
-    ax.set_title("(a) the world you benchmark in\nchanges the answer")
-    ax.legend(fontsize=7)
+    ax.set_ylabel("VPC gain from targeted instructions")
+    ax.set_title("(a) an i.i.d. benchmark (red)\nhides most of the gain")
+    ax.margins(y=0.18)
     ax.grid(alpha=0.3, axis="y")
 
     # (b) confidence-head quality

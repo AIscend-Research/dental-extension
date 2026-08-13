@@ -1,5 +1,34 @@
 # Tasks and who can work in parallel
 
+> **Status update — the project pivoted to evidential capture.** The roadmap
+> below is the original application plan (train HierarchicalDet, make it robust,
+> add a confidence head). It is still accurate about that track, and the GPU
+> training run is still not done. But the paper's contribution is now the
+> framework/theory/benchmark described in the README, which is complete and
+> fully evaluated: see [docs/experiments_results.md](docs/experiments_results.md).
+>
+> What that changes about the roadmap:
+>
+> - **Phase 2's degradation pipeline is now a dependency, not the deliverable.**
+>   `src/sim/` wraps it in a latent capture *process*. The primitives, severity
+>   contract and box remapping are used unchanged.
+> - **Phase 3's confidence head is now load-bearing infrastructure.** E4 shows
+>   verdicts per capture fall 0.230 → 0.125 as head noise rises, so improving
+>   it is the highest-value remaining modelling work.
+> - **Phase 4's selective-prediction metrics are superseded, not discarded.**
+>   Risk-coverage and safe-deferral answer "how good is the confidence
+>   ranking"; the Docket answers "how many verdicts per photograph, at a stated
+>   error rate". Both are computed.
+> - **The detector is no longer on the critical path for the paper.** The
+>   framework is model-agnostic and is demonstrated on an anchored analytic
+>   reader and on a real learned reader over DENTEX crops. A trained
+>   HierarchicalDet would slot in as another `DiagnosticChannel`.
+> - **The one thing that still genuinely needs more data**: validating
+>   `SIGNAL_LOSS_WEIGHTS` (which artifacts destroy the most diagnostic signal).
+>   E6 attempted it and was inconclusive — the public 50-radiograph split is
+>   too small for the fine-grained task (AUC 0.481) and too easy on the coarse
+>   one (0.986). This needs the full 11GB DENTEX training split.
+
 The point of the scaffold is that people are not all blocked on the same thing.
 Below, each workstream says what it depends on. Anything marked "no detector
 needed" can start the moment `setup_env.sh` finishes.

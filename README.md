@@ -1,6 +1,48 @@
-# Confidence-Aware Caries Detection
+# The Burden-of-Proof Camera
 
-A lightweight caries detector for smartphone photos of dental X-rays, built for
+**Evidential capture**: a formal task, an anytime-valid theory, and a benchmark
+for diagnostic systems that must *meet a stated burden of proof* before
+rendering a verdict — and may subpoena better evidence when they cannot.
+
+A screening model looking at a smartphone photo of a dental radiograph has
+three options, not one: convict (caries), discharge (sound), or demand another
+photograph naming what to fix. The question this repo formalises is not "how
+accurate is the model" but **how many justified verdicts it can produce per
+photograph taken**, subject to an error guarantee that actually holds when the
+system is allowed to keep retaking.
+
+Three contributions, no new photography required:
+
+1. **Theory** (`src/evidence/`, [docs/theory_anytime_validity.md](docs/theory_anytime_validity.md)) —
+   evidence as wealth. A retake loop is optional stopping, which breaks
+   fixed-level testing by multiplicity and breaks split-conformal by
+   non-exchangeability. Betting against the null with stakes that read only the
+   *degradation* channel, never the diagnosis, restores an anytime-valid
+   guarantee under arbitrarily adaptive retaking. The measurability condition
+   is enforced by the type system, not by discipline.
+2. **The world** (`src/sim/`) — a capture-session *process*, not a corruption
+   filter. A latent scene (glare, tremor, darkness, tilt) that persists across
+   shots and responds causally and imperfectly to instructions, with side
+   effects, operator fatigue, and partial compliance. Benchmarking on i.i.d.
+   corruptions understates targeted retaking by ~7× (E4).
+3. **The benchmark** (`src/bench/`) — *The Docket*: a frozen, seeded challenge.
+   Given K captures and a mandated standard of proof, maximise justified
+   verdicts per capture. Verdict rate cannot be gamed, because the
+   false-conviction rate sits in the next column with its confidence interval.
+
+Results, including five refuted predictions of our own design, are in
+[docs/experiments_results.md](docs/experiments_results.md).
+
+```bash
+.venv/bin/python -m experiments.run_all      # ~9 min, CPU only
+```
+
+---
+
+## The original application track
+
+The framework above grew out of, and still contains, the applied project: a
+lightweight caries detector for smartphone photos of dental X-rays, built for
 offline use in low-resource clinics. Two things make it different from a plain
 detector: it stays accurate when the input is a bad phone shot (blur, glare, off
 angle, poor light), and it knows when an image is too degraded to trust, so it
@@ -42,7 +84,25 @@ shots agree as an extra confidence signal.
 You do not have to wait for the Detectron2 install to start working. Most of the
 codebase is decoupled from it on purpose.
 
-Runs right now, no GPU, no detector:
+The evidential-capture framework (everything in the section above) runs
+entirely without the detector stack: numpy + opencv + matplotlib, CPU only.
+
+- `src/sim/` — capture-session simulator: latent scene state, instruction
+  response with side effects, operator fatigue, renderer over the existing
+  degradation primitives
+- `src/evidence/` — e-processes, conformal and likelihood-ratio e-values,
+  degradation-stratified calibration, the standards-of-proof ladder, and the
+  two-sided verdict machine with its subpoena power
+- `src/bench/` — The Docket: benchmark spec, seven capture policies (four
+  sound, two deliberately unsound, one oracle), leaderboard metrics with a
+  binomial guarantee audit
+- `src/models/diagnostic.py` — the analytic reader, anchored at clean and
+  clinic AUC
+- `src/models/real_channel.py`, `src/data/dentex_crops.py` — the real-image
+  arm: DENTEX tooth crops, a learned reader, and a learned degradation head
+- `experiments/e1..e6` — the six experiments; `experiments/run_all.py` runs them
+
+Also runs right now, no GPU, no detector:
 - `src/data/degradation.py` — the synthetic phone-artifact pipeline (Phase 2
   core), including ground-truth box remapping for detector training
   (`apply_degradations(..., boxes=...)`)

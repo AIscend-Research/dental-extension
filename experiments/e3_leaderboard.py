@@ -202,17 +202,24 @@ def make_figure(headline, budget_rows, ladder_rows) -> str:
 
     # (a) headline: VPC vs accuracy, sound arms filled, unsound hollow
     ax = axes[0]
-    rows = headline["likelihood-ratio (estimated)"]
-    for r in rows:
+    rows = sorted(headline["likelihood-ratio (estimated)"], key=lambda r: r.verdicts_per_capture)
+    # The sound arms cluster tightly, so fixed label offsets overlap into an
+    # unreadable smear. Alternate the offsets and draw a leader line instead.
+    offsets = [(6, 8), (6, -14), (-46, 8), (-46, -14)]
+    for i, r in enumerate(rows):
         ok = r.guaranteed and not (r.convict_violation or r.discharge_violation)
         ax.scatter(
-            r.verdicts_per_capture, r.verdict_accuracy, s=90,
+            r.verdicts_per_capture, r.verdict_accuracy, s=90, zorder=3,
             facecolors="tab:blue" if ok else "none",
             edgecolors="tab:blue" if ok else "tab:red", linewidths=1.8,
             marker="o" if ok else "X",
         )
-        ax.annotate(r.policy.replace("_", "\n"), (r.verdicts_per_capture, r.verdict_accuracy),
-                    fontsize=7, xytext=(4, 4), textcoords="offset points")
+        ax.annotate(
+            r.policy, (r.verdicts_per_capture, r.verdict_accuracy),
+            fontsize=7, xytext=offsets[i % len(offsets)], textcoords="offset points",
+            arrowprops=dict(arrowstyle="-", lw=0.5, color="grey", shrinkA=0, shrinkB=3),
+        )
+    ax.margins(0.18)
     ax.set_xlabel("verdicts per capture")
     ax.set_ylabel("accuracy on rendered verdicts")
     ax.set_title("(a) the headline trade-off\n(hollow red X = guarantee forfeited)")

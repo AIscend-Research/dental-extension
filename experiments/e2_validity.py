@@ -339,7 +339,10 @@ def make_figure(sweep_a, sweep_b, runs) -> str:
     ax.legend(fontsize=8)
     ax.grid(alpha=0.3, which="both")
 
-    fig.suptitle("E2: only the sound construction stays under its own promise", fontsize=12)
+    fig.suptitle(
+        "E2: every e-process stays under its promise; peeking at the diagnosis does not",
+        fontsize=12,
+    )
     fig.tight_layout()
     path = figure_path("e2_validity.png")
     fig.savefig(path, dpi=140)

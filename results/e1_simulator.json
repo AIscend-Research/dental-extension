@@ -111,11 +111,11 @@
       0.5599999999999713
     ]
   },
-  "figure": "/Users/welu28/Documents/GitHub/dental-extension/figures/e1_simulator.png",
+  "figure": "/Users/christopherhuang/Documents/GitHub/dental-extension/figures/e1_simulator.png",
   "config": {
     "n_sessions": 4000,
     "n_shots": 5,
     "clinic_difficulty": 0.5
   },
-  "generated_utc": "2026-08-13T05:11:15Z"
+  "generated_utc": "2026-08-15T05:07:42Z"
 }

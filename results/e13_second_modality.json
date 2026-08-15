@@ -1,0 +1,252 @@
+{
+  "dataset": "Kermany et al. pediatric pneumonia chest X-ray (CC BY 4.0), NOT CheXphoto",
+  "scoping_note": "Real CheXphoto photographs are gated behind a CheXpert data-use agreement, not obtained. This experiment tests generalization of this project's OWN simulator/evidence machinery to a second real modality, not a reproduction of CheXphoto's specific corruption pipeline.",
+  "n_train": 2981,
+  "n_calibration": 312,
+  "n_test": 312,
+  "clean_auc": 0.8989214840379638,
+  "damage_analysis_interpretable": true,
+  "damage_curves": [
+    {
+      "severity": 0.0,
+      "blur": 0.8989214840379638,
+      "glare": 0.8989214840379638,
+      "angle": 0.8989214840379638,
+      "low_light": 0.8989214840379638,
+      "jpeg": 0.8989214840379638
+    },
+    {
+      "severity": 0.2,
+      "blur": 0.8819072955613076,
+      "glare": 0.8946182053494391,
+      "angle": 0.8975757357875563,
+      "low_light": 0.922006519029815,
+      "jpeg": 0.8921484037963762
+    },
+    {
+      "severity": 0.4,
+      "blur": 0.87807736554501,
+      "glare": 0.8915264595916019,
+      "angle": 0.8960154826958106,
+      "low_light": 0.9221131722749497,
+      "jpeg": 0.8951251078515962
+    },
+    {
+      "severity": 0.6,
+      "blur": 0.876436822931646,
+      "glare": 0.8857000766944684,
+      "angle": 0.8742162784009203,
+      "low_light": 0.9160962515578563,
+      "jpeg": 0.8999568593615186
+    },
+    {
+      "severity": 0.8,
+      "blur": 0.8678254721503211,
+      "glare": 0.8549072476272649,
+      "angle": 0.8587911034416643,
+      "low_light": 0.8982372255776052,
+      "jpeg": 0.9066436583261432
+    },
+    {
+      "severity": 1.0,
+      "blur": 0.8547826191160962,
+      "glare": 0.8165156744319816,
+      "angle": 0.8418440226248681,
+      "low_light": 0.8632082254817371,
+      "jpeg": 0.9109577221742882
+    }
+  ],
+  "measured_damage": {
+    "blur": 0.11064549463489677,
+    "glare": 0.20657150066688304,
+    "angle": 0.14307943717481966,
+    "low_light": 0.08952453047835336,
+    "jpeg": -0.030171947658700005
+  },
+  "measured_rank": [
+    "glare",
+    "angle",
+    "blur",
+    "low_light",
+    "jpeg"
+  ],
+  "docket": {
+    "n_cases": 3000,
+    "budget": 4,
+    "prevalence": 0.6173333333333333
+  },
+  "leaderboard": [
+    {
+      "policy": "single_shot",
+      "n_cases": 3000,
+      "n_captures": 3000,
+      "mean_captures": 1.0,
+      "verdict_rate": 0.5113333333333333,
+      "verdicts_per_capture": 0.5113333333333333,
+      "verdict_accuracy": 0.9191655801825294,
+      "refer_rate": 0.4886666666666667,
+      "false_conviction_rate": 0.09407665505226481,
+      "false_conviction_ci": [
+        0.0785166493187446,
+        0.11234431628624832
+      ],
+      "alpha_convict": 0.5,
+      "convict_violation": false,
+      "false_discharge_rate": 0.008639308855291577,
+      "false_discharge_ci": [
+        0.005324749346391039,
+        0.013988105802453561
+      ],
+      "alpha_discharge": 0.2,
+      "discharge_violation": false,
+      "guaranteed": true,
+      "sensitivity": 0.985480943738657,
+      "specificity": 0.75,
+      "mean_final_usability": 0.5853895061632408
+    },
+    {
+      "policy": "fixed_retake",
+      "n_cases": 3000,
+      "n_captures": 12000,
+      "mean_captures": 4.0,
+      "verdict_rate": 0.8263333333333334,
+      "verdicts_per_capture": 0.20658333333333334,
+      "verdict_accuracy": 0.8705123033481242,
+      "refer_rate": 0.17366666666666664,
+      "false_conviction_rate": 0.15940766550522648,
+      "false_conviction_ci": [
+        0.13937300700624022,
+        0.18171419804000916
+      ],
+      "alpha_convict": 0.5,
+      "convict_violation": false,
+      "false_discharge_rate": 0.07451403887688984,
+      "false_discharge_ci": [
+        0.06341453202516595,
+        0.08737506122460278
+      ],
+      "alpha_discharge": 0.2,
+      "discharge_violation": false,
+      "guaranteed": true,
+      "sensitivity": 0.9122137404580153,
+      "specificity": 0.7982359426681367,
+      "mean_final_usability": 0.5773528966409052
+    },
+    {
+      "policy": "untargeted_evidential",
+      "n_cases": 3000,
+      "n_captures": 6151,
+      "mean_captures": 2.050333333333333,
+      "verdict_rate": 0.8273333333333334,
+      "verdicts_per_capture": 0.4035116241261584,
+      "verdict_accuracy": 0.8698630136986302,
+      "refer_rate": 0.17266666666666663,
+      "false_conviction_rate": 0.1602787456445993,
+      "false_conviction_ci": [
+        0.1401947094085769,
+        0.1826288454968892
+      ],
+      "alpha_convict": 0.5,
+      "convict_violation": false,
+      "false_discharge_rate": 0.07505399568034557,
+      "false_discharge_ci": [
+        0.06391384740535544,
+        0.08795342402556841
+      ],
+      "alpha_discharge": 0.2,
+      "discharge_violation": false,
+      "guaranteed": true,
+      "sensitivity": 0.9116338207247299,
+      "specificity": 0.7975797579757976,
+      "mean_final_usability": 0.583131769001845
+    },
+    {
+      "policy": "evidential_capture",
+      "n_cases": 3000,
+      "n_captures": 6009,
+      "mean_captures": 2.003,
+      "verdict_rate": 0.8616666666666667,
+      "verdicts_per_capture": 0.43018805125644866,
+      "verdict_accuracy": 0.8634429400386847,
+      "refer_rate": 0.1383333333333333,
+      "false_conviction_rate": 0.17857142857142858,
+      "false_conviction_ci": [
+        0.1574992462051562,
+        0.20178765574386176
+      ],
+      "alpha_convict": 0.5,
+      "convict_violation": false,
+      "false_discharge_rate": 0.07991360691144708,
+      "false_discharge_ci": [
+        0.06841555852510045,
+        0.09315081653621943
+      ],
+      "alpha_discharge": 0.2,
+      "discharge_violation": false,
+      "guaranteed": true,
+      "sensitivity": 0.9079029247044181,
+      "specificity": 0.7903885480572597,
+      "mean_final_usability": 0.6202402265169036
+    },
+    {
+      "policy": "greedy_diagnostic",
+      "n_cases": 3000,
+      "n_captures": 4481,
+      "mean_captures": 1.4936666666666667,
+      "verdict_rate": 0.835,
+      "verdicts_per_capture": 0.5590270029011382,
+      "verdict_accuracy": 0.8582834331337326,
+      "refer_rate": 0.16500000000000004,
+      "false_conviction_rate": 0.25609756097560976,
+      "false_conviction_ci": [
+        0.2316909414340292,
+        0.2821310979852798
+      ],
+      "alpha_convict": 0.5,
+      "convict_violation": false,
+      "false_discharge_rate": 0.032937365010799136,
+      "false_discharge_ci": [
+        0.025726806623095726,
+        0.04208156667772909
+      ],
+      "alpha_discharge": 0.2,
+      "discharge_violation": false,
+      "guaranteed": false,
+      "sensitivity": 0.9625766871165644,
+      "specificity": 0.664,
+      "mean_final_usability": 0.6014494249001543
+    },
+    {
+      "policy": "naive_best_shot",
+      "n_cases": 3000,
+      "n_captures": 12000,
+      "mean_captures": 4.0,
+      "verdict_rate": 0.615,
+      "verdicts_per_capture": 0.15375,
+      "verdict_accuracy": 0.9246612466124661,
+      "refer_rate": 0.385,
+      "false_conviction_rate": 0.11149825783972125,
+      "false_conviction_ci": [
+        0.09457083008998135,
+        0.13101713269934662
+      ],
+      "alpha_convict": 0.5,
+      "convict_violation": false,
+      "false_discharge_rate": 0.005939524838012959,
+      "false_discharge_ci": [
+        0.0033197403466402957,
+        0.010604723896428726
+      ],
+      "alpha_discharge": 0.2,
+      "discharge_violation": false,
+      "guaranteed": false,
+      "sensitivity": 0.9917849141150112,
+      "specificity": 0.7470355731225297,
+      "mean_final_usability": 0.6660765746179127
+    }
+  ],
+  "ordering_reproduces": true,
+  "zero_violations": true,
+  "figure": "/Users/christopherhuang/Documents/GitHub/dental-extension/figures/e13_second_modality.png",
+  "generated_utc": "2026-08-15T05:56:27Z"
+}

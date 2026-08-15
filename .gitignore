@@ -1,5 +1,6 @@
 # data + weights are large and/or licensed -- never commit them
 data/dentex/
+data/chest_xray_pneumonia/
 models_weights/*.pkl
 models_weights/*.pth
 external/HierarchicalDet/

@@ -50,11 +50,15 @@ exhibits are collected in a browsable dossier artifact:
 ## The original application track
 
 The framework above grew out of, and still contains, the applied project: a
-lightweight caries detector for smartphone photos of dental X-rays, built for
-offline use in low-resource clinics. Two things make it different from a plain
-detector: it stays accurate when the input is a bad phone shot (blur, glare, off
-angle, poor light), and it knows when an image is too degraded to trust, so it
-asks for a retake or flags for a clinician instead of quietly guessing wrong.
+caries detector for smartphone photos of dental X-rays, built for offline use
+(once captured) in low-resource clinics. Two things make it different from a
+plain detector: it stays accurate when the input is a bad phone shot (blur,
+glare, off angle, poor light), and it knows when an image is too degraded to
+trust, so it asks for a retake or flags for a clinician instead of quietly
+guessing wrong. It is not lightweight in the mobile/edge sense -- the backbone
+benchmarked here is 281.9M parameters, 508 GFLOPs, 2.52s/image on CPU (see
+`docs/phase3_model_benchmarks.md`) -- and the framework does not need it to
+be: it is diagnostic-model-agnostic by design (see `docs/decisions.md`).
 
 Built on top of [HierarchicalDet](https://github.com/ibrahimethemhamamci/HierarchicalDet)
 (the MICCAI 2023 DENTEX baseline: DiffusionDet + a modified Detectron2), using

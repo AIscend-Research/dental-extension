@@ -1,0 +1,79 @@
+{
+  "reader": {
+    "clean_auc": 0.88,
+    "clinic_auc": 0.7755501528957179
+  },
+  "equal_cost_comparison": {
+    "n_cases": 4000,
+    "total_budget": 16000,
+    "uniform": {
+      "policy": "evidential_capture (uniform K=4)",
+      "n_cases": 4000,
+      "n_captures": 12262,
+      "mean_captures": 3.0655,
+      "verdict_rate": 0.66325,
+      "verdicts_per_capture": 0.21635948458652748,
+      "verdict_accuracy": 0.8435733132303053,
+      "refer_rate": 0.33675,
+      "false_conviction_rate": 0.14896927265655388,
+      "false_conviction_ci": [
+        0.13572989604157912,
+        0.16325610760229556
+      ],
+      "alpha_convict": 0.5,
+      "convict_violation": false,
+      "false_discharge_rate": 0.02239328201539538,
+      "false_discharge_ci": [
+        0.015906299086412147,
+        0.03144129327829865
+      ],
+      "alpha_discharge": 0.2,
+      "discharge_violation": false,
+      "guaranteed": true,
+      "sensitivity": 0.9715808170515098,
+      "specificity": 0.7491814014407334,
+      "mean_final_usability": 0.6207448833344018
+    },
+    "shared_budget": {
+      "policy": "evidential_capture (shared budget)",
+      "n_cases": 4000,
+      "n_captures": 15719,
+      "mean_captures": 3.92975,
+      "verdict_rate": 0.9995,
+      "verdicts_per_capture": 0.2543418792544055,
+      "verdict_accuracy": 0.8429214607303652,
+      "refer_rate": 0.0004999999999999449,
+      "false_conviction_rate": 0.21898094126798912,
+      "false_conviction_ci": [
+        0.20342067258580518,
+        0.2353797569241111
+      ],
+      "alpha_convict": 0.5,
+      "convict_violation": false,
+      "false_discharge_rate": 0.04548635409377187,
+      "false_discharge_ci": [
+        0.03584716881834235,
+        0.05756273776170112
+      ],
+      "alpha_discharge": 0.2,
+      "discharge_violation": false,
+      "guaranteed": true,
+      "sensitivity": 0.9545136459062281,
+      "specificity": 0.7808485792137019,
+      "mean_final_usability": 0.6422140064463719
+    },
+    "reallocation_gain_vpc": 0.037982394667878006
+  },
+  "validity_check": {
+    "n_cases": 20000,
+    "alpha": 0.5,
+    "false_conviction_rate": 0.1562,
+    "false_conviction_ci": [
+      0.15123452951291178,
+      0.16129751933114628
+    ],
+    "violated": false,
+    "verdict": "GUARANTEE HOLDS under the shared scheduler"
+  },
+  "generated_utc": "2026-08-15T05:30:19Z"
+}

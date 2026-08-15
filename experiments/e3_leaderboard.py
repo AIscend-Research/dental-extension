@@ -58,6 +58,8 @@ ARMS = [
     "untargeted_evidential",
     "evidential_capture",
     "oracle_instruction",
+    "one_step_lookahead",
+    "confidence_threshold_selective",
     "greedy_diagnostic",
     "naive_best_shot",
 ]

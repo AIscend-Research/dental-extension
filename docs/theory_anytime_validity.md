@@ -87,6 +87,34 @@ checks the firewall holds by construction.
 
 ## 4. The wealth process
 
+**Grounding, read in full rather than cited secondhand (2026-08-14).** Two
+papers this section leans on:
+
+- **Vovk & Wang (2021), *E-values: calibration, combination, and
+  applications*** [arXiv:1912.06116]. Their Proposition 2.1 characterizes
+  admissible p-to-e calibrators exactly: a decreasing `f: [0,1] → [0,∞]` is
+  a calibrator iff `∫f ≤ 1`, and admissible iff upper semicontinuous,
+  `f(0) = ∞`, and `∫f = 1`. The family `f_κ(p) = κp^{κ−1}` (their eq. 1) is
+  exactly this construction's calibrator, and satisfies all three
+  conditions for every `κ ∈ (0,1)` — so "admissible p-to-e calibrator" below
+  is not an assertion, it is this proposition applied to a specific `f_κ`.
+  Their Remark 2.3 is also the precise statement behind "the p-to-e route is
+  lossy" (§5 below): the reciprocal of a p-value is only *approximately* an
+  e-value, `f(p) = 1/p` is achievable only in a degenerate limiting case, and
+  every genuine calibrator pays for validity against every alternative
+  simultaneously.
+- **Ramdas, Ruf, Larsson & Koolen (2022), *Admissible anytime-valid
+  sequential inference must rely on nonnegative martingales***
+  [arXiv:2009.03167]. Their central result is stronger than "nonnegative
+  supermartingales are *a* valid way to get anytime-validity" — they prove
+  nonnegative (super)martingales are *necessary*: every admissible p-process,
+  e-process, sequential test, or confidence sequence can be recovered or
+  dominated by one built from a nonnegative martingale. This upgrades the
+  wealth-process construction below from "a reasonable choice among several"
+  to "the general form any admissible construction must reduce to" — the
+  choice of framework in this paper is not a design decision competing with
+  alternatives so much as an instance of the only structure that works.
+
 Let `κ` be an admissible p-to-e calibrator — this implementation uses
 Vovk–Wang, `e = κ p^{κ−1}` with `κ = 1/2`, for which `E[e] = 1` when `p` is
 uniform. Set `E_t = κ(P_t)` and
@@ -176,11 +204,112 @@ of this process, not a theorem — a process whose retakes made images worse
 would flip it — so stratification remains the defensible default, on the
 grounds of weaker assumptions rather than rescued coverage.
 
-**What is assumed, not proved, about A1.** The construction gives conditional
-validity given the stratum; it does not rule out residual dependence between
-`S_t` and the session history within a stratum. Proving A1 from primitives
-about the capture process — rather than assuming it and measuring the
-consequences — is the obvious next theoretical step and is not done here.
+**What is assumed, not proved, about A1 -- and how far a primitive-level
+argument actually gets.** The construction gives conditional validity given
+the stratum; it does not rule out residual dependence between `S_t` and the
+session history within a stratum. This subsection does what §6's last
+version flagged as not done: it derives A1 as far as the generative model's
+own primitives take it, and shows precisely where the argument runs out and
+an empirical claim has to take over -- rather than leaving the whole thing
+as one undifferentiated assumption.
+
+*Notation.* Let `R_t` be the true rendered severities at shot `t` (`SceneState.
+severities()`), `Y` the case's true label (constant across the session), `δ`
+the lesion difficulty, and `q_t = quality(R_t)` (`SurrogateChannel.quality`,
+deterministic given `R_t`).
+
+**Lemma (Markov screening).** Conditional on `(R_t, Y, δ)`, the pair
+`(S_t, D_t)` is independent of `G_{t-1}`.
+
+*Proof.* Read the generative code directly. `SurrogateChannel.read` sets
+`mu = separation * (2Y-1) * (1-δ) * q_t^γ`, `sigma = sigma_base +
+sigma_degraded*(1-q_t)`, and draws `S_t = sigmoid(Normal(mu, sigma))` with a
+fresh `rng.normal` call; `_read_degradation` sets `D_t[name] = R_t[name] +
+head_bias + Normal(0, head_noise)`, again with fresh, per-shot, per-name
+noise. Neither formula references anything about the session besides `R_t`,
+`Y`, `δ`, and noise drawn independently of every earlier draw. `G_{t-1}` is
+measurable with respect to `(D_1..D_{t-1}, S_1..S_{t-1})`, all of which enter
+`R_t`'s own generation (via which instruction the policy issued and how the
+scene responded) but do not appear in `(S_t, D_t)`'s formulas once `R_t` is
+fixed. ∎
+
+This is a real theorem about the code as written, not an assumption -- and it
+is also the precise sense in which `R_t` is a sufficient state for one shot's
+readings: everything upstream of shot `t` matters only through what it did to
+the scene, never directly.
+
+**What the lemma buys, and what it does not.** Conditioning further on `R_t`
+(not just `G_t`), the lemma gives `S_t | (G_t, R_t, Y{=}0) \sim f_0(\cdot \mid
+q_t)`. But `A1` conditions on `G_t`, which observes only the *noisy* `D_t`,
+not `R_t`. Marginalising `R_t` out,
+
+$$\Pr(S_t \le s \mid G_t, Y{=}0) = \mathbb{E}\big[F_0(s \mid q_t) \;\big|\; G_t, Y{=}0\big],$$
+
+an average over the conditional law of `q_t` given what `G_t` actually saw,
+`Z_t = ζ(D_t) = z`. The calibration pool for stratum `z` was built the same
+way from a *different* population: `collect_calibration` draws a fresh
+session's FIRST shot each time, i.e. `R^{cal} \sim \pi_1` (`sample_initial_
+scene`, never touched by an instruction), conditioned on landing in `z` via
+its own noisy `D^{cal}`. Classical split-conformal validity within stratum
+`z` needs the conformal p-value's calibration-pool comparison to be honest,
+which reduces `A1` to exactly one condition:
+
+> **(A1'), stratum-conditional stochastic dominance.** For every `z`, the law
+> of `q_t` given `(Z_t{=}z, Y{=}0, G_t)` is stochastically dominated by (or
+> equal to) the calibration law of `q^{cal}` given `(Z^{cal}{=}z, Y{=}0)`,
+> *in the direction that lowers `S_t`* -- i.e. test-time true quality, given
+> the same predicted stratum, is at least as good as calibration's.
+
+This is strictly sharper than "A1 holds" -- it names the one inequality doing
+all the work, and the Markov lemma is what licenses reducing the whole
+filtration `G_t` down to a statement about `q_t \mid Z_t` in the first place.
+It is also, honestly, still not a theorem: (A1') is a claim about how two
+distributions compare, and nothing in the primitives forces it in general.
+
+**A mechanistic account of when (A1') should hold, and when it should not.**
+Two things can put a session in a good-looking stratum `z` at shot `t \ge 2`,
+and they point in opposite directions:
+
+1. *A genuine correction.* `CaptureSession._apply_instruction` moves the
+   scene's *equilibrium*, not just the momentary value
+   (`self.scene.equilibrium[target] = min(equilibrium[target], after + ...)`),
+   so a session that reaches a clean-looking `Z_t` because an instruction was
+   followed has a true `R_t` (and hence `q_t`) that is durably better than a
+   first-shot draw from `π_1` could be -- `π_1` never receives a correction.
+   This pushes (A1') to hold, and is the mechanism E2 already observed
+   empirically ("retakes produce cleaner shots... a sound tooth photographed
+   cleanly scores low against a pool containing dirtier shots").
+2. *A lucky misread.* `D_t` is a noisy estimate of `R_t` (`head_noise`); a
+   session can land in a good stratum `z` purely because the noise
+   under-reported a still-bad `R_t`, with no real improvement to `q_t`. This
+   pushes the OTHER way -- exactly the "confidently wrong" failure mode the
+   whole framework exists to guard against -- and if it dominates, `q_t`
+   given `Z_t{=}z` at test time is no better, or worse, than calibration's,
+   and (A1') can fail.
+
+Which mechanism dominates is governed by `head_noise` relative to how much a
+genuine correction moves `q`, i.e. it is an empirical question about
+magnitudes, not one the primitives settle on their own -- but it is now a
+*named* empirical question with a specific, falsifiable shape: **(A1') should
+degrade, and eventually fail, as `head_noise` rises past the point where
+mechanism 2 dominates mechanism 1**, holding everything else fixed. E4's
+confidence-head-quality ablation already sweeps `head_noise` and shows *power*
+(VPC) falling as it rises (0.230 -> 0.125); what it does not yet show is
+whether *validity itself* starts to erode over that same sweep, which is the
+sharper, more dangerous failure this reduction predicts should appear
+eventually and which a future E2-style null sweep over `head_noise` could
+check directly.
+
+**Summary of the reduction.** A1 is not proved outright -- proving it in
+general would mean proving a distributional comparison that depends on
+magnitudes (`head_noise` vs. correction strength) the primitives leave free,
+and no clean theorem removes that. What the argument above does establish
+from primitives alone, as a real proof rather than a restated assumption, is
+that A1 reduces *exactly* to (A1') via the Markov screening lemma, and that
+(A1')'s truth is governed by a specific, nameable race between two
+mechanisms already present in the simulator's design. That is a strictly
+smaller and more falsifiable gap than "residual dependence... not ruled
+out," even though it is still a gap.
 
 ## 7. What is claimed
 
@@ -192,4 +321,10 @@ consequences — is the obvious next theoretical step and is not done here.
    versus powerful-and-estimated (§5). Both measured.
 4. The assumption A1 is the load-bearing one, it is empirically supported in
    the regimes tested, and it degrades gracefully rather than catastrophically
-   as the case mix drifts (§6). Measured, not proved.
+   as the case mix drifts (§6). Not proved outright, but reduced via a proved
+   Markov screening lemma to one named condition (A1', stratum-conditional
+   stochastic dominance of true quality, test vs. calibration), with a
+   mechanistic account of when that condition should hold (genuine
+   equilibrium-shifting corrections) versus fail (noise-driven stratum
+   misclassification as `head_noise` grows) — a falsifiable prediction not
+   yet checked directly (§6).

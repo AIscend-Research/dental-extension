@@ -3,9 +3,13 @@
     .venv/bin/python -m experiments.run_all           # everything
     .venv/bin/python -m experiments.run_all e2 e3     # a subset
 
-Total runtime is roughly 13 minutes on a laptop CPU. E6 and E7 are the only
-ones that need data on disk; they are skipped with a clear message if the
-DENTEX validation split has not been fetched, so the rest still completes.
+Total runtime is roughly 25-30 minutes on a laptop CPU (E6 grew from ~1 to
+~15 min once pointed at the full ~700-radiograph training split instead of
+the 50-radiograph validation split; E13 adds another ~10 min). E6, E7 and
+E13 are the ones that need data on disk (DENTEX for E6/E7,
+`data/chest_xray_pneumonia` for E13 -- see `src/data/chest_xray_crops.py`'s
+docstring for how to fetch it); each is skipped with a clear message if its
+data is missing, so the rest still completes.
 """
 
 from __future__ import annotations
@@ -22,6 +26,11 @@ from experiments import (
     e5_sensitivity,
     e6_real_images,
     e7_qualitative,
+    e9_burst_vs_sequential,
+    e10_instrument_ablation,
+    e11_capture_budgets,
+    e12_conformal_risk_control,
+    e13_second_modality,
 )
 
 EXPERIMENTS = {
@@ -32,6 +41,11 @@ EXPERIMENTS = {
     "e5": ("sensitivity", e5_sensitivity.main),
     "e6": ("real DENTEX images", e6_real_images.main),
     "e7": ("qualitative figures", e7_qualitative.main),
+    "e9": ("burst fusion vs sequential accumulation", e9_burst_vs_sequential.main),
+    "e10": ("instrument ablation (blur-variance heuristic)", e10_instrument_ablation.main),
+    "e11": ("per-case capture budgets under a shared cost", e11_capture_budgets.main),
+    "e12": ("conformal-risk-control-style baseline", e12_conformal_risk_control.main),
+    "e13": ("second real modality: chest radiographs", e13_second_modality.main),
 }
 
 

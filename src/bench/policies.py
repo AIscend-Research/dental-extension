@@ -49,8 +49,9 @@ from src.evidence.verdict import (
     VerdictMachine,
     VerdictOutcome,
 )
-from src.models.diagnostic import Case, DiagnosticChannel
+from src.models.diagnostic import Case, DiagnosticChannel, predicted_usability
 from src.sim.instructions import Instruction, RETAKE_ANY, instruction_for_factor
+from src.sim.lookahead import best_lookahead_instruction
 from src.sim.session import CaptureSession
 
 
@@ -175,7 +176,7 @@ class EvidentialCapture(CapturePolicy):
                 # running-maximum check means a later dip cannot revoke it
                 pass
 
-            instruction = self._choose_instruction(verdict.instruction, ctx)
+            instruction = self._choose_instruction(verdict.instruction, ctx, reading.degradation, shot_i)
             instructions.append(instruction.name if instruction else "none")
 
         if outcome is VerdictOutcome.PENDING:
@@ -186,7 +187,13 @@ class EvidentialCapture(CapturePolicy):
             peeked=False,
         )
 
-    def _choose_instruction(self, proposed: Instruction | None, ctx: PolicyContext) -> Instruction:
+    def _choose_instruction(
+        self,
+        proposed: Instruction | None,
+        ctx: PolicyContext,
+        degradation: dict[str, float] | None = None,
+        shot_index: int = 0,
+    ) -> Instruction:
         if not self.targeted:
             return RETAKE_ANY
         if self.oracle_instruction:
@@ -269,6 +276,162 @@ class OracleInstruction(CapturePolicy):
         return EvidentialCapture(
             targeted=True, oracle_instruction=True, strategy=self.strategy
         ).run(ctx, case_id)
+
+
+@dataclass
+class OneStepLookahead(EvidentialCapture):
+    """Evidential capture whose subpoena maximises *projected* usability.
+
+    Same information as the deployable arm -- the predicted degradation
+    channel and the shot index, both G_t-measurable, never the true scene --
+    but a different decision rule. `evidential_capture` and
+    `oracle_instruction` both subpoena whichever factor currently looks
+    worst; E3 found that giving that rule the *true* scene state
+    (`oracle_instruction`) does not improve on giving it the predicted one,
+    which means the confidence head was never the bottleneck. This policy is
+    the thing that result predicts should help instead: project each
+    candidate correction's side effects through `src.sim.state.COUPLING`
+    (glare -> tilt/darkness, tilt -> tremor, ...) and a population operator
+    model, and subpoena whichever correction leaves the shot most usable in
+    expectation -- which can differ from "the worst factor right now" exactly
+    when fixing it would trade for something worse.
+
+    See `src/sim/lookahead.py` for the projection and its stated
+    simplifications (population, not true, operator; no glare-reposition
+    modelling). Because the projection only reads `EvidenceView`-shaped
+    information, this policy inherits `EvidentialCapture`'s validity
+    guarantee unchanged -- the theorem does not care how the instruction was
+    chosen, only that the choice was G_t-measurable.
+    """
+
+    name: str = "one_step_lookahead"
+
+    def _choose_instruction(
+        self,
+        proposed: Instruction | None,
+        ctx: PolicyContext,
+        degradation: dict[str, float] | None = None,
+        shot_index: int = 0,
+    ) -> Instruction:
+        if not self.targeted or self.oracle_instruction:
+            return super()._choose_instruction(proposed, ctx, degradation, shot_index)
+        if not degradation:
+            return proposed or RETAKE_ANY
+        return best_lookahead_instruction(degradation, shot_index)
+
+
+@dataclass
+class BurstFusionAnalytic(CapturePolicy):
+    """K untargeted shots, fused into ONE reading before a single test.
+
+    `fixed_retake` already answers "does retaking help at all, without
+    targeting": it takes K untargeted shots and accumulates their evidence
+    *sequentially* through the wealth process (K bets, K updates). This arm
+    spends the identical K untargeted shots but fuses them first -- averaging
+    the diagnosis score and every predicted severity across the burst, then
+    running the verdict machine's `observe` exactly once on the fused
+    reading. Both arms are sound (untargeted, degradation-channel-only
+    stakes) and spend exactly K captures; the only thing that differs is
+    burst fusion (average first, test once) versus sequential accumulation
+    (test K times, multiply the wealth). Making that comparison explicit is
+    the point: `sequential wealth accumulation IS a form of principled
+    fusion` is a claim this arm lets the data check rather than assert, and
+    it is the "burst fusion vs plain averaging" comparison
+    `docs/phase4_adjacent_fields.md` flags computational photography and
+    astronomy both treat as the baseline learned fusion has to beat.
+    """
+
+    k: int = 4
+    strategy: BettingStrategy = field(default_factory=DegradationAwareBet)
+    name: str = "burst_fusion_analytic"
+
+    def run(self, ctx: PolicyContext, case_id: int) -> SessionResult:
+        machine = VerdictMachine(
+            calibrator=ctx.calibrator,
+            burden=ctx.burden,
+            strategy=self.strategy,
+            n_strata=ctx.n_strata,
+        )
+        k = min(self.k, ctx.budget)
+        scores: list[float] = []
+        qualities: list[float] = []
+        degradation_keys: set[str] = set()
+        degradation_sums: dict[str, float] = {}
+
+        for shot_i in range(k):
+            capture = ctx.session.capture(None if shot_i == 0 else RETAKE_ANY)
+            reading = ctx.channel.read(ctx.case, capture.severities, ctx.rng)
+            scores.append(reading.score)
+            qualities.append(reading.true_quality)
+            for key, value in reading.degradation.items():
+                degradation_keys.add(key)
+                degradation_sums[key] = degradation_sums.get(key, 0.0) + value
+
+        fused_score = float(np.mean(scores))
+        fused_degradation = {key: degradation_sums[key] / k for key in degradation_keys}
+        fused_usability = predicted_usability(fused_degradation)
+
+        verdict = machine.observe(
+            score=fused_score,
+            degradation=fused_degradation,
+            predicted_usability=fused_usability,
+            captures_remaining=0,
+        )
+        outcome = verdict.outcome
+        if outcome is VerdictOutcome.PENDING:
+            outcome = VerdictOutcome.REFER
+
+        return _result(
+            case_id, ctx, outcome, k, machine, [fused_usability], [fused_score], qualities,
+            ["fused_retake"] * (k - 1), peeked=False,
+        )
+
+
+@dataclass
+class ConfidenceThresholdSelective(CapturePolicy):
+    """SelectiveNet-style baseline: one shot, threshold the raw score, abstain.
+
+    No calibration, no wealth process, no retake -- the natural first thing
+    anyone reaches for (Geifman & El-Yaniv 2019's selection function, in its
+    simplest fixed-threshold form): predict CARIES if the diagnosis score is
+    confidently high, SOUND if confidently low, REFER otherwise. `peeks=True`
+    because thresholding the raw diagnosis score directly is, definitionally,
+    conditioning on Y_t -- there is no calibration step to be G_t-measurable
+    about. Exists so the benchmark carries a non-evidential baseline, not just
+    the authors' own arms; the gap to `single_shot` (calibrated, guaranteed)
+    is what calibration actually buys over raw confidence.
+    """
+
+    threshold: float = 0.3
+    name: str = "confidence_threshold_selective"
+    peeks: bool = True
+
+    def run(self, ctx: PolicyContext, case_id: int) -> SessionResult:
+        capture = ctx.session.capture()
+        reading = ctx.channel.read(ctx.case, capture.severities, ctx.rng)
+        margin = reading.score - 0.5
+        if margin > self.threshold:
+            outcome = VerdictOutcome.CARIES
+        elif margin < -self.threshold:
+            outcome = VerdictOutcome.SOUND
+        else:
+            outcome = VerdictOutcome.REFER
+
+        return SessionResult(
+            case_id=case_id,
+            label=ctx.case.label,
+            outcome=outcome,
+            n_captures=1,
+            correct=_correctness(outcome, ctx.case.label),
+            peeked=True,
+            wealth_convict=float("nan"),
+            wealth_discharge=float("nan"),
+            final_usability=reading.usability,
+            mean_true_quality=reading.true_quality,
+            instructions=(),
+            usability_trace=(reading.usability,),
+            score_trace=(reading.score,),
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -454,6 +617,9 @@ POLICIES: dict[str, type[CapturePolicy]] = {
     "untargeted_evidential": UntargetedEvidential,
     "evidential_capture": EvidentialCapture,
     "oracle_instruction": OracleInstruction,
+    "one_step_lookahead": OneStepLookahead,
+    "burst_fusion_analytic": BurstFusionAnalytic,
+    "confidence_threshold_selective": ConfidenceThresholdSelective,
     "greedy_diagnostic": GreedyDiagnostic,
     "naive_best_shot": NaiveBestShot,
 }

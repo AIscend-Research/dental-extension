@@ -19,15 +19,22 @@ four questions:
   4. Does the benchmark's policy ordering, and the guarantee, reproduce?
 
 Two tasks are used, each where it is actually valid, because neither supports
-both jobs:
+both jobs. Both now default to the full ~700-radiograph training split
+(3529 diagnosis-labelled boxes) rather than the 50-radiograph public
+validation split -- the small split was the one originally available and is
+kept as an automatic fallback if the training zip has not been fetched, but
+it is what made the fine-grained task's AUC uninterpretable in the first
+place (32 positives total is too few to fit or measure anything). See
+`docs/simulator_grounding.md` section 5.
 
-  caries_vs_deep (Caries vs Deep Caries, 133 teeth) carries the artifact-damage
+  caries_vs_deep (Caries vs Deep Caries) carries the artifact-damage
     analysis. Both classes are ordinary erupted teeth, so the decision rests on
     fine-grained density rather than shape -- the kind of evidence real caries
-    reading depends on. It is far too thin on positives (32 in total) to
-    support a conformal calibration set, so it does not run the Docket.
+    reading depends on. On the 50-radiograph split it was far too thin on
+    positives (32 in total) to support a conformal calibration set, so it never
+    runs the Docket regardless of split size.
 
-  caries_vs_other (Caries+Deep vs Impacted+Periapical, 182 teeth) carries the
+  caries_vs_other (Caries+Deep vs Impacted+Periapical) carries the
     end-to-end Docket run. It has enough teeth per class to calibrate on, and
     it is close to saturated -- impacted teeth are separable on coarse
     morphology alone -- so it demonstrates the machinery runs on real
@@ -45,6 +52,8 @@ Run: .venv/bin/python -m experiments.e6_real_images
 """
 
 from __future__ import annotations
+
+from pathlib import Path
 
 import numpy as np
 
@@ -71,6 +80,20 @@ N_CASES = 3000
 BUDGET = 4
 N_RENDERS_TRAIN = 12
 SEVERITY_GRID = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
+
+# The full DENTEX training split (~700 radiographs, 3529 diagnosis-labelled
+# boxes) rather than the 50-radiograph public validation split. The
+# validation split was the only thing previously downloaded (150MB, ~70s);
+# it is too small to make the fine-grained caries_vs_deep task interpretable
+# (32 positives total -> chance-level AUC, see docs/simulator_grounding.md
+# section 5). The training split (11GB) is what that section says is needed
+# to actually resolve SIGNAL_LOSS_WEIGHTS. Falls back to the validation split
+# with a warning if the training zip has not been fetched/unzipped, so a
+# fresh clone that only ran the quickstart still gets a result (just the
+# small-sample one already on record).
+_TRAIN_ROOT = Path("data/dentex/DENTEX/training_data/quadrant-enumeration-disease")
+TRAIN_ANNOTATIONS = _TRAIN_ROOT / "train_quadrant_enumeration_disease.json"
+TRAIN_IMAGES = _TRAIN_ROOT / "xrays"
 ARMS = [
     "single_shot",
     "fixed_retake",
@@ -162,7 +185,16 @@ def main() -> None:
     rng = np.random.default_rng(0)
 
     print("\n--- task A: caries_vs_deep (fine-grained; carries the damage analysis) ---")
-    crops = load_tooth_crops(task="caries_vs_deep")
+    if TRAIN_ANNOTATIONS.exists():
+        print(f"  using the full training split: {TRAIN_ANNOTATIONS}")
+        crops = load_tooth_crops(annotations=TRAIN_ANNOTATIONS, image_root=TRAIN_IMAGES, task="caries_vs_deep")
+    else:
+        print(
+            "  WARNING: training split not found -- falling back to the 50-radiograph "
+            "validation split (python scripts/download_dentex.py, then unzip "
+            "training_data/quadrant-enumeration-disease/ from training_data.zip)"
+        )
+        crops = load_tooth_crops(task="caries_vs_deep")
     print(describe(crops, "all"))
     print(f"\nfitting {5}-fold grouped CV over source radiographs ...", flush=True)
     folds, clean_auc = grouped_cv_channels(crops, rng)
@@ -234,7 +266,10 @@ def main() -> None:
     # Switched to the coarse task here: caries_vs_deep has only ~6 positive
     # teeth in the calibration split, which cannot support a conformal null.
     print("\n--- task B: caries_vs_other (coarse; carries the end-to-end Docket) ---")
-    crops_b = load_tooth_crops(task="caries_vs_other")
+    if TRAIN_ANNOTATIONS.exists():
+        crops_b = load_tooth_crops(annotations=TRAIN_ANNOTATIONS, image_root=TRAIN_IMAGES, task="caries_vs_other")
+    else:
+        crops_b = load_tooth_crops(task="caries_vs_other")
     train_b, cal_crops, test = split_by_source_image(crops_b, seed=3)
     for name, part in [("train", train_b), ("calibration", cal_crops), ("test", test)]:
         print(describe(part, name))

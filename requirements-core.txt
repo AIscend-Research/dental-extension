@@ -12,3 +12,4 @@ pyyaml>=6.0
 huggingface_hub>=0.23    # to pull the DENTEX dataset
 pytest>=8.0
 pycocotools>=2.0.7       # coco_map()/detection eval -- no torch/detectron2 needed for this
+pyarrow>=14.0             # reading Hugging Face parquet datasets, e.g. src/data/chest_xray_crops.py

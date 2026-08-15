@@ -1,0 +1,101 @@
+{
+  "reader": {
+    "clean_auc": 0.88,
+    "clinic_auc": 0.7755501528957179
+  },
+  "docket": {
+    "n_cases": 4000,
+    "budget": 4,
+    "burden": "convict=preponderance/discharge=clear_and_convincing"
+  },
+  "rows": [
+    {
+      "policy": "conformal_risk_control_style (single-shot, marginal)",
+      "n_cases": 4000,
+      "n_captures": 4000,
+      "mean_captures": 1.0,
+      "verdict_rate": 0.0615,
+      "verdicts_per_capture": 0.0615,
+      "verdict_accuracy": 0.8333333333333334,
+      "refer_rate": 0.9385,
+      "false_conviction_rate": 0.014677481653147934,
+      "false_conviction_ci": [
+        0.010712071359658421,
+        0.020081016810478934
+      ],
+      "alpha_convict": 0.5,
+      "convict_violation": false,
+      "false_discharge_rate": 0.002126151665485471,
+      "false_discharge_ci": [
+        0.0007233280103902348,
+        0.006232645011607422
+      ],
+      "alpha_discharge": 0.2,
+      "discharge_violation": false,
+      "guaranteed": true,
+      "sensitivity": 0.9815950920245399,
+      "specificity": 0.5421686746987951,
+      "mean_final_usability": 0.5256185644375158
+    },
+    {
+      "policy": "single_shot (stratified)",
+      "n_cases": 4000,
+      "n_captures": 4000,
+      "mean_captures": 1.0,
+      "verdict_rate": 0.05975,
+      "verdicts_per_capture": 0.05975,
+      "verdict_accuracy": 0.8158995815899581,
+      "refer_rate": 0.94025,
+      "false_conviction_rate": 0.015836230204712243,
+      "false_conviction_ci": [
+        0.011694949012882157,
+        0.021412202615663144
+      ],
+      "alpha_convict": 0.5,
+      "convict_violation": false,
+      "false_discharge_rate": 0.002126151665485471,
+      "false_discharge_ci": [
+        0.0007233280103902348,
+        0.006232645011607422
+      ],
+      "alpha_discharge": 0.2,
+      "discharge_violation": false,
+      "guaranteed": true,
+      "sensitivity": 0.9814814814814815,
+      "specificity": 0.4675324675324675,
+      "mean_final_usability": 0.5256185644375158
+    },
+    {
+      "policy": "evidential_capture (stratified, retake)",
+      "n_cases": 4000,
+      "n_captures": 13877,
+      "mean_captures": 3.46925,
+      "verdict_rate": 0.432,
+      "verdicts_per_capture": 0.12452259133818548,
+      "verdict_accuracy": 0.8969907407407407,
+      "refer_rate": 0.5680000000000001,
+      "false_conviction_rate": 0.0664349169563538,
+      "false_conviction_ci": [
+        0.05746976986665116,
+        0.07668481944570792
+      ],
+      "alpha_convict": 0.5,
+      "convict_violation": false,
+      "false_discharge_rate": 0.004252303330970942,
+      "false_discharge_ci": [
+        0.0019502552628885036,
+        0.009246475169691367
+      ],
+      "alpha_discharge": 0.2,
+      "discharge_violation": false,
+      "guaranteed": true,
+      "sensitivity": 0.9933407325194229,
+      "specificity": 0.7920193470374849,
+      "mean_final_usability": 0.620846972344477
+    }
+  ],
+  "stratification_gain_vpc": -0.0017500000000000016,
+  "retake_gain_vpc": 0.06477259133818548,
+  "scoping_note": "Not a reimplementation of Angelopoulos et al. 2022's conformal risk control algorithm -- see module docstring. This is the single-shot, unstratified conformal baseline that family of methods represents here.",
+  "generated_utc": "2026-08-15T05:37:25Z"
+}

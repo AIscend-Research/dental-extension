@@ -28,6 +28,7 @@ function works on a normal machine too, which is how it gets tested.
 
 from __future__ import annotations
 
+import importlib
 import os
 import subprocess
 import sys
@@ -209,6 +210,15 @@ def import_hierarchicaldet(baseline_path: str | Path = "external/HierarchicalDet
     baseline_path = str(baseline_path)
     if baseline_path not in sys.path:
         sys.path.insert(0, baseline_path)
+    # If this function was ever called before `baseline_path` existed on disk
+    # (e.g. the baseline-clone cell ran after this one, or was skipped and
+    # added later), Python's import system caches "nothing importable here"
+    # for that sys.path entry -- creating the directory afterward does not
+    # invalidate that cache within the same running kernel, and the import
+    # below fails with a plain ModuleNotFoundError that looks identical to
+    # "the directory doesn't exist" even once it does. Cheap and always safe
+    # to call again.
+    importlib.invalidate_caches()
     from hierarchialdet.config import add_diffusiondet_config
 
     return add_diffusiondet_config

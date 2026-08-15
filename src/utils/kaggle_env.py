@@ -33,8 +33,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-REPO_URL = "https://github.com/christopherh-88/Carries-Confidence.git"
-REPO_DIRNAME = "Carries-Confidence"
+REPO_URL = "https://github.com/christopherh-88/dental-extension.git"
+REPO_DIRNAME = "dental-extension"
 
 # The annotation file that identifies a real DENTEX diagnosis split.
 DENTEX_ANNOTATION_GLOB = "**/train_quadrant_enumeration_disease.json"

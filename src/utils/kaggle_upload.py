@@ -241,7 +241,7 @@ def build_metadata(
             "for use from Kaggle notebooks.\n\n"
             "Licensed CC BY-NC-SA 4.0 by the original authors -- non-commercial use only. "
             "Cite the DENTEX challenge paper (Hamamci et al.), not this mirror.\n\n"
-            "Used by https://github.com/christopherh-88/dental-extension "
+            "Used by https://github.com/AIscend-Research/dental-extension "
             "(`kaggle/*.ipynb`), which locates this mount by looking for "
             "`train_quadrant_enumeration_disease.json`, not by dataset name."
         ),

@@ -72,6 +72,24 @@ torch+CUDA build (the one thing not verified locally, since this repo was
 built on CPU/MPS), it breaks here, at step 5 (`from detectron2 import _C`),
 cheaply — not 30 minutes into notebook 01.
 
+Before opening a session, run `pytest tests/test_kaggle_notebooks.py` (fast,
+no GPU, no data). It is the preflight for everything in these notebooks that
+is checkable without hardware: that each cell parses, that the names they
+import from `src/` still exist, that no dataset mount path is hardcoded, and
+— the one that actually bit — that the bootstrap clones this repo rather
+than a fork. Until 2026-08-16 all four notebooks cloned
+`christopherh-88/dental-extension`, so a Kaggle session silently ran that
+fork's `main` no matter what was merged here. The clone URL now has a single
+definition (`src/utils/kaggle_env.REPO_URL`) and the test keeps every
+notebook in sync with it.
+
+Two external dependencies this notebook fetches were re-checked on
+2026-08-16 and are live: the Swin-Large-22k checkpoint (step 7) and
+`ibrahimethemhamamci/HierarchicalDet` with the
+`diffdet.custom.swinbase.nonpretrain.yaml` config step 9 merges. What
+remains unverifiable outside a session is unchanged and is the whole point of
+running it: the detectron2 build against Kaggle's torch+CUDA.
+
 ## 3. `kaggle/01_train_baseline_detector.ipynb`, BOTH arms (11–28h GPU each, unverified)
 
 Run twice, in separate sessions, with `TRAIN_ARM` set to `"baseline"` then

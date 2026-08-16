@@ -10,33 +10,55 @@ what to check at each step and where the results feed back into this repo.
 
 ## 0. Before you start
 
-- `data/dentex/` now has the full training split unzipped locally (11 GB on
-  disk: `training_data/quadrant-enumeration-disease/` + `validation_data/`).
-  You do **not** need to re-download anything for the Kaggle steps below —
-  you're uploading what's already here, not re-fetching from Hugging Face.
+- The Kaggle steps upload **local** data — `data/dentex/` is gitignored (the
+  DENTEX license is non-commercial and gated), so it exists only on the
+  machine that downloaded it. On the machine where this was last run it holds
+  the full training split unzipped (11 GB:
+  `training_data/quadrant-enumeration-disease/` + `validation_data/`) and
+  nothing needs re-fetching. On a fresh clone it does not exist, and step 1
+  will say so and print the download commands; run
+  `python scripts/download_dentex.py` (needs `huggingface-cli login` and
+  accepting DENTEX's terms) and unzip before uploading.
 - The label-map and "lightweight" decisions are locked (`docs/decisions.md`)
   — you do not need to make a call before training; `configs/default.yaml`
   already says what to train (`task: diagnosis`, all four classes).
 
 ## 1. Upload DENTEX as a Kaggle Dataset (~15–30 min, account action)
 
+This is the one step that needs *your* account, but the fiddly parts are
+scripted (`scripts/upload_dentex_to_kaggle.py`, logic in
+`src/utils/kaggle_upload.py`, tested in `tests/test_kaggle_upload.py`):
+
 ```bash
-pip install kaggle   # if not already
-kaggle datasets init -p data/dentex/DENTEX/training_data/quadrant-enumeration-disease
-# edit the generated dataset-metadata.json: set a title/id, e.g. "dentex-quadrant-enumeration-disease"
-kaggle datasets create -p data/dentex/DENTEX/training_data/quadrant-enumeration-disease --dir-mode zip
+pip install kaggle
+# https://www.kaggle.com/settings -> API -> "Create New Token" downloads kaggle.json
+mkdir -p ~/.kaggle && mv ~/Downloads/kaggle.json ~/.kaggle/ && chmod 600 ~/.kaggle/kaggle.json
+
+python scripts/upload_dentex_to_kaggle.py --dry-run   # checks everything, uploads nothing
+python scripts/upload_dentex_to_kaggle.py             # the training split (~2-3 GB)
 ```
 
-Upload just the `quadrant-enumeration-disease` subfolder (705 images +
+The dry run is worth the ten seconds: every check it runs would otherwise
+fail *after* a multi-gigabyte upload has finished streaming. It resolves your
+username, validates the slug against Kaggle's rules (6–50 chars, lowercase,
+no underscores), confirms the split is complete, and prints the exact command
+it would run. `--update -m "what changed"` versions a dataset you already own
+instead of failing with a 409.
+
+It uploads just the `quadrant-enumeration-disease` subfolder (705 images +
 annotations, ~2–3 GB), not the full 11 GB archive — it's the only split with
 diagnosis labels and is what `configs/default.yaml` and every notebook below
-actually point at. If you also want the validation split available on
-Kaggle (for a genuinely held-out eval separate from training), upload
-`data/dentex/DENTEX/validation_data/` as a second dataset the same way.
+actually point at. For a genuinely held-out eval, publish the validation
+split as a second dataset with `--split validation`; that path also copies
+`validation_triple.json` in from `DENTEX/`, one level above the uploaded
+folder, which a hand-rolled `kaggle datasets create -p validation_data` would
+silently leave behind — giving you images with no labels.
 
-Note the dataset slug Kaggle assigns you (`<your-username>/<dataset-name>`)
-— every notebook below needs it attached, and `find_dentex_root()`
-(`src/utils/kaggle_env.py`) looks it up under `/kaggle/input/`.
+Nothing else in the repo needs editing afterwards: `find_dentex_root()`
+(`src/utils/kaggle_env.py`) locates the mount under `/kaggle/input/` by
+looking for `train_quadrant_enumeration_disease.json`, not by dataset name,
+so the slug is yours to choose. You still need the slug to *attach* the
+dataset to each notebook (Add Data → Your Datasets).
 
 ## 2. `kaggle/00_setup_and_sanity_check.ipynb` (~10 min GPU)
 

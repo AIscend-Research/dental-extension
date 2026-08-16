@@ -34,7 +34,11 @@ import subprocess
 import sys
 from pathlib import Path
 
-REPO_URL = "https://github.com/christopherh-88/dental-extension.git"
+# The canonical repo, not a fork: a Kaggle session clones this unauthenticated
+# and gets whatever `main` says, so pointing it at a fork silently runs old code
+# hours into a GPU session. tests/test_kaggle_notebooks.py keeps every notebook's
+# copy of this URL in sync with this constant.
+REPO_URL = "https://github.com/AIscend-Research/dental-extension.git"
 REPO_DIRNAME = "dental-extension"
 
 # The annotation file that identifies a real DENTEX diagnosis split.

@@ -65,7 +65,11 @@ photographs taken with a real camera of a real film. That is the same question
 the real phone pilot (`docs/irb_determination_request.md` §B) is meant to
 answer — and unlike the pilot, this version needs no new data collection, no
 films, and no ethics determination. **If both routes are open, this is the
-cheaper one, and it should be tried first.**
+cheaper one, and it should be tried first.** It does not replace the pilot:
+`docs/phone_pilot_protocol.md` photographs *dental* films under conditions
+chosen to stress this project's own artifact taxonomy, while CheXphoto's film
+subset is 250 chest radiographs shot under one clinical lighting setup. The
+pilot is the better instrument; this is the one available today.
 
 ## What the ungated route already produced
 

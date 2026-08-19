@@ -84,3 +84,15 @@ skipping it:
   At that point, the real photos serve double duty: validating the existing
   two synthetic arms *and* providing training/validation signal for a GAN
   arm, making it a much stronger comparison than building it blind now.
+- **What the pilot decides about which GAN is even possible** (added
+  2026-08-19, see `docs/phone_pilot_protocol.md` 7): whether the photographs
+  register onto their source radiographs. `src/pilot/registration.py` warps
+  each photograph back into its source's frame, and if that succeeds for most
+  of the set the pilot is *paired* data -- a pix2pix-style setup, which needs
+  far less of it than the unpaired CycleGAN alternative. If registration
+  mostly fails, unpaired is the only option left. Either way tens of
+  photographs train nothing on their own; the realistic use is as the
+  validation set for a GAN trained on synthetic pairs, and as the denominator
+  for the same `compare_arms` measurement the other two arms get. A GAN arm
+  scored on the photographs it was trained on is a memorisation check, not a
+  third arm.

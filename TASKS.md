@@ -69,8 +69,24 @@ tuned to agree:
   scales are not currently calibrated to mean the same perceptual thing --
   do not average/compare severity-conditioned results across arms without
   first recalibrating one to match the other, or note this as a caveat.
+**Cross-arm severity calibration done** -- the "not calibrated to mean the
+same perceptual thing" caveat above is now a measurement, on five real DENTEX
+radiographs, and it is more specific than the caveat: `blur` and `jpeg` map
+identity between the arms (pool them freely), `low_light` agrees only up to
+~0.4 and then albumentations *saturates* (no albumentations severity
+reproduces OpenCV above 0.4, so no translation table can fix it), and the two
+`glare` models never match at any severity -- they are different artifacts,
+not different scales. See `docs/phone_pilot_protocol.md` 8.1,
+`results/pilot_arm_calibration.json`, and
+`python scripts/pilot_report.py calibrate --references <dir>`.
+
 Still needed (needs a human + a phone, not code): re-photographing a few
-printed X-rays to check which arm's artifacts actually match reality.
+printed X-rays to check which arm's artifacts actually match reality. The
+analysis that photographs feed into is built and tested -- shot list,
+registration onto the source radiograph, and per-artifact severity fits for
+both arms (`src/pilot/`, `tests/test_pilot.py`). Protocol, sample size, and
+acceptance criteria: `docs/phone_pilot_protocol.md`. The remaining input is
+the photographs, and the IRB determination that gates taking them.
 
 **Stream 2 — Data and splits (no detector needed).**
 File: `src/data/dentex.py`.
@@ -131,7 +147,8 @@ the written determination is a human action, still outstanding.
   Actual upload/attach as a Kaggle Dataset not yet done (needs a Kaggle account
   action, not something buildable from this environment).
 - Burst simulation for fusion → `make_burst()` in `degradation.py` (done)
-- Small real pilot set to validate realism → Stream 1, still blocked (needs a
+- Small real pilot set to validate realism → **protocol and analysis built,
+  see `docs/phone_pilot_protocol.md` and `src/pilot/`**; still blocked (needs a
   human + a phone + IRB clearance, see `docs/phase1_background.md`; the
   clearance request is drafted at `docs/irb_determination_request.md` §B,
   which also notes a lower-governance fallback: re-photographing printed

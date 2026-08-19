@@ -1,0 +1,614 @@
+{
+  "n_images": 5,
+  "seed": 0,
+  "calibration": {
+    "blur": [
+      {
+        "image": "val_1.png",
+        "opencv_severity": 0.2,
+        "albumentations_severity": 0.2,
+        "residual": 0.1059
+      },
+      {
+        "image": "val_1.png",
+        "opencv_severity": 0.4,
+        "albumentations_severity": 0.4,
+        "residual": 0.0215
+      },
+      {
+        "image": "val_1.png",
+        "opencv_severity": 0.6,
+        "albumentations_severity": 0.7,
+        "residual": 0.0044
+      },
+      {
+        "image": "val_1.png",
+        "opencv_severity": 0.8,
+        "albumentations_severity": 0.9,
+        "residual": 0.0011
+      },
+      {
+        "image": "val_1.png",
+        "opencv_severity": 1.0,
+        "albumentations_severity": 1.0,
+        "residual": 0.0025
+      },
+      {
+        "image": "val_10.png",
+        "opencv_severity": 0.2,
+        "albumentations_severity": 0.2,
+        "residual": 0.1061
+      },
+      {
+        "image": "val_10.png",
+        "opencv_severity": 0.4,
+        "albumentations_severity": 0.4,
+        "residual": 0.0083
+      },
+      {
+        "image": "val_10.png",
+        "opencv_severity": 0.6,
+        "albumentations_severity": 0.6,
+        "residual": 0.003
+      },
+      {
+        "image": "val_10.png",
+        "opencv_severity": 0.8,
+        "albumentations_severity": 0.8,
+        "residual": 0.0009
+      },
+      {
+        "image": "val_10.png",
+        "opencv_severity": 1.0,
+        "albumentations_severity": 1.0,
+        "residual": 0.0006
+      },
+      {
+        "image": "val_11.png",
+        "opencv_severity": 0.2,
+        "albumentations_severity": 0.2,
+        "residual": 0.1294
+      },
+      {
+        "image": "val_11.png",
+        "opencv_severity": 0.4,
+        "albumentations_severity": 0.4,
+        "residual": 0.0206
+      },
+      {
+        "image": "val_11.png",
+        "opencv_severity": 0.6,
+        "albumentations_severity": 0.7,
+        "residual": 0.0036
+      },
+      {
+        "image": "val_11.png",
+        "opencv_severity": 0.8,
+        "albumentations_severity": 0.9,
+        "residual": 0.0014
+      },
+      {
+        "image": "val_11.png",
+        "opencv_severity": 1.0,
+        "albumentations_severity": 1.0,
+        "residual": 0.0008
+      },
+      {
+        "image": "val_12.png",
+        "opencv_severity": 0.2,
+        "albumentations_severity": 0.2,
+        "residual": 0.0987
+      },
+      {
+        "image": "val_12.png",
+        "opencv_severity": 0.4,
+        "albumentations_severity": 0.4,
+        "residual": 0.0066
+      },
+      {
+        "image": "val_12.png",
+        "opencv_severity": 0.6,
+        "albumentations_severity": 0.6,
+        "residual": 0.003
+      },
+      {
+        "image": "val_12.png",
+        "opencv_severity": 0.8,
+        "albumentations_severity": 0.8,
+        "residual": 0.0011
+      },
+      {
+        "image": "val_12.png",
+        "opencv_severity": 1.0,
+        "albumentations_severity": 1.0,
+        "residual": 0.001
+      },
+      {
+        "image": "val_13.png",
+        "opencv_severity": 0.2,
+        "albumentations_severity": 0.2,
+        "residual": 0.1041
+      },
+      {
+        "image": "val_13.png",
+        "opencv_severity": 0.4,
+        "albumentations_severity": 0.4,
+        "residual": 0.0074
+      },
+      {
+        "image": "val_13.png",
+        "opencv_severity": 0.6,
+        "albumentations_severity": 0.6,
+        "residual": 0.0029
+      },
+      {
+        "image": "val_13.png",
+        "opencv_severity": 0.8,
+        "albumentations_severity": 0.8,
+        "residual": 0.0009
+      },
+      {
+        "image": "val_13.png",
+        "opencv_severity": 1.0,
+        "albumentations_severity": 1.0,
+        "residual": 0.0008
+      }
+    ],
+    "glare": [
+      {
+        "image": "val_1.png",
+        "opencv_severity": 0.2,
+        "albumentations_severity": 0.0,
+        "residual": 0.8257
+      },
+      {
+        "image": "val_1.png",
+        "opencv_severity": 0.4,
+        "albumentations_severity": 0.0,
+        "residual": 1.8222
+      },
+      {
+        "image": "val_1.png",
+        "opencv_severity": 0.6,
+        "albumentations_severity": 1.0,
+        "residual": 1.9702
+      },
+      {
+        "image": "val_1.png",
+        "opencv_severity": 0.8,
+        "albumentations_severity": 1.0,
+        "residual": 3.774
+      },
+      {
+        "image": "val_1.png",
+        "opencv_severity": 1.0,
+        "albumentations_severity": 1.0,
+        "residual": 12.4152
+      },
+      {
+        "image": "val_10.png",
+        "opencv_severity": 0.2,
+        "albumentations_severity": 0.0,
+        "residual": 1.2729
+      },
+      {
+        "image": "val_10.png",
+        "opencv_severity": 0.4,
+        "albumentations_severity": 1.0,
+        "residual": 2.0655
+      },
+      {
+        "image": "val_10.png",
+        "opencv_severity": 0.6,
+        "albumentations_severity": 1.0,
+        "residual": 2.3736
+      },
+      {
+        "image": "val_10.png",
+        "opencv_severity": 0.8,
+        "albumentations_severity": 1.0,
+        "residual": 6.6432
+      },
+      {
+        "image": "val_10.png",
+        "opencv_severity": 1.0,
+        "albumentations_severity": 1.0,
+        "residual": 13.9452
+      },
+      {
+        "image": "val_11.png",
+        "opencv_severity": 0.2,
+        "albumentations_severity": 0.0,
+        "residual": 0.7088
+      },
+      {
+        "image": "val_11.png",
+        "opencv_severity": 0.4,
+        "albumentations_severity": 0.0,
+        "residual": 2.4948
+      },
+      {
+        "image": "val_11.png",
+        "opencv_severity": 0.6,
+        "albumentations_severity": 1.0,
+        "residual": 2.8471
+      },
+      {
+        "image": "val_11.png",
+        "opencv_severity": 0.8,
+        "albumentations_severity": 1.0,
+        "residual": 7.4127
+      },
+      {
+        "image": "val_11.png",
+        "opencv_severity": 1.0,
+        "albumentations_severity": 1.0,
+        "residual": 15.5905
+      },
+      {
+        "image": "val_12.png",
+        "opencv_severity": 0.2,
+        "albumentations_severity": 0.0,
+        "residual": 1.6017
+      },
+      {
+        "image": "val_12.png",
+        "opencv_severity": 0.4,
+        "albumentations_severity": 1.0,
+        "residual": 3.1747
+      },
+      {
+        "image": "val_12.png",
+        "opencv_severity": 0.6,
+        "albumentations_severity": 1.0,
+        "residual": 3.4585
+      },
+      {
+        "image": "val_12.png",
+        "opencv_severity": 0.8,
+        "albumentations_severity": 1.0,
+        "residual": 8.3594
+      },
+      {
+        "image": "val_12.png",
+        "opencv_severity": 1.0,
+        "albumentations_severity": 1.0,
+        "residual": 16.07
+      },
+      {
+        "image": "val_13.png",
+        "opencv_severity": 0.2,
+        "albumentations_severity": 0.0,
+        "residual": 0.5338
+      },
+      {
+        "image": "val_13.png",
+        "opencv_severity": 0.4,
+        "albumentations_severity": 1.0,
+        "residual": 1.6424
+      },
+      {
+        "image": "val_13.png",
+        "opencv_severity": 0.6,
+        "albumentations_severity": 1.0,
+        "residual": 3.8139
+      },
+      {
+        "image": "val_13.png",
+        "opencv_severity": 0.8,
+        "albumentations_severity": 1.0,
+        "residual": 10.4274
+      },
+      {
+        "image": "val_13.png",
+        "opencv_severity": 1.0,
+        "albumentations_severity": 1.0,
+        "residual": 19.6858
+      }
+    ],
+    "jpeg": [
+      {
+        "image": "val_1.png",
+        "opencv_severity": 0.2,
+        "albumentations_severity": 0.2,
+        "residual": 0.0
+      },
+      {
+        "image": "val_1.png",
+        "opencv_severity": 0.4,
+        "albumentations_severity": 0.4,
+        "residual": 0.0
+      },
+      {
+        "image": "val_1.png",
+        "opencv_severity": 0.6,
+        "albumentations_severity": 0.6,
+        "residual": 0.0
+      },
+      {
+        "image": "val_1.png",
+        "opencv_severity": 0.8,
+        "albumentations_severity": 0.8,
+        "residual": 0.0
+      },
+      {
+        "image": "val_1.png",
+        "opencv_severity": 1.0,
+        "albumentations_severity": 1.0,
+        "residual": 0.0
+      },
+      {
+        "image": "val_10.png",
+        "opencv_severity": 0.2,
+        "albumentations_severity": 0.2,
+        "residual": 0.0
+      },
+      {
+        "image": "val_10.png",
+        "opencv_severity": 0.4,
+        "albumentations_severity": 0.4,
+        "residual": 0.0
+      },
+      {
+        "image": "val_10.png",
+        "opencv_severity": 0.6,
+        "albumentations_severity": 0.6,
+        "residual": 0.0
+      },
+      {
+        "image": "val_10.png",
+        "opencv_severity": 0.8,
+        "albumentations_severity": 0.8,
+        "residual": 0.0
+      },
+      {
+        "image": "val_10.png",
+        "opencv_severity": 1.0,
+        "albumentations_severity": 1.0,
+        "residual": 0.0
+      },
+      {
+        "image": "val_11.png",
+        "opencv_severity": 0.2,
+        "albumentations_severity": 0.2,
+        "residual": 0.0
+      },
+      {
+        "image": "val_11.png",
+        "opencv_severity": 0.4,
+        "albumentations_severity": 0.4,
+        "residual": 0.0
+      },
+      {
+        "image": "val_11.png",
+        "opencv_severity": 0.6,
+        "albumentations_severity": 0.6,
+        "residual": 0.0
+      },
+      {
+        "image": "val_11.png",
+        "opencv_severity": 0.8,
+        "albumentations_severity": 0.8,
+        "residual": 0.0
+      },
+      {
+        "image": "val_11.png",
+        "opencv_severity": 1.0,
+        "albumentations_severity": 1.0,
+        "residual": 0.0
+      },
+      {
+        "image": "val_12.png",
+        "opencv_severity": 0.2,
+        "albumentations_severity": 0.2,
+        "residual": 0.0
+      },
+      {
+        "image": "val_12.png",
+        "opencv_severity": 0.4,
+        "albumentations_severity": 0.4,
+        "residual": 0.0
+      },
+      {
+        "image": "val_12.png",
+        "opencv_severity": 0.6,
+        "albumentations_severity": 0.6,
+        "residual": 0.0
+      },
+      {
+        "image": "val_12.png",
+        "opencv_severity": 0.8,
+        "albumentations_severity": 0.8,
+        "residual": 0.0
+      },
+      {
+        "image": "val_12.png",
+        "opencv_severity": 1.0,
+        "albumentations_severity": 1.0,
+        "residual": 0.0
+      },
+      {
+        "image": "val_13.png",
+        "opencv_severity": 0.2,
+        "albumentations_severity": 0.2,
+        "residual": 0.0
+      },
+      {
+        "image": "val_13.png",
+        "opencv_severity": 0.4,
+        "albumentations_severity": 0.4,
+        "residual": 0.0
+      },
+      {
+        "image": "val_13.png",
+        "opencv_severity": 0.6,
+        "albumentations_severity": 0.6,
+        "residual": 0.0
+      },
+      {
+        "image": "val_13.png",
+        "opencv_severity": 0.8,
+        "albumentations_severity": 0.8,
+        "residual": 0.0
+      },
+      {
+        "image": "val_13.png",
+        "opencv_severity": 1.0,
+        "albumentations_severity": 1.0,
+        "residual": 0.0
+      }
+    ],
+    "low_light": [
+      {
+        "image": "val_1.png",
+        "opencv_severity": 0.2,
+        "albumentations_severity": 0.3,
+        "residual": 0.5053
+      },
+      {
+        "image": "val_1.png",
+        "opencv_severity": 0.4,
+        "albumentations_severity": 0.3,
+        "residual": 0.1701
+      },
+      {
+        "image": "val_1.png",
+        "opencv_severity": 0.6,
+        "albumentations_severity": 0.3,
+        "residual": 0.6199
+      },
+      {
+        "image": "val_1.png",
+        "opencv_severity": 0.8,
+        "albumentations_severity": 0.4,
+        "residual": 0.6543
+      },
+      {
+        "image": "val_1.png",
+        "opencv_severity": 1.0,
+        "albumentations_severity": 0.4,
+        "residual": 1.092
+      },
+      {
+        "image": "val_10.png",
+        "opencv_severity": 0.2,
+        "albumentations_severity": 0.2,
+        "residual": 0.1469
+      },
+      {
+        "image": "val_10.png",
+        "opencv_severity": 0.4,
+        "albumentations_severity": 0.4,
+        "residual": 0.4501
+      },
+      {
+        "image": "val_10.png",
+        "opencv_severity": 0.6,
+        "albumentations_severity": 0.4,
+        "residual": 0.6455
+      },
+      {
+        "image": "val_10.png",
+        "opencv_severity": 0.8,
+        "albumentations_severity": 0.4,
+        "residual": 1.0329
+      },
+      {
+        "image": "val_10.png",
+        "opencv_severity": 1.0,
+        "albumentations_severity": 0.4,
+        "residual": 1.0475
+      },
+      {
+        "image": "val_11.png",
+        "opencv_severity": 0.2,
+        "albumentations_severity": 0.2,
+        "residual": 0.0957
+      },
+      {
+        "image": "val_11.png",
+        "opencv_severity": 0.4,
+        "albumentations_severity": 0.4,
+        "residual": 0.3693
+      },
+      {
+        "image": "val_11.png",
+        "opencv_severity": 0.6,
+        "albumentations_severity": 0.4,
+        "residual": 0.5411
+      },
+      {
+        "image": "val_11.png",
+        "opencv_severity": 0.8,
+        "albumentations_severity": 0.4,
+        "residual": 0.9139
+      },
+      {
+        "image": "val_11.png",
+        "opencv_severity": 1.0,
+        "albumentations_severity": 0.4,
+        "residual": 0.896
+      },
+      {
+        "image": "val_12.png",
+        "opencv_severity": 0.2,
+        "albumentations_severity": 0.2,
+        "residual": 0.1258
+      },
+      {
+        "image": "val_12.png",
+        "opencv_severity": 0.4,
+        "albumentations_severity": 0.4,
+        "residual": 0.4202
+      },
+      {
+        "image": "val_12.png",
+        "opencv_severity": 0.6,
+        "albumentations_severity": 0.4,
+        "residual": 0.591
+      },
+      {
+        "image": "val_12.png",
+        "opencv_severity": 0.8,
+        "albumentations_severity": 0.4,
+        "residual": 0.9683
+      },
+      {
+        "image": "val_12.png",
+        "opencv_severity": 1.0,
+        "albumentations_severity": 0.4,
+        "residual": 0.9722
+      },
+      {
+        "image": "val_13.png",
+        "opencv_severity": 0.2,
+        "albumentations_severity": 0.2,
+        "residual": 0.1183
+      },
+      {
+        "image": "val_13.png",
+        "opencv_severity": 0.4,
+        "albumentations_severity": 0.4,
+        "residual": 0.38
+      },
+      {
+        "image": "val_13.png",
+        "opencv_severity": 0.6,
+        "albumentations_severity": 0.4,
+        "residual": 0.5404
+      },
+      {
+        "image": "val_13.png",
+        "opencv_severity": 0.8,
+        "albumentations_severity": 0.4,
+        "residual": 0.9408
+      },
+      {
+        "image": "val_13.png",
+        "opencv_severity": 1.0,
+        "albumentations_severity": 0.5,
+        "residual": 1.2828
+      }
+    ]
+  }
+}

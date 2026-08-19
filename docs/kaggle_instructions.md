@@ -169,7 +169,10 @@ against reality, and to unblock the deferred GAN-based degradation arm
 (`docs/phase2_data_notes.md`). This needs a human with a phone and printed
 radiographs, and — per `docs/phase1_background.md`'s IRB note — likely needs
 an actual institutional determination before any photos are taken, not
-after. Nothing about this is compute-bound; it's the one item on this whole
+after. The request for that determination is drafted and ready to submit at
+`docs/irb_determination_request.md` (§B is this step); it also flags that
+photographing printed *DENTEX* images, rather than clinic-sourced films,
+recovers most of the validation value at a much lower governance cost. Nothing about this is compute-bound; it's the one item on this whole
 list that isn't waiting on Kaggle at all.
 
 ## What to do with the results

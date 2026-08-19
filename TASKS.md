@@ -116,7 +116,11 @@ later and more achievable than the roadmap's original Aug 22 placeholder), and
 baseline models to benchmark against. This was a search-engine-summary pass,
 not a full paper read -- actually read CheXphoto and SelectiveNet in full
 before writing the real related-work section, and get the IRB note confirmed
-by your institution rather than treating it as settled.
+by your institution rather than treating it as settled. The confirmation
+request is drafted and ready to submit -- see
+`docs/irb_determination_request.md` (three separate asks: secondary use of
+DENTEX, the phone-photo pilot, clinician feedback). Sending it and recording
+the written determination is a human action, still outstanding.
 
 ### Phase 2 — Data and preprocessing
 - Degradation pipeline → Stream 1 (`src/data/degradation.py`, done; albumentations
@@ -128,7 +132,10 @@ by your institution rather than treating it as settled.
   action, not something buildable from this environment).
 - Burst simulation for fusion → `make_burst()` in `degradation.py` (done)
 - Small real pilot set to validate realism → Stream 1, still blocked (needs a
-  human + a phone + IRB clearance, see `docs/phase1_background.md`)
+  human + a phone + IRB clearance, see `docs/phase1_background.md`; the
+  clearance request is drafted at `docs/irb_determination_request.md` §B,
+  which also notes a lower-governance fallback: re-photographing printed
+  DENTEX images rather than clinic-sourced films)
 - Patient-level split → resolved as an image-level split, DENTEX has no
   patient id at all (see `src/data/dentex.py:_patient_key`)
 - Class imbalance → Stream 2 (`class_balance`/`class_weights`/`repeat_factors`, done)

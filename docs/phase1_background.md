@@ -218,6 +218,13 @@ closer to the submission date in case something new landed.
 
 ## Ethics / IRB
 
+**A determination request is now drafted and ready to send — see
+`docs/irb_determination_request.md`.** It separates the three questions below
+into three explicit asks, assembles the facts each one needs, and says what a
+sufficient written answer looks like. It is *unsent*: nothing in this repo can
+produce an institutional determination, only the request for one. The notes
+below remain this project's own reading, not a determination.
+
 - DENTEX itself is already public, de-identified, CC BY-NC-SA 4.0 licensed
   data (see `data/dentex/DENTEX/README.md` after download) — using it as-is
   for method development does not appear to trigger new human-subjects review
@@ -269,7 +276,11 @@ anymore.
 
 ## Still open
 
-- Confirmation from your institution on the IRB question above.
+- Confirmation from your institution on the IRB question above. The request
+  itself is drafted and ready to submit (`docs/irb_determination_request.md`,
+  2026-08-19); what is still open is sending it and recording the answer.
+  Required in writing for ML4H camera-ready, and a hard blocker *today* for
+  the real phone pilot specifically.
 - Both remaining "still open" items from the original search pass are now
   resolved (2026-08-14): CheXphoto and SelectiveNet have been read in full
   (see above), and ML4H 2026's page limits/format are confirmed directly

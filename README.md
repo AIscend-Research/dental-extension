@@ -186,6 +186,10 @@ caries-confidence/
     data/degradation.py     WORKING degradation pipeline + burst generator
                             + box remapping for the geometric degradation
     data/degradation_albumentations.py  the albumentations ablation arm
+    data/chexphoto_transforms.py  CheXphoto's own corruption model, ported
+                            from the MIT-licensed release (reference vendored
+                            under third_party/chexphoto/) -- the third-party
+                            capture process E14 runs the framework against
     data/dentex.py          DENTEX loading, image-level split (no patient id
                             in the data), class balance/weights/repeat
                             factors, detectron2 dataset registration
@@ -200,6 +204,8 @@ caries-confidence/
     utils/kaggle_env.py     Kaggle session bootstrap shared by the notebooks
     utils/seed.py           reproducibility
   tests/                    runnable checks for the working pieces
+  third_party/chexphoto/    verbatim CheXphoto transform sources (MIT), used
+                            only to check the port in tests
   external/                 HierarchicalDet lands here (gitignored)
   data/                     DENTEX lands here (gitignored)
   models_weights/           backbone weights land here (gitignored)

@@ -7,9 +7,11 @@ Total runtime is roughly 25-30 minutes on a laptop CPU (E6 grew from ~1 to
 ~15 min once pointed at the full ~700-radiograph training split instead of
 the 50-radiograph validation split; E13 adds another ~10 min). E6, E7 and
 E13 are the ones that need data on disk (DENTEX for E6/E7,
-`data/chest_xray_pneumonia` for E13 -- see `src/data/chest_xray_crops.py`'s
-docstring for how to fetch it); each is skipped with a clear message if its
-data is missing, so the rest still completes.
+`data/chest_xray_pneumonia` for E13 and E14 -- see
+`src/data/chest_xray_crops.py`'s docstring for how to fetch it); each is
+skipped with a clear message if its data is missing, so the rest still
+completes. E14 adds another ~15 min: its captures run through CheXphoto's
+corruption model, which costs roughly 3x a simulated one.
 """
 
 from __future__ import annotations
@@ -31,6 +33,7 @@ from experiments import (
     e11_capture_budgets,
     e12_conformal_risk_control,
     e13_second_modality,
+    e14_chexphoto_headtohead,
 )
 
 EXPERIMENTS = {
@@ -46,6 +49,7 @@ EXPERIMENTS = {
     "e11": ("per-case capture budgets under a shared cost", e11_capture_budgets.main),
     "e12": ("conformal-risk-control-style baseline", e12_conformal_risk_control.main),
     "e13": ("second real modality: chest radiographs", e13_second_modality.main),
+    "e14": ("head-to-head vs CheXphoto's corruption model", e14_chexphoto_headtohead.main),
 }
 
 

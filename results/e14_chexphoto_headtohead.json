@@ -1,0 +1,665 @@
+{
+  "corruption_models": {
+    "simulator": "src/data/degradation.py (this project's five artifacts)",
+    "chexphoto": "src/data/chexphoto_transforms.py (port of the MIT-licensed CheXphoto release)"
+  },
+  "scoping_note": "CheXphoto's synthetic transformation CODE is used here, applied to freely licensed chest radiographs (Kermany et al., CC BY 4.0). CheXphoto's natural photographs are gated and were NOT obtained; see docs/chexphoto_access.md. The jpeg->moire slot is a substitution, not a correspondence.",
+  "artifact_mapping": {
+    "blur": "blur",
+    "glare": "glare_matte",
+    "low_light": "brightness_down",
+    "angle": "tilt",
+    "jpeg": "moire"
+  },
+  "n_train": 2981,
+  "n_calibration": 312,
+  "n_test": 312,
+  "clean_auc": 0.8989214840379638,
+  "damage_analysis_interpretable": true,
+  "damage_simulator": [
+    {
+      "severity": 0.0,
+      "blur": 0.8989214840379638,
+      "glare": 0.8989214840379638,
+      "angle": 0.8989214840379638,
+      "low_light": 0.8989214840379638,
+      "jpeg": 0.8989214840379638
+    },
+    {
+      "severity": 0.2,
+      "blur": 0.8819072955613076,
+      "glare": 0.8946182053494391,
+      "angle": 0.8975769341386253,
+      "low_light": 0.922006519029815,
+      "jpeg": 0.8921484037963762
+    },
+    {
+      "severity": 0.4,
+      "blur": 0.8780749688428722,
+      "glare": 0.8915264595916019,
+      "angle": 0.8960154826958106,
+      "low_light": 0.9221131722749497,
+      "jpeg": 0.8951251078515962
+    },
+    {
+      "severity": 0.6,
+      "blur": 0.876436822931646,
+      "glare": 0.8857000766944684,
+      "angle": 0.8742150800498514,
+      "low_light": 0.9160962515578563,
+      "jpeg": 0.8999568593615186
+    },
+    {
+      "severity": 0.8,
+      "blur": 0.8678254721503211,
+      "glare": 0.8549072476272649,
+      "angle": 0.8587911034416643,
+      "low_light": 0.8982372255776052,
+      "jpeg": 0.9066436583261432
+    },
+    {
+      "severity": 1.0,
+      "blur": 0.8547814207650273,
+      "glare": 0.8165156744319816,
+      "angle": 0.8418440226248681,
+      "low_light": 0.8632082254817371,
+      "jpeg": 0.9109577221742882
+    }
+  ],
+  "damage_chexphoto": [
+    {
+      "level": 1,
+      "blur": 0.8858067299396031,
+      "glare_matte": 0.8927991084268048,
+      "tilt": 0.7896977758604161,
+      "brightness_down": 0.9070690729556131,
+      "moire": 0.9014356245805771
+    },
+    {
+      "level": 2,
+      "blur": 0.8814926660914582,
+      "glare_matte": 0.8310097306106797,
+      "tilt": 0.8271222797430735,
+      "brightness_down": 0.8943198159332758,
+      "moire": 0.9009419039401784
+    },
+    {
+      "level": 3,
+      "blur": 0.8624245038826575,
+      "glare_matte": 0.7185936151855048,
+      "tilt": 0.8386024829834148,
+      "brightness_down": 0.9069624197104784,
+      "moire": 0.7293548077844886
+    },
+    {
+      "level": 4,
+      "blur": 0.8226056945642796,
+      "glare_matte": 0.7435289042277826,
+      "tilt": 0.8054548940657655,
+      "brightness_down": 0.9054417122040073,
+      "moire": 0.6781396798005944
+    }
+  ],
+  "damage_ordering": {
+    "simulator": [
+      "glare",
+      "angle",
+      "blur",
+      "low_light",
+      "jpeg"
+    ],
+    "chexphoto": [
+      "jpeg",
+      "glare",
+      "angle",
+      "blur",
+      "low_light"
+    ],
+    "kendall_tau": 0.2
+  },
+  "normalised_damage": {
+    "simulator": {
+      "blur": 0.11064849861216268,
+      "glare": 0.20657150066688304,
+      "angle": 0.14307943717481966,
+      "low_light": 0.08952453047835336,
+      "jpeg": -0.030171947658700005
+    },
+    "chexphoto": {
+      "blur": 0.1913052882015789,
+      "glare": 0.38953174002379143,
+      "angle": 0.2342982108311404,
+      "low_light": -0.016344640303762054,
+      "jpeg": 0.5534467635148936
+    }
+  },
+  "severity_alignment": {
+    "blur": {
+      "1": 0.2,
+      "2": 0.2,
+      "3": 0.8,
+      "4": 1.0
+    },
+    "glare": {
+      "1": 0.4,
+      "2": 1.0,
+      "3": 1.0,
+      "4": 1.0
+    },
+    "angle": {
+      "1": 1.0,
+      "2": 1.0,
+      "3": 1.0,
+      "4": 1.0
+    },
+    "low_light": {
+      "1": 0.0,
+      "2": 0.8,
+      "3": 0.0,
+      "4": 0.0
+    },
+    "jpeg": {
+      "1": 0.6,
+      "2": 0.6,
+      "3": 0.2,
+      "4": 0.2
+    }
+  },
+  "docket": {
+    "n_cases": 1500,
+    "budget": 4,
+    "prevalence": 0.618
+  },
+  "leaderboards": {
+    "simulator": [
+      {
+        "policy": "single_shot",
+        "n_cases": 1500,
+        "n_captures": 1500,
+        "mean_captures": 1.0,
+        "verdict_rate": 0.498,
+        "verdicts_per_capture": 0.498,
+        "verdict_accuracy": 0.9317269076305221,
+        "refer_rate": 0.502,
+        "false_conviction_rate": 0.08027923211169284,
+        "false_conviction_ci": [
+          0.06072429022369239,
+          0.10542461443228252
+        ],
+        "alpha_convict": 0.5,
+        "convict_violation": false,
+        "false_discharge_rate": 0.005393743257820928,
+        "false_discharge_ci": [
+          0.0023059857037848247,
+          0.012563998620078655
+        ],
+        "alpha_discharge": 0.2,
+        "discharge_violation": false,
+        "guaranteed": true,
+        "sensitivity": 0.9913344887348353,
+        "specificity": 0.7294117647058823,
+        "mean_final_usability": 0.5874975052496929
+      },
+      {
+        "policy": "fixed_retake",
+        "n_cases": 1500,
+        "n_captures": 6000,
+        "mean_captures": 4.0,
+        "verdict_rate": 0.8446666666666667,
+        "verdicts_per_capture": 0.21116666666666667,
+        "verdict_accuracy": 0.8745067087608525,
+        "refer_rate": 0.15533333333333332,
+        "false_conviction_rate": 0.1431064572425829,
+        "false_conviction_ci": [
+          0.11680731893963407,
+          0.17415921329382486
+        ],
+        "alpha_convict": 0.5,
+        "convict_violation": false,
+        "false_discharge_rate": 0.08306364617044229,
+        "false_discharge_ci": [
+          0.066971676562913,
+          0.10259702341783561
+        ],
+        "alpha_discharge": 0.2,
+        "discharge_violation": false,
+        "guaranteed": true,
+        "sensitivity": 0.905982905982906,
+        "specificity": 0.8169642857142857,
+        "mean_final_usability": 0.5796900418758226
+      },
+      {
+        "policy": "untargeted_evidential",
+        "n_cases": 1500,
+        "n_captures": 3007,
+        "mean_captures": 2.0046666666666666,
+        "verdict_rate": 0.8466666666666667,
+        "verdicts_per_capture": 0.42234785500498834,
+        "verdict_accuracy": 0.8724409448818897,
+        "refer_rate": 0.15333333333333332,
+        "false_conviction_rate": 0.14834205933682373,
+        "false_conviction_ci": [
+          0.12158329763421338,
+          0.17978470356403586
+        ],
+        "alpha_convict": 0.5,
+        "convict_violation": false,
+        "false_discharge_rate": 0.08306364617044229,
+        "false_discharge_ci": [
+          0.066971676562913,
+          0.10259702341783561
+        ],
+        "alpha_discharge": 0.2,
+        "discharge_violation": false,
+        "guaranteed": true,
+        "sensitivity": 0.905982905982906,
+        "specificity": 0.811529933481153,
+        "mean_final_usability": 0.5848934069318689
+      },
+      {
+        "policy": "evidential_capture",
+        "n_cases": 1500,
+        "n_captures": 2953,
+        "mean_captures": 1.9686666666666666,
+        "verdict_rate": 0.878,
+        "verdicts_per_capture": 0.44598713173044363,
+        "verdict_accuracy": 0.8747152619589977,
+        "refer_rate": 0.122,
+        "false_conviction_rate": 0.17102966841186737,
+        "false_conviction_ci": [
+          0.1424146049605337,
+          0.20402642841847368
+        ],
+        "alpha_convict": 0.5,
+        "convict_violation": false,
+        "false_discharge_rate": 0.07227615965480043,
+        "false_discharge_ci": [
+          0.057312901039327686,
+          0.09076986621129798
+        ],
+        "alpha_discharge": 0.2,
+        "discharge_violation": false,
+        "guaranteed": true,
+        "sensitivity": 0.9192771084337349,
+        "specificity": 0.7987679671457906,
+        "mean_final_usability": 0.621634269757218
+      },
+      {
+        "policy": "greedy_diagnostic",
+        "n_cases": 1500,
+        "n_captures": 2186,
+        "mean_captures": 1.4573333333333334,
+        "verdict_rate": 0.854,
+        "verdicts_per_capture": 0.5860018298261666,
+        "verdict_accuracy": 0.8696330991412958,
+        "refer_rate": 0.14600000000000002,
+        "false_conviction_rate": 0.24083769633507854,
+        "false_conviction_ci": [
+          0.20762645644615274,
+          0.27750082979672575
+        ],
+        "alpha_convict": 0.5,
+        "convict_violation": false,
+        "false_discharge_rate": 0.03128371089536138,
+        "false_discharge_ci": [
+          0.021868602588113698,
+          0.04456762028804484
+        ],
+        "alpha_discharge": 0.2,
+        "discharge_violation": false,
+        "guaranteed": false,
+        "sensitivity": 0.9655990510083037,
+        "specificity": 0.684931506849315,
+        "mean_final_usability": 0.6017752634168784
+      },
+      {
+        "policy": "naive_best_shot",
+        "n_cases": 1500,
+        "n_captures": 6000,
+        "mean_captures": 4.0,
+        "verdict_rate": 0.636,
+        "verdicts_per_capture": 0.159,
+        "verdict_accuracy": 0.9255765199161425,
+        "refer_rate": 0.364,
+        "false_conviction_rate": 0.11169284467713787,
+        "false_conviction_ci": [
+          0.0884438445101366,
+          0.1401138739345803
+        ],
+        "alpha_convict": 0.5,
+        "convict_violation": false,
+        "false_discharge_rate": 0.007551240560949299,
+        "false_discharge_ci": [
+          0.003662504162377755,
+          0.015504666707510311
+        ],
+        "alpha_discharge": 0.2,
+        "discharge_violation": false,
+        "guaranteed": false,
+        "sensitivity": 0.9898107714701602,
+        "specificity": 0.7602996254681648,
+        "mean_final_usability": 0.6690304009496829
+      }
+    ],
+    "chexphoto": [
+      {
+        "policy": "single_shot",
+        "n_cases": 1500,
+        "n_captures": 1500,
+        "mean_captures": 1.0,
+        "verdict_rate": 0.086,
+        "verdicts_per_capture": 0.086,
+        "verdict_accuracy": 0.9302325581395349,
+        "refer_rate": 0.914,
+        "false_conviction_rate": 0.015706806282722512,
+        "false_conviction_ci": [
+          0.008284895354620445,
+          0.029579225402273646
+        ],
+        "alpha_convict": 0.5,
+        "convict_violation": false,
+        "false_discharge_rate": 0.0,
+        "false_discharge_ci": [
+          0.0,
+          0.004127017958802013
+        ],
+        "alpha_discharge": 0.2,
+        "discharge_violation": false,
+        "guaranteed": true,
+        "sensitivity": 1.0,
+        "specificity": 0.4,
+        "mean_final_usability": 0.4199606002158278
+      },
+      {
+        "policy": "fixed_retake",
+        "n_cases": 1500,
+        "n_captures": 6000,
+        "mean_captures": 4.0,
+        "verdict_rate": 0.3953333333333333,
+        "verdicts_per_capture": 0.09883333333333333,
+        "verdict_accuracy": 0.8650927487352446,
+        "refer_rate": 0.6046666666666667,
+        "false_conviction_rate": 0.10296684118673648,
+        "false_conviction_ci": [
+          0.08066876147171517,
+          0.13055317536501784
+        ],
+        "alpha_convict": 0.5,
+        "convict_violation": false,
+        "false_discharge_rate": 0.022653721682847898,
+        "false_discharge_ci": [
+          0.01486385448601795,
+          0.03438362220604223
+        ],
+        "alpha_discharge": 0.2,
+        "discharge_violation": false,
+        "guaranteed": true,
+        "sensitivity": 0.9454545454545454,
+        "specificity": 0.7163461538461539,
+        "mean_final_usability": 0.4210719281155863
+      },
+      {
+        "policy": "untargeted_evidential",
+        "n_cases": 1500,
+        "n_captures": 5104,
+        "mean_captures": 3.4026666666666667,
+        "verdict_rate": 0.3953333333333333,
+        "verdicts_per_capture": 0.1161833855799373,
+        "verdict_accuracy": 0.8650927487352446,
+        "refer_rate": 0.6046666666666667,
+        "false_conviction_rate": 0.10296684118673648,
+        "false_conviction_ci": [
+          0.08066876147171517,
+          0.13055317536501784
+        ],
+        "alpha_convict": 0.5,
+        "convict_violation": false,
+        "false_discharge_rate": 0.022653721682847898,
+        "false_discharge_ci": [
+          0.01486385448601795,
+          0.03438362220604223
+        ],
+        "alpha_discharge": 0.2,
+        "discharge_violation": false,
+        "guaranteed": true,
+        "sensitivity": 0.9454545454545454,
+        "specificity": 0.7163461538461539,
+        "mean_final_usability": 0.4319370303583455
+      },
+      {
+        "policy": "evidential_capture",
+        "n_cases": 1500,
+        "n_captures": 5009,
+        "mean_captures": 3.3393333333333333,
+        "verdict_rate": 0.44733333333333336,
+        "verdicts_per_capture": 0.13395887402675186,
+        "verdict_accuracy": 0.8643815201192251,
+        "refer_rate": 0.5526666666666666,
+        "false_conviction_rate": 0.12216404886561955,
+        "false_conviction_ci": [
+          0.09783783693754683,
+          0.15152281943675075
+        ],
+        "alpha_convict": 0.5,
+        "convict_violation": false,
+        "false_discharge_rate": 0.022653721682847898,
+        "false_discharge_ci": [
+          0.01486385448601795,
+          0.03438362220604223
+        ],
+        "alpha_discharge": 0.2,
+        "discharge_violation": false,
+        "guaranteed": true,
+        "sensitivity": 0.953125,
+        "specificity": 0.6860986547085202,
+        "mean_final_usability": 0.4497511676863614
+      },
+      {
+        "policy": "greedy_diagnostic",
+        "n_cases": 1500,
+        "n_captures": 1607,
+        "mean_captures": 1.0713333333333332,
+        "verdict_rate": 0.868,
+        "verdicts_per_capture": 0.8102053515868077,
+        "verdict_accuracy": 0.6966205837173579,
+        "refer_rate": 0.132,
+        "false_conviction_rate": 0.47294938917975565,
+        "false_conviction_ci": [
+          0.43238536383131837,
+          0.5138737131839316
+        ],
+        "alpha_convict": 0.5,
+        "convict_violation": false,
+        "false_discharge_rate": 0.133764832793959,
+        "false_discharge_ci": [
+          0.11335622079165328,
+          0.15719636302067316
+        ],
+        "alpha_discharge": 0.2,
+        "discharge_violation": false,
+        "guaranteed": false,
+        "sensitivity": 0.8496969696969697,
+        "specificity": 0.43186582809224316,
+        "mean_final_usability": 0.41881128652252814
+      },
+      {
+        "policy": "naive_best_shot",
+        "n_cases": 1500,
+        "n_captures": 6000,
+        "mean_captures": 4.0,
+        "verdict_rate": 0.6193333333333333,
+        "verdicts_per_capture": 0.15483333333333332,
+        "verdict_accuracy": 0.7804090419806243,
+        "refer_rate": 0.3806666666666667,
+        "false_conviction_rate": 0.3019197207678883,
+        "false_conviction_ci": [
+          0.2657506210933486,
+          0.340727136405417
+        ],
+        "alpha_convict": 0.5,
+        "convict_violation": false,
+        "false_discharge_rate": 0.03344120819848975,
+        "false_discharge_ci": [
+          0.023657533092952772,
+          0.04707587632923033
+        ],
+        "alpha_discharge": 0.2,
+        "discharge_violation": false,
+        "guaranteed": false,
+        "sensitivity": 0.9520123839009288,
+        "specificity": 0.38869257950530034,
+        "mean_final_usability": 0.4369469451468126
+      }
+    ]
+  },
+  "checks": {
+    "simulator": {
+      "ordering_reproduces": true,
+      "zero_violations": true,
+      "verdicts_per_capture": {
+        "single_shot": 0.498,
+        "fixed_retake": 0.21116666666666667,
+        "untargeted_evidential": 0.42234785500498834,
+        "evidential_capture": 0.44598713173044363,
+        "greedy_diagnostic": 0.5860018298261666,
+        "naive_best_shot": 0.159
+      }
+    },
+    "chexphoto": {
+      "ordering_reproduces": true,
+      "zero_violations": true,
+      "verdicts_per_capture": {
+        "single_shot": 0.086,
+        "fixed_retake": 0.09883333333333333,
+        "untargeted_evidential": 0.1161833855799373,
+        "evidential_capture": 0.13395887402675186,
+        "greedy_diagnostic": 0.8102053515868077,
+        "naive_best_shot": 0.15483333333333332
+      }
+    }
+  },
+  "calibration_transfer": {
+    "leaderboard": [
+      {
+        "policy": "single_shot",
+        "n_cases": 1500,
+        "n_captures": 1500,
+        "mean_captures": 1.0,
+        "verdict_rate": 0.698,
+        "verdicts_per_capture": 0.698,
+        "verdict_accuracy": 0.66189111747851,
+        "refer_rate": 0.30200000000000005,
+        "false_conviction_rate": 0.6178010471204188,
+        "false_conviction_ci": [
+          0.5773538669344085,
+          0.656679184773374
+        ],
+        "alpha_convict": 0.5,
+        "convict_violation": true,
+        "false_discharge_rate": 0.0,
+        "false_discharge_ci": [
+          0.0,
+          0.004127017958802013
+        ],
+        "alpha_discharge": 0.2,
+        "discharge_violation": false,
+        "guaranteed": true,
+        "sensitivity": 1.0,
+        "specificity": 0.0,
+        "mean_final_usability": 0.4199606002158278
+      },
+      {
+        "policy": "fixed_retake",
+        "n_cases": 1500,
+        "n_captures": 6000,
+        "mean_captures": 4.0,
+        "verdict_rate": 0.8653333333333333,
+        "verdicts_per_capture": 0.21633333333333332,
+        "verdict_accuracy": 0.635593220338983,
+        "refer_rate": 0.1346666666666667,
+        "false_conviction_rate": 0.7888307155322862,
+        "false_conviction_ci": [
+          0.7535447230261823,
+          0.8202696481980847
+        ],
+        "alpha_convict": 0.5,
+        "convict_violation": true,
+        "false_discharge_rate": 0.022653721682847898,
+        "false_discharge_ci": [
+          0.01486385448601795,
+          0.03438362220604223
+        ],
+        "alpha_discharge": 0.2,
+        "discharge_violation": false,
+        "guaranteed": true,
+        "sensitivity": 0.9746376811594203,
+        "specificity": 0.03829787234042553,
+        "mean_final_usability": 0.4210719281155863
+      },
+      {
+        "policy": "untargeted_evidential",
+        "n_cases": 1500,
+        "n_captures": 2544,
+        "mean_captures": 1.696,
+        "verdict_rate": 0.866,
+        "verdicts_per_capture": 0.5106132075471698,
+        "verdict_accuracy": 0.6351039260969977,
+        "refer_rate": 0.134,
+        "false_conviction_rate": 0.7905759162303665,
+        "false_conviction_ci": [
+          0.7553787045717977,
+          0.8219028229740659
+        ],
+        "alpha_convict": 0.5,
+        "convict_violation": true,
+        "false_discharge_rate": 0.022653721682847898,
+        "false_discharge_ci": [
+          0.01486385448601795,
+          0.03438362220604223
+        ],
+        "alpha_discharge": 0.2,
+        "discharge_violation": false,
+        "guaranteed": true,
+        "sensitivity": 0.9746376811594203,
+        "specificity": 0.03821656050955414,
+        "mean_final_usability": 0.42505299191730844
+      },
+      {
+        "policy": "evidential_capture",
+        "n_cases": 1500,
+        "n_captures": 2529,
+        "mean_captures": 1.686,
+        "verdict_rate": 0.864,
+        "verdicts_per_capture": 0.5124555160142349,
+        "verdict_accuracy": 0.6365740740740741,
+        "refer_rate": 0.136,
+        "false_conviction_rate": 0.8010471204188482,
+        "false_conviction_ci": [
+          0.7664020370110038,
+          0.8316824284644404
+        ],
+        "alpha_convict": 0.5,
+        "convict_violation": true,
+        "false_discharge_rate": 0.012944983818770227,
+        "false_discharge_ci": [
+          0.00742027954014802,
+          0.022489857694801517
+        ],
+        "alpha_discharge": 0.2,
+        "discharge_violation": false,
+        "guaranteed": true,
+        "sensitivity": 0.9854368932038835,
+        "specificity": 0.02754237288135593,
+        "mean_final_usability": 0.4252503685384225
+      }
+    ],
+    "arms_with_violations": [
+      "single_shot",
+      "fixed_retake",
+      "untargeted_evidential",
+      "evidential_capture"
+    ]
+  },
+  "figure": "/Users/hyunjunyi/AIscend/dental-extension/figures/e14_chexphoto_headtohead.png",
+  "generated_utc": "2026-08-19T12:58:06Z"
+}

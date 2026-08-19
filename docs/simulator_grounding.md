@@ -139,6 +139,16 @@ a stated assumption that the framework's conclusions were shown insensitive to
 | Coupling magnitudes | chosen; shown non-load-bearing in E4 |
 | Prevalence, difficulty distributions | chosen; swept in E5 |
 
+One half of that gap is now addressable without new labelled data. The
+weights question in 5 needs a competent reader on labelled radiographs and
+stays open, but whether the *artifacts themselves* look like phone artifacts
+is settled by photographs, not by more DENTEX: `docs/phone_pilot_protocol.md`
+is the protocol and `src/pilot/` the analysis, both built and waiting on the
+IRB determination rather than on compute. Its 8.1 already reports one result
+that needed no photographs -- the two synthetic arms' severity scales measured
+against each other on real radiographs, which agree for blur and jpeg,
+saturate for low_light, and never meet for glare.
+
 The sim-to-real gap is the framework's principal limitation, and it is the same
 one the robotics simulators this design borrows from carry: parameters grounded
 where evidence exists, stated where it does not, and a conclusion whose

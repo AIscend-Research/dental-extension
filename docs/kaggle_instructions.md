@@ -175,6 +175,23 @@ photographing printed *DENTEX* images, rather than clinic-sourced films,
 recovers most of the validation value at a much lower governance cost. Nothing about this is compute-bound; it's the one item on this whole
 list that isn't waiting on Kaggle at all.
 
+Everything except the photographs is now built, so this step is a morning's
+work once the determination lands rather than a project:
+
+```bash
+python scripts/pilot_report.py plan --films data/pilot/references \
+    --out data/pilot/manifest.csv --seed 0      # the shot list, before shooting
+python scripts/pilot_report.py report --manifest data/pilot/manifest.csv \
+    --photos data/pilot/photos --references data/pilot/references
+```
+
+`docs/phone_pilot_protocol.md` is the protocol: what to print, the 66-shot
+design and why it is that size, the acceptance criteria to fix *before*
+looking at the output, and which document each result feeds back into. The
+one analysis needing no photographs — translating the two synthetic arms'
+severity scales onto each other — is already run there in 8.1, on real
+DENTEX radiographs.
+
 ## What to do with the results
 
 Once steps 3–6 produce real numbers, the sections in `docs/paper_draft.md`

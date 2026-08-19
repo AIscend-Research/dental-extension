@@ -330,9 +330,33 @@ complication rather than a clean win — `single_shot` (VPC 0.511) beat
 reader makes retaking not worth it" pattern independently on a second real
 dataset and modality, which is stronger evidence that pattern is a real
 property of strong readers under loose burdens rather than a DENTEX
-artifact. This supports the framework's generality across modalities; it
-does not substitute for a real CheXphoto head-to-head, which remains open
-pending CheXpert data access.
+artifact. This supports the framework's generality across modalities.
+
+**New: a head-to-head against CheXphoto's own corruption model (E14).**
+CheXphoto turned out to be gated in half rather than in whole: the
+photographs sit behind a Stanford research use agreement, but the synthetic
+corruption model was released as MIT-licensed code and applies to any
+radiograph. Running it as the capture process — same reader, same
+calibration protocol, same policies, same docket, only the renderer swapped
+(`src/data/chexphoto_transforms.py`, a port checked against the vendored
+reference) — the guarantee held with **zero violations** and the targeting
+ordering reproduced (0.134 > 0.116 > 0.099 VPC), under a corruption process
+this project did not write and did not design its method around. The
+`single_shot` reversal above does *not* survive that harsher process
+(single_shot last at 0.086 VPC), which usefully bounds it as a property of
+near-strong readers rather than of retaking.
+
+The same experiment produced the project's sharpest negative result. A
+calibrator fitted under this project's capture model and deployed under
+CheXphoto's yields false-conviction rates of 0.62–0.80 against a 0.50 bound
+— every guaranteed arm violated — because the reader's scores collapse
+upward under unfamiliar corruption (94.6% of negatives score above 0.5,
+against 35.5% under the familiar process). Matched calibration restores
+validity with zero violations. §6 records this as a deployment precondition.
+
+None of this uses CheXphoto's photographs, so no number here is a CheXphoto
+benchmark result; a head-to-head on the real photographs remains open, and
+`docs/chexphoto_access.md` records the (~1 business day) access route.
 
 **Five refuted predictions, kept deliberately**: (1) degradation-aware
 betting loses to constant staking; (2) marginal (unstratified) calibration
@@ -402,6 +426,16 @@ the stated error guarantee and against DENTEX's ground-truth labels, not
 against a clinician's judgment of whether the ~30 escalated cases a
 qualitative review would surface are, in fact, cases a clinician would also
 find undecidable from the photograph. This gut-check has not been run.
+
+**The guarantee assumes you calibrated on the capture process you will
+meet (E14).** This is the strongest condition on the paper's central claim
+and it is not graceful when violated: a calibrator fitted under one
+corruption model and deployed under another overshot its stated
+false-conviction bound by up to 1.6x (0.80 against 0.50) across every
+guaranteed arm. Deployment therefore requires either calibration data from
+the deployment site's own capture process, or a detector for capture-process
+shift — the degradation head is the obvious candidate for the latter and
+this work does not use it that way.
 
 **No real phone pilot.** Every degradation in this work is synthetic
 (hand-built OpenCV transforms and an albumentations arm, compared against

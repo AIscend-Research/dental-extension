@@ -453,8 +453,174 @@ a completely different real classification task. Supports: the "retaking
 helps least when the reader is already strong" pattern is real and
 reproduces independently. Does not support: any claim about CheXphoto
 specifically, or about photographic (as opposed to this project's five-
-artifact) corruption models on chest radiographs — a genuine CheXphoto
-head-to-head remains open, gated on CheXpert data access.
+artifact) corruption models on chest radiographs. **Superseded in part by
+E14 below**: CheXphoto's corruption model turned out to be MIT-licensed code
+rather than gated data, so the head-to-head this section describes as open
+has since been run — on the corruption model, though still not on CheXphoto's
+photographs.
+
+---
+
+## E14 — head-to-head against CheXphoto's own corruption model
+
+E13 answered "does this work on a second modality" by running chest
+radiographs through *this project's* capture simulator. That leaves the
+sharper objection standing: the simulator and the method were designed
+together, so a guarantee that holds under it might be a fact about the
+simulator rather than about the method. E14 answers that one.
+
+**The access finding that made this runnable.** CheXphoto is gated in half,
+not in whole. The *photographs* (Nokia10k, iPhone1k, the 250-image VinBrain
+film subset) sit behind a Stanford research use agreement — now on Redivis,
+not the route this repo's earlier notes assumed, and answered in about one
+business day rather than never (`docs/chexphoto_access.md`). But CheXphoto's
+*synthetic corruption model* was released as **MIT-licensed code**, and it
+applies to any radiograph. E13's "not obtainable in this environment" was
+right about the images and wrong about the corruption model, which is the
+half a head-to-head actually needs.
+
+So: `src/data/chexphoto_transforms.py` ports that code to this project's
+numpy/OpenCV convention, with the reference vendored verbatim under
+`third_party/chexphoto/` and `tests/test_chexphoto_transforms.py` checking
+the port against it — pixel-exact for the deterministic transforms (motion,
+brightness, contrast at mean abs difference 0.00; blur under 0.6 grey levels)
+and distribution-matched over repeated draws for the stochastic ones. That
+test earned its place immediately: PIL applies perspective coefficients as a
+destination-to-source map, so the obvious forward warp silently collapses
+`tilt` to a near no-op, which the reference comparison caught and eyeballing
+would not have.
+
+`src/models/chexphoto_channel.py` then swaps the renderer and **nothing
+else** — same fitted reader, same features, same usability definition, same
+calibration protocol, same policies, same docket, same seeds. The artifact
+correspondence is blur→blur, glare→glare_matte, low_light→brightness_down,
+angle→tilt, and jpeg→moiré, where the last is a **substitution, not a
+correspondence**: CheXphoto has no compression artifact and this project has
+no moiré (they photograph monitors; this project's taxonomy was grounded on
+photographing films, `docs/simulator_grounding.md`). Per-artifact curves are
+reported separately so that substitution never has to be taken on faith.
+
+Same image pool as E13 (2,981 train / 312 calibration / 312 test), clean AUC
+0.899, docket of 1,500 cases over 312 radiographs at K=4.
+
+### 1. The guarantee survives a third party's corruption model
+
+| | ordering reproduces | violations among guaranteed arms |
+|---|---|---|
+| our capture model | yes | **zero** |
+| CheXphoto's capture model | yes | **zero** |
+
+`evidential_capture > untargeted_evidential > fixed_retake` in
+verdicts-per-capture holds under both (ours: 0.446 > 0.422 > 0.211;
+CheXphoto's: 0.134 > 0.116 > 0.099). This is the result the roadmap item
+asked for, and it is now stronger than "not about teeth": it is also not
+about the corruption process this project wrote. The simulator arm here also
+independently replicates E13's leaderboard at a different docket size
+(E13 at 3,000 cases: 0.430 / 0.404 / 0.207).
+
+Two honest observations about the CheXphoto arm. Absolute verdict yield is
+far lower (VPC 0.134 vs 0.446) — CheXphoto's corruption is simply harsher on
+this reader, and more cases end up referred. And `single_shot`'s reversal,
+which dominated the leaderboard in E6 and E13, **disappears** under harsher
+corruption (VPC 0.086, last place): the "retaking is not worth it" pattern is
+specifically a near-strong-reader phenomenon, and CheXphoto's capture model
+puts the reader outside that regime. That is a useful boundary on a finding
+this project has now reported twice.
+
+### 2. The damage orderings do *not* agree
+
+| | worst first |
+|---|---|
+| ours, at severity 1.0 | glare > angle > blur > low_light > jpeg |
+| CheXphoto's, at level 4 | moiré > glare_matte > tilt > blur > brightness_down |
+
+Kendall tau +0.20 — weak agreement. Glare is damaging in both (rank 1–2);
+blur is middling in both; the disagreements are at the ends. Three specifics
+worth keeping:
+
+- **moiré is the single most damaging artifact in CheXphoto's model**
+  (AUC 0.899 → 0.678) and has no counterpart in this project's taxonomy at
+  all. It is a screen-photography artifact, so its absence is defensible for
+  a photographed-film scenario — but "defensible" is not "measured", and this
+  is the first measurement of what it would cost.
+- **`brightness_down` barely damages this reader** (0.905 at level 4) while
+  our `low_light` does (0.863 at severity 1.0). CheXphoto's darkening is a
+  multiplicative factor of ~0.38 with no noise model; ours adds sensor noise
+  as light drops, and the noise, not the darkness, is what the reader loses.
+- **`tilt` is non-monotone** (0.790 at level 1, then 0.827 / 0.839 / 0.805).
+  Its black borders shift the feature distribution in a way that does not
+  simply worsen with level.
+
+**A confound, stated plainly.** The reader was trained under this project's
+simulator, so the CheXphoto column measures artifact severity *and*
+train/test corruption mismatch together, and cannot separate them. That is
+the deployment-realistic setting — you meet corruption you did not train on —
+but it means these numbers do not license "moiré is intrinsically worse than
+glare", only "moiré is worse for a reader trained the way ours was".
+
+The severity-alignment table (`results/e14_chexphoto_headtohead.json`,
+`severity_alignment`) reads the other direction: for each CheXphoto level, the
+severity on our axis whose damage matches. It is coherent for blur
+(L1→0.2 rising to L4→1.0) and degenerate for `angle` (every level maps to
+1.0 — CheXphoto's tilt is harsher at level 1 than ours is at full strength)
+and for `low_light` (no correspondence at all, per the noise-model difference
+above). Our severity axis and CheXphoto's level axis are **not**
+interchangeable, and nothing downstream should treat them as if they were.
+
+### 3. Calibration does not transfer — the guarantee breaks
+
+The deployment question: nobody calibrates on the corruption process they will
+actually meet. So: fit the calibrator under our capture model, deploy it
+under CheXphoto's.
+
+| policy | VPC | FCR (α = 0.50) | status |
+|---|---|---|---|
+| single_shot | 0.698 | **0.618** | VIOLATED |
+| evidential_capture | 0.512 | **0.801** | VIOLATED |
+| untargeted_evidential | 0.511 | **0.791** | VIOLATED |
+| fixed_retake | 0.216 | **0.789** | VIOLATED |
+
+**Every guaranteed arm violates, and not marginally** — false-conviction
+rates of 0.62–0.80 against a 0.50 bound, with verdict accuracy collapsing to
+~0.64. Compare the matched-calibrator run above: zero violations.
+
+The mechanism is a score shift, measured rather than inferred. On the same
+calibration crops, the reader's score distribution under the two capture
+models:
+
+| capture model | mean score, positives | mean score, negatives | P(score > 0.5 \| negative) |
+|---|---|---|---|
+| ours | 0.853 | 0.392 | 0.355 |
+| CheXphoto's | 0.941 | 0.896 | **0.946** |
+
+Under CheXphoto's corruption the reader's scores collapse upward: it calls
+almost everything pneumonia. A calibrator fitted on our captures reads a high
+score as strong evidence, so the ladder convicts negatives at scale. The
+matched calibrator learns that a high score means little *under this capture
+process* and restores validity — at the cost of most of the verdict yield
+(VPC 0.134 vs 0.512), which is the correct trade and exactly what the
+guarantee is for.
+
+**What this means for the paper.** The anytime-validity guarantee is
+conditional on the calibration set coming from the deployment capture
+process, and this is the first result in the repo that shows what happens
+when it does not: not graceful degradation, but a 1.6x overshoot of the
+stated error bound. That belongs in the limitations section as a deployment
+precondition, not as a footnote — and it is a use case for the degradation
+head that this project has not exploited: detecting that the capture process
+has shifted is a prerequisite for knowing the calibration is stale.
+
+### What E14 does not claim
+
+It does not use CheXphoto's photographs, so no number here is a CheXphoto
+benchmark number or a result "on CheXphoto data". It runs CheXphoto's
+corruption *code* on freely licensed chest radiographs (Kermany et al., CC BY
+4.0) — the same images as E13, deliberately, so the only thing that changes
+between the two experiments is the capture process. The remaining gap is real
+optics: every image in every experiment in this repo is still a synthetic
+corruption of a digital radiograph. CheXphoto's 250-image film subset is the
+cheapest published route to closing that gap and needs no ethics
+determination (`docs/chexphoto_access.md`).
 
 ---
 
@@ -504,4 +670,19 @@ trap, and an ablation gave a split verdict rather than a clean one:
    second real dataset and a second modality (chest radiographs, unrelated
    reader, unrelated prevalence), which is stronger evidence for it being a
    genuine property of strong readers under loose burdens than either single
-   observation was alone.
+   observation was alone. **E14 bounds it**: under CheXphoto's harsher
+   corruption model the same reader falls out of the near-strong regime and
+   `single_shot` drops to last place, so the pattern is about the reader's
+   operating point, not about retaking being generally unhelpful.
+9. **Calibration does not transfer across capture processes, and the
+   guarantee breaks loudly when it has to** (E14). A calibrator fitted under
+   this project's corruption model and deployed under CheXphoto's produced
+   false-conviction rates of 0.62-0.80 against a 0.50 bound -- every
+   guaranteed arm violated, verdict accuracy down to ~0.64 -- because the
+   reader's scores collapse upward under the unfamiliar corruption (94.6% of
+   negatives score above 0.5, against 35.5% under the familiar one). The
+   matched calibrator restores validity with zero violations and a much
+   lower verdict yield, which is the trade the guarantee exists to make.
+   This is the sharpest deployment precondition the project has found: the
+   anytime-validity claim is conditional on calibrating under the capture
+   process you will actually meet, and failure is not graceful.

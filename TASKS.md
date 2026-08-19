@@ -294,6 +294,19 @@ not the core venv.
   Phase 3 runs to produce actual ablation numbers)
 - Clinician gut-check on deferred cases: qualitative, no code -- not started,
   needs a human
+- Head-to-head on CheXphoto chest radiographs ("if the guarantee and the
+  ordering reproduce in a second modality, the claim stops being about
+  teeth"): **done for the corruption model, still open for the
+  photographs** -- see `docs/experiments_results.md` E14 and
+  `experiments/e14_chexphoto_headtohead.py`. CheXphoto is gated in half
+  only: its synthetic corruption code is MIT-licensed and was ported and
+  verified against the vendored original, so the framework now runs under a
+  third party's capture process. Guarantee held with zero violations and the
+  targeting ordering reproduced. It also produced the project's sharpest
+  negative result -- calibration does not transfer across capture processes
+  (false-conviction rate 0.62-0.80 against a 0.50 bound). CheXphoto's actual
+  photographs need a Stanford research use agreement, ~1 business day, no
+  IRB determination required: `docs/chexphoto_access.md`.
 - Adjacent-field inspiration sweep (computational photography, speech
   rejection, astronomy multi-exposure, triage tiers): **done**, see
   `docs/phase4_adjacent_fields.md`. Concrete follow-ups it surfaced: benchmark

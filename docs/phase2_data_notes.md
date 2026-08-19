@@ -79,7 +79,8 @@ skipping it:
   be evaluated for realism without the same real pilot set that's already the
   known blocker.
 - **Recommendation**: defer the GAN arm until after the real pilot set exists
-  (needs a phone + printed films + IRB clearance per `docs/phase1_background.md`).
+  (needs a phone + printed films + IRB clearance per `docs/phase1_background.md`;
+  determination request drafted at `docs/irb_determination_request.md` §B).
   At that point, the real photos serve double duty: validating the existing
   two synthetic arms *and* providing training/validation signal for a GAN
   arm, making it a much stronger comparison than building it blind now.

@@ -60,6 +60,7 @@ import numpy as np
 from experiments.common import (
     CLINIC_DIFFICULTY,
     HEADLINE_BURDEN,
+    annotate_no_overlap,
     banner,
     figure_path,
     save_results,
@@ -176,7 +177,8 @@ def collect_real_calibration(channel, crops, rng, n_per_crop=40) -> CalibrationD
             labels.append(crop.label)
             usabilities.append(reading.usability)
     return CalibrationData(
-        scores=np.array(scores), labels=np.array(labels), usabilities=np.array(usabilities)
+        scores=np.array(scores), labels=np.array(labels), usabilities=np.array(usabilities),
+        _first_shots_only=True,  # session.capture() above takes no instruction -- first shot only
     )
 
 
@@ -390,15 +392,25 @@ def make_figure(damage_rows, clean_auc, head_rows, leaderboard) -> str:
             edgecolors="tab:blue" if ok else "tab:red", linewidths=1.8,
             marker="o" if ok else "X",
         )
-        ax.annotate(r.policy.replace("_", "\n"), (r.verdicts_per_capture, r.verdict_accuracy),
-                    fontsize=7, xytext=(4, 4), textcoords="offset points")
+    ax.margins(0.18)
     ax.set_xlabel("verdicts per capture")
     ax.set_ylabel("accuracy on rendered verdicts")
     ax.set_title("(c) The Docket, on real radiographs")
     ax.grid(alpha=0.3)
+    ax_c = ax  # label placement deferred past tight_layout() -- see below
 
     fig.suptitle("E6: the real-image arm (DENTEX, 182 teeth / 50 radiographs)", fontsize=12)
     fig.tight_layout()
+    # Placed AFTER tight_layout(), not before: tight_layout() can resize the
+    # axes to fit labels/titles, shifting the data-to-pixel mapping every
+    # offset-points annotation is anchored to -- placing first and letting
+    # layout move the ground under the labels can silently reintroduce the
+    # collision this function exists to prevent (e.g. untargeted_evidential
+    # vs evidential_capture, which land almost on top of each other here).
+    annotate_no_overlap(
+        ax_c, [r.verdicts_per_capture for r in leaderboard], [r.verdict_accuracy for r in leaderboard],
+        [r.policy.replace("_", "\n") for r in leaderboard],
+    )
     path = figure_path("e6_real_images.png")
     fig.savefig(path, dpi=140)
     plt.close(fig)

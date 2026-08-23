@@ -21,7 +21,7 @@ property of this process rather than something to rely on in general.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import numpy as np
 
@@ -39,6 +39,13 @@ class CalibrationData:
     scores: np.ndarray
     labels: np.ndarray
     usabilities: np.ndarray
+    # Set only by collect_calibration(). fit_calibrator() checks this on any
+    # externally-supplied `data=` so a caller can't hand it session/retake-
+    # loop data just because that happens to have the same three array
+    # fields -- doing so would reintroduce exactly the selection-bias
+    # mismatch stratification exists to prevent (see this module's
+    # docstring), silently rather than by a caller's deliberate choice.
+    _first_shots_only: bool = field(default=False, repr=False, compare=False)
 
     def __len__(self) -> int:
         return len(self.scores)
@@ -80,7 +87,9 @@ def collect_calibration(
         labels[i] = label
         usabilities[i] = reading.usability
 
-    return CalibrationData(scores=scores, labels=labels, usabilities=usabilities)
+    return CalibrationData(
+        scores=scores, labels=labels, usabilities=usabilities, _first_shots_only=True
+    )
 
 
 def fit_calibrator(
@@ -93,6 +102,17 @@ def fit_calibrator(
     """Collect calibration data (unless given) and fit a calibrator to it."""
     if data is None:
         data = collect_calibration(channel, n_strata=n_strata, **kwargs)
+    elif not data._first_shots_only:
+        raise ValueError(
+            "fit_calibrator(data=...) requires CalibrationData produced by "
+            "collect_calibration() (first shots only). Calibrating against "
+            "anything else -- e.g. capture data pulled from inside a retake "
+            "loop -- reintroduces exactly the selection-bias mismatch "
+            "stratification exists to prevent; see this module's docstring. "
+            "If this data really is first-shots-only, build it via "
+            "collect_calibration() rather than constructing CalibrationData "
+            "directly."
+        )
     cal = calibrator_cls(n_strata=n_strata).fit(data.scores, data.labels, data.usabilities)
     return cal, data
 

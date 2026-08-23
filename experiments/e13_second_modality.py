@@ -35,7 +35,15 @@ from __future__ import annotations
 
 import numpy as np
 
-from experiments.common import CLINIC_DIFFICULTY, HEADLINE_BURDEN, banner, figure_path, save_results, save_table
+from experiments.common import (
+    CLINIC_DIFFICULTY,
+    HEADLINE_BURDEN,
+    annotate_no_overlap,
+    banner,
+    figure_path,
+    save_results,
+    save_table,
+)
 from experiments.e6_real_images import collect_real_calibration, evaluate_auc, MIN_INTERPRETABLE_AUC
 from src.bench.docket import make_image_docket
 from src.bench.metrics import format_leaderboard, score_results
@@ -188,15 +196,24 @@ def make_figure(damage_rows, clean_auc, rows) -> str:
             edgecolors="tab:blue" if ok else "tab:red", linewidths=1.8,
             marker="o" if ok else "X",
         )
-        ax.annotate(r.policy.replace("_", "\n"), (r.verdicts_per_capture, r.verdict_accuracy),
-                    fontsize=7, xytext=(4, 4), textcoords="offset points")
+    ax.margins(0.18)
     ax.set_xlabel("verdicts per capture")
     ax.set_ylabel("accuracy on rendered verdicts")
     ax.set_title("(b) The Docket, second modality\n(chest radiographs, pneumonia vs normal)")
     ax.grid(alpha=0.3)
+    ax_b = ax  # label placement deferred past tight_layout() -- see below
 
     fig.suptitle("E13: second-modality generalization check (NOT CheXphoto)", fontsize=12)
     fig.tight_layout()
+    # Placed AFTER tight_layout(), not before -- see e3_leaderboard.py's
+    # make_figure for why. naive_best_shot sits high enough in this panel
+    # that its label used to collide with the two-line title above; the
+    # title is now always in annotate_no_overlap's collision set for exactly
+    # this reason, not just here.
+    annotate_no_overlap(
+        ax_b, [r.verdicts_per_capture for r in rows], [r.verdict_accuracy for r in rows],
+        [r.policy.replace("_", "\n") for r in rows],
+    )
     path = figure_path("e13_second_modality.png")
     fig.savefig(path, dpi=140)
     plt.close(fig)

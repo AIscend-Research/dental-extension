@@ -30,6 +30,7 @@ from experiments.common import (
     CLINIC_DIFFICULTY,
     HEADLINE_BURDEN,
     PREVALENCE,
+    annotate_no_overlap,
     banner,
     build_world,
     figure_path,
@@ -205,10 +206,7 @@ def make_figure(headline, budget_rows, ladder_rows) -> str:
     # (a) headline: VPC vs accuracy, sound arms filled, unsound hollow
     ax = axes[0]
     rows = sorted(headline["likelihood-ratio (estimated)"], key=lambda r: r.verdicts_per_capture)
-    # The sound arms cluster tightly, so fixed label offsets overlap into an
-    # unreadable smear. Alternate the offsets and draw a leader line instead.
-    offsets = [(6, 8), (6, -14), (-46, 8), (-46, -14)]
-    for i, r in enumerate(rows):
+    for r in rows:
         ok = r.guaranteed and not (r.convict_violation or r.discharge_violation)
         ax.scatter(
             r.verdicts_per_capture, r.verdict_accuracy, s=90, zorder=3,
@@ -216,16 +214,12 @@ def make_figure(headline, budget_rows, ladder_rows) -> str:
             edgecolors="tab:blue" if ok else "tab:red", linewidths=1.8,
             marker="o" if ok else "X",
         )
-        ax.annotate(
-            r.policy, (r.verdicts_per_capture, r.verdict_accuracy),
-            fontsize=7, xytext=offsets[i % len(offsets)], textcoords="offset points",
-            arrowprops=dict(arrowstyle="-", lw=0.5, color="grey", shrinkA=0, shrinkB=3),
-        )
     ax.margins(0.18)
     ax.set_xlabel("verdicts per capture")
     ax.set_ylabel("accuracy on rendered verdicts")
     ax.set_title("(a) the headline trade-off\n(hollow red X = guarantee forfeited)")
     ax.grid(alpha=0.3)
+    ax_a = ax  # label placement deferred past tight_layout() -- see below
 
     # (b) budget sweep
     ax = axes[1]
@@ -258,6 +252,20 @@ def make_figure(headline, budget_rows, ladder_rows) -> str:
 
     fig.suptitle("E3: The Docket -- justified verdicts per photograph", fontsize=12)
     fig.tight_layout()
+    # Label placement runs AFTER tight_layout(), not before: tight_layout()
+    # can resize/reposition axes to fit labels/titles, which shifts the
+    # data-to-pixel mapping every offset-points annotation is anchored to.
+    # Placing labels first and letting tight_layout() move the ground under
+    # them can silently reintroduce the exact collision this function exists
+    # to prevent. The sound arms in panel (a) cluster tightly (evidential_
+    # capture/one_step_lookahead/oracle_instruction can be within thousandths
+    # of a VPC of each other), so a fixed offset -- even alternated -- can
+    # still collide; placing by rendered-bbox collision against final axes
+    # geometry is what actually holds.
+    annotate_no_overlap(
+        ax_a, [r.verdicts_per_capture for r in rows], [r.verdict_accuracy for r in rows],
+        [r.policy for r in rows],
+    )
     path = figure_path("e3_leaderboard.png")
     fig.savefig(path, dpi=140)
     plt.close(fig)

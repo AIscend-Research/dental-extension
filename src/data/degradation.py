@@ -216,6 +216,26 @@ class DegradationResult:
     # degradation, or None if no boxes were passed in. Only "angle" moves
     # them; every other degradation leaves them untouched by construction.
     boxes: np.ndarray | None = None
+    # Indices into the ORIGINAL `boxes` array that survived, or None if no
+    # boxes were passed in. This arm (opencv) never drops a box -- "angle"
+    # zeroes a degenerate box's area instead of removing it -- so this is
+    # always the identity `arange(len(boxes))` here; it exists so callers can
+    # index any parallel per-box label array the same way regardless of which
+    # degradation arm (opencv vs albumentations) produced the result, since
+    # the albumentations arm's Affine transform DOES drop out-of-frame boxes.
+    kept_indices: np.ndarray | None = None
+
+    def __post_init__(self) -> None:
+        # Default kept_indices to identity whenever a caller passed boxes but
+        # didn't compute a real kept/dropped set itself (this arm never drops
+        # a box, so that's every call here) -- one place to derive "nothing
+        # was dropped" instead of both apply_degradations() implementations
+        # (opencv here, albumentations in degradation_albumentations.py)
+        # each re-deriving it. A caller that DID drop boxes (only the
+        # albumentations arm's "angle" step, today) still passes the real
+        # kept_indices explicitly, which leaves this untouched.
+        if self.kept_indices is None and self.boxes is not None:
+            self.kept_indices = np.arange(len(self.boxes))
 
     def label_vector(self) -> np.ndarray:
         """Severity per degradation, in DEGRADATION_NAMES order. For the head."""
@@ -288,6 +308,9 @@ def apply_degradations(
         else:
             out = DEGRADATIONS[name](out, sev)
         applied[name] = round(sev, 3)
+    # kept_indices left unset -- this arm never drops a box, so
+    # DegradationResult.__post_init__ fills in the identity default from
+    # out_boxes itself; no need to duplicate that arange here too.
     return DegradationResult(image=out, severities=applied, boxes=out_boxes)
 
 

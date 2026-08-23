@@ -87,7 +87,12 @@ def project_degradation(
     if target_factor is None:
         return dict(degradation)
 
-    fatigue = float(np.clip(shot_index * DEFAULT_FATIGUE_PER_SHOT, 0.0, 1.0))
+    # `shot_index` is the shot just captured (0-indexed); the correction
+    # this projects lands on the *next* shot, i.e. after shot_index+1 shots
+    # have tired the operator (session.py ticks fatigue once per completed
+    # capture, starting from 0). Using shot_index directly here understated
+    # fatigue by one DEFAULT_FATIGUE_PER_SHOT for every candidate alike.
+    fatigue = float(np.clip((shot_index + 1) * DEFAULT_FATIGUE_PER_SHOT, 0.0, 1.0))
     removal = _expected_removal_fraction(fatigue)
 
     factors = _degradation_to_factors(degradation)

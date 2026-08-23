@@ -20,6 +20,7 @@ readable from the experiment rather than inherited.
 from __future__ import annotations
 
 import json
+import math
 import time
 from dataclasses import asdict, is_dataclass
 from pathlib import Path
@@ -179,3 +180,77 @@ def banner(title: str, world: World | None = None) -> None:
 def figure_path(name: str) -> Path:
     FIGURES.mkdir(parents=True, exist_ok=True)
     return FIGURES / name
+
+
+_ANNOTATE_CANDIDATE_OFFSETS = [
+    (r * math.cos(math.radians(a)), r * math.sin(math.radians(a)))
+    for r in (10, 20, 34, 50)
+    for a in (35, -35, 145, -145, 90, -90, 0, 180)
+]
+
+
+def annotate_no_overlap(ax, xs, ys, labels, fontsize=7, avoid=()) -> None:
+    """Label each (x, y) scatter point without the text smearing together.
+
+    A fixed offset (or a short cycle of fixed offsets) only separates labels
+    when the points themselves are already spread out. Several of the
+    leaderboard scatters here have policy arms that land almost on top of
+    each other (e.g. evidential_capture/one_step_lookahead/oracle_instruction
+    are within a few thousandths of a VPC of one another), and a fixed offset
+    there just moves the collision from the markers to the text. This tries
+    an expanding ring of candidate offsets per label and keeps the first one
+    whose *rendered* bounding box doesn't overlap anything already placed
+    (other labels, the axes title, plus anything extra in `avoid`), drawing a
+    thin leader line back to the point so a label is never ambiguous about
+    which marker it names, even for the smallest offset.
+
+    The axes title is always in the collision set (not just when a caller
+    remembers to pass it): any panel here can end up with a data point near
+    the top of its axes on some future rerun (new arm, different seed), and
+    checking one extra bbox is free -- e13's two-line title collided with a
+    label before this was made unconditional; nothing about that scenario is
+    specific to e13's panel.
+
+    `avoid` is for anything ELSE a caller wants labels to clear (e.g. a
+    legend box) beyond the title, which is covered automatically.
+    """
+    fig = ax.figure
+    fig.canvas.draw()  # populate a renderer so text extents are real, not guessed
+    renderer = fig.canvas.get_renderer()
+
+    placed = [ax.title.get_window_extent(renderer=renderer)]
+    placed += [a.get_window_extent(renderer=renderer) for a in avoid]
+
+    for x, y, label in zip(xs, ys, labels):
+        t = bbox = dx = dy = None
+        for i, (dx, dy) in enumerate(_ANNOTATE_CANDIDATE_OFFSETS):
+            t = ax.annotate(
+                label, (x, y), xytext=(dx, dy), textcoords="offset points",
+                fontsize=fontsize, zorder=5,
+            )
+            bbox = t.get_window_extent(renderer=renderer)
+            collides = any(bbox.overlaps(b) for b in placed)
+            is_last = i == len(_ANNOTATE_CANDIDATE_OFFSETS) - 1
+            if not collides or is_last:
+                # last candidate is kept even if it still collides, rather
+                # than silently dropping the label.
+                break
+            t.remove()
+        placed.append(bbox)
+        line = ax.annotate(
+            "", xy=(x, y), xytext=(dx, dy), textcoords="offset points", xycoords="data",
+            arrowprops=dict(arrowstyle="-", lw=0.5, color="grey", shrinkA=0, shrinkB=3),
+        )
+        # The leader line's own extent goes in `placed` too, not just the
+        # label text -- otherwise a later label in this same call can be
+        # placed right across an earlier point's line, since the line was
+        # invisible to the collision check that chose it. Call this on the
+        # Annotation itself, not `line.arrow_patch` directly: the patch is
+        # constructed with placeholder (0,0)-(1,1) coordinates and only gets
+        # its real position from `Annotation.update_positions()`, which runs
+        # inside `Annotation.get_window_extent()` -- calling it on the patch
+        # before that measures nothing real (verified against this repo's
+        # matplotlib: Annotation.get_window_extent() already unions in the
+        # arrow's bbox once positions are updated, so this one call is both
+        # necessary and sufficient).
+        placed.append(line.get_window_extent(renderer=renderer))

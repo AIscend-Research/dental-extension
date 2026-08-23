@@ -147,7 +147,7 @@
         ],
         "alpha_discharge": 0.2,
         "discharge_violation": false,
-        "guaranteed": true,
+        "guaranteed": false,
         "sensitivity": 0.9924160346695557,
         "specificity": 0.7992610837438424,
         "mean_final_usability": 0.6068516677372029
@@ -157,10 +157,10 @@
         "n_cases": 4000,
         "n_captures": 13729,
         "mean_captures": 3.43225,
-        "verdict_rate": 0.443,
-        "verdicts_per_capture": 0.12906985213781047,
-        "verdict_accuracy": 0.8944695259593679,
-        "refer_rate": 0.5569999999999999,
+        "verdict_rate": 0.44275,
+        "verdicts_per_capture": 0.12899701362080268,
+        "verdict_accuracy": 0.8944099378881988,
+        "refer_rate": 0.55725,
         "false_conviction_rate": 0.07043343653250773,
         "false_conviction_ci": [
           0.06119187982257721,
@@ -176,9 +176,9 @@
         "alpha_discharge": 0.2,
         "discharge_violation": false,
         "guaranteed": true,
-        "sensitivity": 0.9946865037194474,
+        "sensitivity": 0.9946808510638298,
         "specificity": 0.7809867629362214,
-        "mean_final_usability": 0.6255795823153019
+        "mean_final_usability": 0.6257841604890041
       },
       {
         "policy": "confidence_threshold_selective",
@@ -401,7 +401,7 @@
         ],
         "alpha_discharge": 0.2,
         "discharge_violation": false,
-        "guaranteed": true,
+        "guaranteed": false,
         "sensitivity": 0.9795918367346939,
         "specificity": 0.7421465968586387,
         "mean_final_usability": 0.6049401336600528
@@ -411,14 +411,14 @@
         "n_cases": 4000,
         "n_captures": 12122,
         "mean_captures": 3.0305,
-        "verdict_rate": 0.676,
-        "verdicts_per_capture": 0.22306550074245174,
-        "verdict_accuracy": 0.8409763313609467,
-        "refer_rate": 0.32399999999999995,
-        "false_conviction_rate": 0.15673374613003097,
+        "verdict_rate": 0.67575,
+        "verdicts_per_capture": 0.2229830061046032,
+        "verdict_accuracy": 0.8412874583795783,
+        "refer_rate": 0.32425000000000004,
+        "false_conviction_rate": 0.1563467492260062,
         "false_conviction_ci": [
-          0.14322686793057496,
-          0.17125976834577208
+          0.14285450898636526,
+          0.17085928246053006
         ],
         "alpha_convict": 0.5,
         "convict_violation": false,
@@ -431,8 +431,8 @@
         "discharge_violation": false,
         "guaranteed": true,
         "sensitivity": 0.9781849912739965,
-        "specificity": 0.7400513478818999,
-        "mean_final_usability": 0.6200105877649523
+        "specificity": 0.7405266538214516,
+        "mean_final_usability": 0.6201077135945998
       },
       {
         "policy": "confidence_threshold_selective",
@@ -568,7 +568,7 @@
       "verdict_rate": 0.1175,
       "verdict_accuracy": 0.7829787234042553,
       "mean_captures": 1.0,
-      "guaranteed": true,
+      "guaranteed": false,
       "violated": false
     },
     {
@@ -658,7 +658,7 @@
       "verdict_rate": 0.3205,
       "verdict_accuracy": 0.8143525741029641,
       "mean_captures": 1.8825,
-      "guaranteed": true,
+      "guaranteed": false,
       "violated": false
     },
     {
@@ -748,7 +748,7 @@
       "verdict_rate": 0.5095,
       "verdict_accuracy": 0.8047105004906772,
       "mean_captures": 2.562,
-      "guaranteed": true,
+      "guaranteed": false,
       "violated": false
     },
     {
@@ -838,15 +838,15 @@
       "verdict_rate": 0.659,
       "verdict_accuracy": 0.8148710166919575,
       "mean_captures": 3.0525,
-      "guaranteed": true,
+      "guaranteed": false,
       "violated": false
     },
     {
       "budget": 4,
       "policy": "one_step_lookahead",
-      "verdicts_per_capture": 0.21970443349753693,
-      "verdict_rate": 0.669,
-      "verdict_accuracy": 0.8124065769805681,
+      "verdicts_per_capture": 0.21986863711001642,
+      "verdict_rate": 0.6695,
+      "verdict_accuracy": 0.8125466766243465,
       "mean_captures": 3.045,
       "guaranteed": true,
       "violated": false
@@ -928,16 +928,16 @@
       "verdict_rate": 0.8455,
       "verdict_accuracy": 0.8225901833234772,
       "mean_captures": 3.631,
-      "guaranteed": true,
+      "guaranteed": false,
       "violated": false
     },
     {
       "budget": 6,
       "policy": "one_step_lookahead",
-      "verdicts_per_capture": 0.23922114047287898,
+      "verdicts_per_capture": 0.23925441646960635,
       "verdict_rate": 0.86,
       "verdict_accuracy": 0.8232558139534883,
-      "mean_captures": 3.595,
+      "mean_captures": 3.5945,
       "guaranteed": true,
       "violated": false
     },
@@ -1018,16 +1018,16 @@
       "verdict_rate": 0.9285,
       "verdict_accuracy": 0.8206785137318255,
       "mean_captures": 3.891,
-      "guaranteed": true,
+      "guaranteed": false,
       "violated": false
     },
     {
       "budget": 8,
       "policy": "one_step_lookahead",
-      "verdicts_per_capture": 0.2485284499672989,
+      "verdicts_per_capture": 0.24856096284667714,
       "verdict_rate": 0.95,
       "verdict_accuracy": 0.8247368421052632,
-      "mean_captures": 3.8225,
+      "mean_captures": 3.822,
       "guaranteed": true,
       "violated": false
     },
@@ -1137,5 +1137,5 @@
     }
   ],
   "figure": "/Users/christopherhuang/Documents/GitHub/dental-extension/figures/e3_leaderboard.png",
-  "generated_utc": "2026-08-15T05:10:03Z"
+  "generated_utc": "2026-08-23T16:51:50Z"
 }

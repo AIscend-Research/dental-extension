@@ -207,7 +207,11 @@ def make_figure(rows) -> str:
         x = np.arange(len(sel))
         for name in EXPECTED_ORDER:
             ax.plot(x, [r[f"vpc_{name}"] for r in sel], "o-", label=name, ms=4)
-        ax.set_xticks(x, [r["setting"].split()[-1] for r in sel], fontsize=8)
+        # `setting["value"]` (not the formatted `setting` string) so a
+        # tuple-valued axis like case-difficulty's Beta(a, b) doesn't get
+        # cut at its internal space -- `"Beta(1.5, 6.0)".split()[-1]` used
+        # to render the tick as the mangled "6.0)" instead of "(1.5, 6.0)".
+        ax.set_xticks(x, [str(r["value"]) for r in sel], fontsize=8)
         ax.set_title(axis)
         ax.grid(alpha=0.3)
         for i, r in enumerate(sel):

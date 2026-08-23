@@ -83,6 +83,34 @@ cleaner shots and a sound tooth photographed cleanly scores low against a pool
 of dirtier shots. Stratification's case is weaker assumptions and a little
 power, not rescued coverage.
 
+**The A1′ falsifiable prediction, checked directly (sweep D, updated
+2026-08-23).** `docs/theory_anytime_validity.md` §6 predicted that A1′ (and
+hence validity itself, not just power) should degrade as `head_noise` rises
+past the point where noise-driven stratum misclassification dominates
+genuine correction. Swept `head_noise` over
+`{0.00, 0.06, 0.12, 0.25, 0.40, 0.60, 0.80, 1.00}` — extended 2.5× past E4's
+own power sweep, to a noise standard deviation as large as the severity scale
+itself — and measured the STRATIFIED arm's crossing rate at α = 0.05 directly
+(K = 4, 10 000 null sessions per point):
+
+| head_noise | 0.00 | 0.06 | 0.12 | 0.25 | 0.40 | 0.60 | 0.80 | 1.00 |
+|---|---|---|---|---|---|---|---|---|
+| crossing rate | 0.0005 | 0.0009 | 0.0003 | 0.0001 | 0.0001 | 0.0000 | 0.0000 | 0.0000 |
+
+No violation anywhere (Wilson upper bound never exceeds 0.0018). The rate
+trends *toward* zero as noise rises, not toward the 0.05 bound — the opposite
+of the predicted failure. Reason, worked through in
+`docs/theory_anytime_validity.md` §6: the confidence head applies the *same*
+unbiased noise kernel to both the calibration and test populations, so as
+`head_noise → ∞` conditioning on the predicted stratum becomes uninformative
+for both alike, and A1′ collapses to the raw equilibrium-shift property E1
+already measures directly (mean true usability +0.1098, first shot to last),
+independent of stratification. Noise degrades stratification's *added* power
+(E4's falling VPC) without reversing the ordering A1′ needs. This narrows,
+rather than closes, the original gap: it is now specifically a confidence
+head whose noise is *asymmetric* between calibration and deployment
+conditions — not tested here — that would need to break it.
+
 ## E3 — The Docket leaderboard
 
 n = 4000 cases, K = 4, likelihood-ratio evidence. Updated 2026-08-14 with two

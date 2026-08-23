@@ -21,8 +21,7 @@ is invisible to per-image confidence and lethal to the error guarantee: it is
 optional stopping, and naive retake loops inflate false-positive rate by 6×
 (from 5.6% to 33.6% as budget rises from one photograph to eight, at a
 nominal 5% level) at clinically meaningful standards of proof, while looking
-fine at loose ones — at a 50% standard neither naive method registers a
-violation at any budget. We reframe capture as sequential evidence-gathering: a betting process
+fine at loose ones. We reframe capture as sequential evidence-gathering: a betting process
 against the null whose stakes are fixed by a *degradation* channel, read and
 committed to before the *diagnosis* channel is ever consulted — a firewall
 enforced by the type system, not by discipline. This restores an
@@ -40,6 +39,14 @@ targeting ordering both reproduce, with zero violations, when the same
 unmodified machinery is applied to a second real modality (pediatric
 pneumonia chest radiographs), and one pattern — that a near-saturated reader
 makes retaking not worth its cost — reproduces independently across both.
+The guarantee further survives a corruption process the authors did not
+design: swapping in a third party's own synthetic capture model
+(CheXphoto's, MIT-licensed) for the same task holds validity with zero
+violations under identical policies and calibration protocol, while a
+mismatched calibration — fit under one capture process, deployed under the
+other — breaks it outright (false-conviction rates up to 0.80 against a
+stated 0.50 bound), naming calibration-process match as an explicit
+deployment precondition rather than a footnote.
 We report five predictions this design got wrong, including one converted into a positive
 result: a one-step-lookahead subpoena rule that accounts for side effects
 between corrections closes the gap to a perfect-information oracle,
@@ -187,10 +194,16 @@ reading, which a first-shot calibration draw never benefits from — and when
 it should not — a sufficiently noisy degradation head can land a session in
 a good-looking stratum by misread rather than real improvement, which is
 exactly the "confidently wrong" pathology the framework exists to prevent.
-This yields a falsifiable prediction not yet checked directly: A1′, and
-hence validity itself, should degrade as confidence-head noise rises past
-the point where misread-driven stratification dominates correction-driven
-stratification — sharper than the power degradation E4 already measures.
+This yields a falsifiable prediction, since checked directly (§5, E2): A1′,
+and hence validity itself, should degrade as confidence-head noise rises
+past the point where misread-driven stratification dominates
+correction-driven stratification. It does not, up to noise 2.5× past E4's
+own power-degradation sweep — a structural argument (App./§3.3 extended in
+`docs/theory_anytime_validity.md` §6) explains why: the same unbiased noise
+kernel corrupts both the calibration and test populations' stratum
+assignment alike, so in the high-noise limit A1′ collapses to the raw
+equilibrium-shift property E1 already measures directly, independent of
+stratification.
 
 Two evidence constructions are reported side by side: a conformal p-to-e
 route (exactly valid, lossy) and a likelihood-ratio route (empirically valid,
@@ -406,14 +419,26 @@ under nominal in every setting tested. A deployment whose case mix differs
 sharply from its calibration archive should expect the guarantee to erode,
 not necessarily break outright.
 
-**A1 is reduced, not proved.** §3.3's Markov screening lemma is a real
-theorem about the generative model as implemented; the residual condition
-(A1′) it reduces to is a distributional comparison whose truth depends on
-magnitudes (confidence-head noise vs. correction strength) the primitives do
-not pin down. The falsifiable prediction this yields — that validity itself,
-not just power, should degrade as head noise grows past a point where
-noise-driven misclassification dominates genuine correction — has not yet
-been checked directly.
+**A1 is reduced, not proved outright — for an arbitrary generative model.**
+§3.3's Markov screening lemma is a real theorem about the generative model as
+implemented; the residual condition (A1′) it reduces to is a distributional
+comparison whose truth depends on magnitudes (confidence-head noise vs.
+correction strength) the primitives do not pin down in general. For the
+specific simulator and policies used throughout this paper, though, the
+falsifiable prediction this yields — that validity itself, not just power,
+should degrade as head noise grows past a point where noise-driven
+misclassification dominates genuine correction — was checked directly (E2)
+across confidence-head noise up to 2.5× E4's own power-degradation sweep, and
+did not occur; false-conviction rate trended toward zero, not toward the
+nominal bound. A structural argument in `docs/theory_anytime_validity.md` §6
+explains the high-noise end of that finding: the confidence head corrupts
+both the calibration and test populations' stratum assignment with the same
+unbiased noise kernel, so the predicted failure needed an asymmetry between
+the two populations that this design does not have. Whether a confidence
+head whose noise is *not* symmetric across calibration and deployment
+conditions could still break A1′ remains untested — a head that degrades
+specifically under retake-loop conditions it was not calibrated on is not a
+design this codebase builds.
 
 **DENTEX's own acknowledged limitations propagate.** Labels come from a
 single-review-pass protocol (a student annotator, corrected by one of three

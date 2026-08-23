@@ -31,6 +31,17 @@ Three sweeps:
      hard-case subpopulation the calibration set under-represents, and reports
      what happens. This is the experiment most likely to embarrass the method,
      which is why it is here.
+  D. the falsifiable prediction from docs/theory_anytime_validity.md #6:
+     A1 reduces to A1' (stratum-conditional stochastic dominance of true
+     quality, test vs. calibration), and A1' should degrade -- and eventually
+     fail -- as `head_noise` rises past the point where noise-driven stratum
+     misclassification dominates genuine equilibrium-shifting correction.
+     This sweeps `head_noise` and checks the STRATIFIED arm's crossing rate
+     directly, rather than leaving that prediction unchecked. Both calibration
+     and test use the same head_noise (the same confidence head reads both),
+     matching E4's existing power sweep at the same grid points, so the two
+     experiments are read together: E4 shows what noise costs in verdicts per
+     capture, this shows what it costs in the guarantee itself.
 
 Run: .venv/bin/python -m experiments.e2_validity
 """
@@ -67,6 +78,11 @@ BUDGET = 4
 ALPHA_GRID = [0.5, 0.3, 0.2, 0.1, 0.05, 0.02, 0.01]
 BUDGET_GRID = [1, 2, 3, 5, 8]
 FIXED_ALPHA = 0.05
+# Same first five points as E4's power sweep (docs/experiments_results.md,
+# "confidence-head quality"), extended past 0.40 to actually locate a
+# validity failure if the theory's mechanism-2-dominates-mechanism-1
+# prediction is right, rather than stopping at the point E4 happened to stop.
+HEAD_NOISE_GRID = [0.0, 0.06, 0.12, 0.25, 0.40, 0.60, 0.80, 1.00]
 
 
 def run_null_sessions(
@@ -262,11 +278,46 @@ def main() -> None:
         flag = " VIOLATION" if scope[-1]["violates"] else ""
         print(f"  {label:<42} {rate:.4f}{flag}")
 
-    fig = make_figure(sweep_a, sweep_b, runs)
+    # -- Sweep D: does A1' itself erode as head_noise rises? ----------------
+    print(f"\n[D] the falsifiable A1' prediction: crossing rate vs head_noise "
+          f"(alpha={FIXED_ALPHA}, STRATIFIED arm only)")
+    head_noise_sweep = []
+    for head_noise in HEAD_NOISE_GRID:
+        hn_world = build_world(head_noise=head_noise)
+        out = run_null_sessions(
+            hn_world, hn_world.calibrator, "stratified", BUDGET,
+            N_NULL_SESSIONS // 2, seed=400,
+        )
+        ev = out["evidence"]
+        k = int(np.sum(ev >= 1.0 / FIXED_ALPHA))
+        n = len(ev)
+        rate = k / n
+        lo, hi = wilson_lower(k, n), wilson_upper(k, n)
+        head_noise_sweep.append({
+            "head_noise": head_noise,
+            "crossing_rate": rate,
+            "ci_lo": lo, "ci_hi": hi,
+            "violates": bool(lo > FIXED_ALPHA),
+        })
+        flag = "  VIOLATION" if head_noise_sweep[-1]["violates"] else ""
+        print(f"  head_noise={head_noise:.2f}  rate={rate:.4f}  ci=[{lo:.4f}, {hi:.4f}]{flag}")
+    n_violations_d = sum(1 for r in head_noise_sweep if r["violates"])
+    if n_violations_d:
+        first = next(r["head_noise"] for r in head_noise_sweep if r["violates"])
+        print(f"  A1' breaks empirically starting at head_noise={first:.2f} "
+              f"({n_violations_d}/{len(HEAD_NOISE_GRID)} grid points violate)")
+    else:
+        print(f"  no violation up to head_noise={HEAD_NOISE_GRID[-1]:.2f} -- A1' holds "
+              f"throughout the tested range; the failure mode is real (see the "
+              f"mechanism in theory_anytime_validity.md #6) but the noise level needed "
+              f"to trigger it is at or beyond this grid.")
+
+    fig = make_figure(sweep_a, sweep_b, runs, head_noise_sweep)
     print(f"\nfigure -> {fig}")
 
     save_table("e2_validity_alpha_sweep", sweep_a)
     save_table("e2_validity_budget_sweep", sweep_b)
+    save_table("e2_validity_head_noise_sweep", head_noise_sweep)
     save_results(
         "e2_validity",
         {
@@ -276,6 +327,7 @@ def main() -> None:
             "alpha_sweep": sweep_a,
             "budget_sweep": sweep_b,
             "scope_of_guarantee": scope,
+            "head_noise_sweep": head_noise_sweep,
             "mean_shots": {a: float(runs[a]["n_shots"].mean()) for a in arms},
             "figure": fig,
         },
@@ -283,7 +335,7 @@ def main() -> None:
     print("results -> results/e2_validity.json")
 
 
-def make_figure(sweep_a, sweep_b, runs) -> str:
+def make_figure(sweep_a, sweep_b, runs, head_noise_sweep) -> str:
     import matplotlib
 
     matplotlib.use("Agg")
@@ -296,7 +348,7 @@ def make_figure(sweep_a, sweep_b, runs) -> str:
         "best_shot": ("^--", "tab:red"),
         "greedy": ("v--", "tab:purple"),
     }
-    fig, axes = plt.subplots(1, 3, figsize=(15, 4.6))
+    fig, axes = plt.subplots(1, 4, figsize=(19.5, 4.6))
 
     ax = axes[0]
     alphas = [r["alpha"] for r in sweep_a]
@@ -338,6 +390,23 @@ def make_figure(sweep_a, sweep_b, runs) -> str:
     ax.set_title("(c) the whole tail, against Ville")
     ax.legend(fontsize=8)
     ax.grid(alpha=0.3, which="both")
+
+    ax = axes[3]
+    hn = [r["head_noise"] for r in head_noise_sweep]
+    rates = [r["crossing_rate"] for r in head_noise_sweep]
+    los = [r["ci_lo"] for r in head_noise_sweep]
+    his = [r["ci_hi"] for r in head_noise_sweep]
+    ax.axhline(FIXED_ALPHA, color="k", ls=":", lw=1.4, label=f"nominal alpha = {FIXED_ALPHA}")
+    ax.fill_between(hn, los, his, alpha=0.2, color="tab:blue", label="Wilson CI")
+    ax.plot(hn, rates, "o-", color="tab:blue", label="stratified")
+    for r in head_noise_sweep:
+        if r["violates"]:
+            ax.plot(r["head_noise"], r["crossing_rate"], "x", color="tab:red", ms=12, mew=2.5, zorder=5)
+    ax.set_xlabel("head_noise (confidence-head estimation noise)")
+    ax.set_ylabel("false-conviction rate")
+    ax.set_title("(d) the falsifiable A1' prediction:\nvalidity itself vs confidence-head noise")
+    ax.legend(fontsize=8)
+    ax.grid(alpha=0.3)
 
     fig.suptitle(
         "E2: every e-process stays under its promise; peeking at the diagnosis does not",

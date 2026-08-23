@@ -89,6 +89,19 @@ def run_docket_global_budget(
     max_per_case = max_per_case if max_per_case is not None else docket.budget * 4
     strategy = strategy or DegradationAwareBet()
 
+    if total_budget < n:
+        # Phase 1 below gives every case its mandatory first shot
+        # unconditionally (a session can't be instructed before it has
+        # produced something to react to), so actual spend is always >= n
+        # regardless of total_budget. Below n, the function silently spent
+        # more than requested instead of erroring; make that failure explicit
+        # rather than letting a caller believe the cap held.
+        raise ValueError(
+            f"total_budget={total_budget} is below n_cases={n}: every case "
+            "gets a mandatory first shot before any reallocation, so total "
+            "spend can never be below n_cases. Pass a larger total_budget."
+        )
+
     cases: dict[int, _CaseState] = {}
     for dc in docket.cases:
         rng = np.random.default_rng(dc.seed)

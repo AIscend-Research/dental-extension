@@ -29,13 +29,13 @@
       "severity": 0.2,
       "blur": 0.8819072955613076,
       "glare": 0.8946182053494391,
-      "angle": 0.8975769341386253,
+      "angle": 0.8975757357875563,
       "low_light": 0.922006519029815,
       "jpeg": 0.8921484037963762
     },
     {
       "severity": 0.4,
-      "blur": 0.8780749688428722,
+      "blur": 0.87807736554501,
       "glare": 0.8915264595916019,
       "angle": 0.8960154826958106,
       "low_light": 0.9221131722749497,
@@ -45,7 +45,7 @@
       "severity": 0.6,
       "blur": 0.876436822931646,
       "glare": 0.8857000766944684,
-      "angle": 0.8742150800498514,
+      "angle": 0.8742162784009203,
       "low_light": 0.9160962515578563,
       "jpeg": 0.8999568593615186
     },
@@ -59,7 +59,7 @@
     },
     {
       "severity": 1.0,
-      "blur": 0.8547814207650273,
+      "blur": 0.8547826191160962,
       "glare": 0.8165156744319816,
       "angle": 0.8418440226248681,
       "low_light": 0.8632082254817371,
@@ -70,10 +70,10 @@
     {
       "level": 1,
       "blur": 0.8858067299396031,
-      "glare_matte": 0.8927991084268048,
+      "glare_matte": 0.8928003067778737,
       "tilt": 0.7896977758604161,
       "brightness_down": 0.9070690729556131,
-      "moire": 0.9014356245805771
+      "moire": 0.9014368229316461
     },
     {
       "level": 2,
@@ -81,13 +81,13 @@
       "glare_matte": 0.8310097306106797,
       "tilt": 0.8271222797430735,
       "brightness_down": 0.8943198159332758,
-      "moire": 0.9009419039401784
+      "moire": 0.9009431022912472
     },
     {
       "level": 3,
       "blur": 0.8624245038826575,
       "glare_matte": 0.7185936151855048,
-      "tilt": 0.8386024829834148,
+      "tilt": 0.8386012846323458,
       "brightness_down": 0.9069624197104784,
       "moire": 0.7293548077844886
     },
@@ -95,8 +95,8 @@
       "level": 4,
       "blur": 0.8226056945642796,
       "glare_matte": 0.7435289042277826,
-      "tilt": 0.8054548940657655,
-      "brightness_down": 0.9054417122040073,
+      "tilt": 0.8054536957146966,
+      "brightness_down": 0.9054393155018694,
       "moire": 0.6781396798005944
     }
   ],
@@ -119,7 +119,7 @@
   },
   "normalised_damage": {
     "simulator": {
-      "blur": 0.11064849861216268,
+      "blur": 0.11064549463489677,
       "glare": 0.20657150066688304,
       "angle": 0.14307943717481966,
       "low_light": 0.08952453047835336,
@@ -128,8 +128,8 @@
     "chexphoto": {
       "blur": 0.1913052882015789,
       "glare": 0.38953174002379143,
-      "angle": 0.2342982108311404,
-      "low_light": -0.016344640303762054,
+      "angle": 0.23430121480840632,
+      "low_light": -0.01633863234923024,
       "jpeg": 0.5534467635148936
     }
   },
@@ -198,7 +198,7 @@
         "guaranteed": true,
         "sensitivity": 0.9913344887348353,
         "specificity": 0.7294117647058823,
-        "mean_final_usability": 0.5874975052496929
+        "mean_final_usability": 0.5874975009525331
       },
       {
         "policy": "fixed_retake",
@@ -226,7 +226,7 @@
         "guaranteed": true,
         "sensitivity": 0.905982905982906,
         "specificity": 0.8169642857142857,
-        "mean_final_usability": 0.5796900418758226
+        "mean_final_usability": 0.5796900405537176
       },
       {
         "policy": "untargeted_evidential",
@@ -254,7 +254,7 @@
         "guaranteed": true,
         "sensitivity": 0.905982905982906,
         "specificity": 0.811529933481153,
-        "mean_final_usability": 0.5848934069318689
+        "mean_final_usability": 0.5848934011354944
       },
       {
         "policy": "evidential_capture",
@@ -282,7 +282,7 @@
         "guaranteed": true,
         "sensitivity": 0.9192771084337349,
         "specificity": 0.7987679671457906,
-        "mean_final_usability": 0.621634269757218
+        "mean_final_usability": 0.6216342646772991
       },
       {
         "policy": "greedy_diagnostic",
@@ -310,7 +310,7 @@
         "guaranteed": false,
         "sensitivity": 0.9655990510083037,
         "specificity": 0.684931506849315,
-        "mean_final_usability": 0.6017752634168784
+        "mean_final_usability": 0.6017752606630168
       },
       {
         "policy": "naive_best_shot",
@@ -338,7 +338,7 @@
         "guaranteed": false,
         "sensitivity": 0.9898107714701602,
         "specificity": 0.7602996254681648,
-        "mean_final_usability": 0.6690304009496829
+        "mean_final_usability": 0.6690303107939964
       }
     ],
     "chexphoto": [
@@ -368,7 +368,7 @@
         "guaranteed": true,
         "sensitivity": 1.0,
         "specificity": 0.4,
-        "mean_final_usability": 0.4199606002158278
+        "mean_final_usability": 0.4199601774996683
       },
       {
         "policy": "fixed_retake",
@@ -396,7 +396,7 @@
         "guaranteed": true,
         "sensitivity": 0.9454545454545454,
         "specificity": 0.7163461538461539,
-        "mean_final_usability": 0.4210719281155863
+        "mean_final_usability": 0.4210715228056936
       },
       {
         "policy": "untargeted_evidential",
@@ -424,7 +424,7 @@
         "guaranteed": true,
         "sensitivity": 0.9454545454545454,
         "specificity": 0.7163461538461539,
-        "mean_final_usability": 0.4319370303583455
+        "mean_final_usability": 0.4319366143835656
       },
       {
         "policy": "evidential_capture",
@@ -452,7 +452,7 @@
         "guaranteed": true,
         "sensitivity": 0.953125,
         "specificity": 0.6860986547085202,
-        "mean_final_usability": 0.4497511676863614
+        "mean_final_usability": 0.4497507897149461
       },
       {
         "policy": "greedy_diagnostic",
@@ -480,7 +480,7 @@
         "guaranteed": false,
         "sensitivity": 0.8496969696969697,
         "specificity": 0.43186582809224316,
-        "mean_final_usability": 0.41881128652252814
+        "mean_final_usability": 0.41881085683922203
       },
       {
         "policy": "naive_best_shot",
@@ -508,7 +508,7 @@
         "guaranteed": false,
         "sensitivity": 0.9520123839009288,
         "specificity": 0.38869257950530034,
-        "mean_final_usability": 0.4369469451468126
+        "mean_final_usability": 0.4369465989986229
       }
     ]
   },
@@ -566,7 +566,7 @@
         "guaranteed": true,
         "sensitivity": 1.0,
         "specificity": 0.0,
-        "mean_final_usability": 0.4199606002158278
+        "mean_final_usability": 0.4199601774996683
       },
       {
         "policy": "fixed_retake",
@@ -594,7 +594,7 @@
         "guaranteed": true,
         "sensitivity": 0.9746376811594203,
         "specificity": 0.03829787234042553,
-        "mean_final_usability": 0.4210719281155863
+        "mean_final_usability": 0.4210715228056936
       },
       {
         "policy": "untargeted_evidential",
@@ -622,7 +622,7 @@
         "guaranteed": true,
         "sensitivity": 0.9746376811594203,
         "specificity": 0.03821656050955414,
-        "mean_final_usability": 0.42505299191730844
+        "mean_final_usability": 0.4250525627772654
       },
       {
         "policy": "evidential_capture",
@@ -650,7 +650,7 @@
         "guaranteed": true,
         "sensitivity": 0.9854368932038835,
         "specificity": 0.02754237288135593,
-        "mean_final_usability": 0.4252503685384225
+        "mean_final_usability": 0.4252499327859417
       }
     ],
     "arms_with_violations": [
@@ -660,6 +660,6 @@
       "evidential_capture"
     ]
   },
-  "figure": "/Users/hyunjunyi/AIscend/dental-extension/figures/e14_chexphoto_headtohead.png",
-  "generated_utc": "2026-08-19T12:58:06Z"
+  "figure": "/Users/christopherhuang/Documents/GitHub/dental-extension/figures/e14_chexphoto_headtohead.png",
+  "generated_utc": "2026-08-23T17:59:22Z"
 }

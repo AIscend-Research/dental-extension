@@ -147,7 +147,11 @@ def test_fixed_retake_always_spends_the_whole_budget(world):
 def test_unsound_arms_are_flagged_as_having_peeked(world):
     channel, calibrator = world
     d = make_docket("smoke", n_cases=100, budget=3, seed=9)
-    for name in ("greedy_diagnostic", "naive_best_shot"):
+    # oracle_instruction never reads the diagnosis channel, but it reads the
+    # true latent scene state to pick its instruction -- not G_t-measurable
+    # (A3) -- so it must be flagged peeked too, not just the arms that peek
+    # at the diagnosis score directly.
+    for name in ("greedy_diagnostic", "naive_best_shot", "oracle_instruction"):
         results = run_docket(d, policy_by_name(name), channel, calibrator)
         assert all(r.peeked for r in results)
         assert not score_results(name, results, d.burden).guaranteed

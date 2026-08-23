@@ -177,6 +177,13 @@ def apply_degradations(
 
     out = img.copy()
     out_boxes = None if boxes is None else np.asarray(boxes, dtype=np.float64).reshape(-1, 4)
+    # angle is the only step that can drop a box (Affine crops out-of-frame
+    # boxes instead of zeroing them); it runs at most once and always first,
+    # so `kept_indices` maps 1:1 into the ORIGINAL `boxes` the whole time --
+    # no later step touches it. Left unset (None) if angle never runs --
+    # DegradationResult.__post_init__ fills in the identity default from
+    # out_boxes itself in that case, same as the opencv arm.
+    kept_indices = None
     applied: dict[str, float] = {}
     step = 0
     for name in ["angle", "low_light", "glare", "blur", "jpeg"]:
@@ -185,12 +192,12 @@ def apply_degradations(
         sev = random.uniform(*severity_range)
         step_seed = None if seed is None else seed + step
         if name == "angle" and out_boxes is not None:
-            out, out_boxes, _kept = angle_with_boxes(out, sev, out_boxes, seed=step_seed)
+            out, out_boxes, kept_indices = angle_with_boxes(out, sev, out_boxes, seed=step_seed)
         else:
             out = DEGRADATIONS[name](out, sev, seed=step_seed)
         applied[name] = round(sev, 3)
         step += 1
-    return DegradationResult(image=out, severities=applied, boxes=out_boxes)
+    return DegradationResult(image=out, severities=applied, boxes=out_boxes, kept_indices=kept_indices)
 
 
 if __name__ == "__main__":

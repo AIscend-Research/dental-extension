@@ -184,7 +184,13 @@ class EvidentialCapture(CapturePolicy):
 
         return _result(
             case_id, ctx, outcome, n, machine, usabilities, scores, qualities, instructions,
-            peeked=False,
+            # oracle_instruction reads ctx.session.scene.factors -- the true
+            # latent state -- in _choose_instruction below, which is not
+            # G_t-measurable (A3). That arm must report peeked=True so the
+            # leaderboard's guaranteed/"ok" status isn't claimed for a run
+            # that structurally doesn't satisfy the theorem's hypotheses,
+            # even though it never reads the diagnosis channel itself.
+            peeked=self.oracle_instruction,
         )
 
     def _choose_instruction(

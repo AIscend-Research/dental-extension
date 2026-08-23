@@ -95,7 +95,7 @@ the first run (same seeds), confirming the additions didn't disturb anything:
 | confidence_threshold_selective | 0.300 | 30.0% | 0.877 | 70.0% | 1.00 | **unguaranteed** |
 | **evidential_capture** | **0.225** | 68.2% | 0.842 | 31.8% | 3.03 | ok |
 | one_step_lookahead | 0.223 | 67.6% | 0.841 | 32.4% | 3.03 | ok |
-| oracle_instruction | 0.219 | 66.4% | 0.843 | 33.6% | 3.04 | ok |
+| oracle_instruction | 0.219 | 66.4% | 0.843 | 33.6% | 3.04 | **unguaranteed** |
 | untargeted_evidential | 0.190 | 59.2% | 0.839 | 40.8% | 3.12 | ok |
 | fixed_retake | 0.145 | 58.0% | 0.853 | 42.0% | 4.00 | ok |
 | single_shot | 0.118 | 11.8% | 0.750 | 88.2% | 1.00 | ok |
@@ -115,6 +115,13 @@ fixing the rule closes the gap.** `oracle_instruction` reads the true latent
 scene and still does not beat `evidential_capture`; both apply the same
 greedy "fix the worst factor" rule, just with different information, so
 neither improving nor perfecting the confidence head was ever going to help.
+`oracle_instruction` is correctly flagged **unguaranteed** in the table above
+(fixed 2026-08-23; it previously showed "ok" by mistake): reading the true
+latent scene to choose an instruction is not `G_t`-measurable (violates A3),
+so it forfeits the formal guarantee exactly like `naive_best_shot` and
+`greedy_diagnostic` do, even though — unlike them — it never reads the
+diagnosis channel. It exists purely as a non-deployable upper bound on
+instruction quality, never as a candidate deployment policy.
 **`one_step_lookahead`** (new) tests the actual prediction this implies: same
 information as the deployable arm (predicted degradation and shot index
 only, never the true scene), but a decision rule that projects each

@@ -270,6 +270,23 @@ def to_detectron2_dicts(
     """
     from detectron2.structures import BoxMode
 
+    # Unlike class_balance/class_weights/repeat_factors, this function is
+    # multi-task-schema-only by design (see docstring: it needs all three of
+    # category_id_1/2/3 for the hierarchical loss). A flat-schema COCO dict
+    # has no category_id_3 on its annotations, so `ann.get("category_id_3",
+    # 0)` below would silently label every annotation class 0 instead of
+    # erroring -- fail loudly here instead.
+    if "categories_3" not in coco:
+        raise ValueError(
+            "to_detectron2_dicts() requires DENTEX's multi-task schema "
+            "(categories_1/2/3 + category_id_1/2/3 per annotation), not a "
+            "flat COCO categories/category_id schema -- got a coco dict with "
+            "no 'categories_3' key. class_balance()/class_weights()/"
+            "repeat_factors() support both schemas via _category_schema(); "
+            "this function does not, because DiffusionDet's hierarchical "
+            "loss needs all three tasks, not a single collapsed category_id."
+        )
+
     image_root = Path(image_root)
     by_image = index_annotations(coco)
     wanted = set(image_ids) if image_ids is not None else None

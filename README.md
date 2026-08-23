@@ -37,9 +37,9 @@ Results, including five refuted predictions of our own design, are in
 one real carious tooth photographed four times, with the instructions the system
 issued and the evidence crossing its burden of proof. The mechanism is drawn in
 [figures/diagram_firewall.svg](figures/diagram_firewall.svg) and
-[figures/diagram_verdict_loop.svg](figures/diagram_verdict_loop.svg). All eleven
-exhibits are collected in a browsable dossier artifact:
-<https://claude.ai/code/artifact/827ba957-b91e-4a0a-a6f0-14ee0a8b9258>
+[figures/diagram_verdict_loop.svg](figures/diagram_verdict_loop.svg). The full set
+of exhibits, including every experiment's figure, lives in
+[figures/](figures/).
 
 ```bash
 .venv/bin/python -m experiments.run_all      # ~13 min, CPU only

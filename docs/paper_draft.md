@@ -115,7 +115,7 @@ Three contributions follow, none requiring new photography:
 3. **The Docket** (§5): a frozen, seeded benchmark maximizing justified
    verdicts per photograph under a mandated standard of proof, now carrying
    two non-evidential baselines from the selective-prediction and
-   burst-photography literatures alongside the authors' own arms, so the
+   conformal-risk-control literatures alongside the authors' own arms, so the
    comparison is not authors-only.
 
 We report five predictions this design got wrong (§5, summary table), kept
@@ -175,8 +175,9 @@ G_t-measurability rather than merely being asked to respect it.
 
 **3.3 What A1 reduces to.** A1 is the one genuinely assumed condition. We
 prove a Markov screening lemma directly from the simulator's generative code
-— conditional on the true rendered severities R_t, the pair (S_t, D_t) is
-independent of everything earlier in the session — and use it to show A1
+— conditional on the true rendered severities R_t, the true label Y, and the
+case difficulty δ, the pair (S_t, D_t) is independent of everything earlier
+in the session — and use it to show A1
 reduces exactly to one named condition (A1′): that, given the same predicted
 degradation stratum, the true image quality at test time (inside a retake
 loop) stochastically dominates the calibration population's (first shots,
@@ -240,7 +241,10 @@ raw rate and pays for it in accuracy and in the guarantee it no longer has.
 **New in this draft: one-step lookahead.** `oracle_instruction` — reading
 the *true* latent scene but still applying the greedy "fix the worst factor"
 rule — does not beat the deployable arm, confirming the rule, not the
-information, is the bottleneck. A lookahead policy that projects each
+information, is the bottleneck. (`oracle_instruction` is itself unguaranteed:
+reading the true scene to pick an instruction is not `G_t`-measurable, so it
+is reported here purely as a non-deployable upper bound on instruction
+quality, not a candidate policy.) A lookahead policy that projects each
 candidate correction's expected side effects through the coupling structure
 (using only the predicted degradation channel and shot index — no
 information the deployable arm lacks) matches `evidential_capture` at the

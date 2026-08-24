@@ -42,17 +42,28 @@ Three sweeps:
      matching E4's existing power sweep at the same grid points, so the two
      experiments are read together: E4 shows what noise costs in verdicts per
      capture, this shows what it costs in the guarantee itself.
+  E. the one gap sweep D's structural explanation left open (theory doc #6,
+     updated 2026-08-23): the argument for why A1' survives rising head_noise
+     depends on the SAME noise kernel corrupting both the calibration and
+     test populations alike. This sweeps the case where it does not -- the
+     confidence head is well-behaved at calibration time (a controlled
+     bench-test setting) but noisier at deployment/retake-loop time (the
+     field) -- and checks whether that asymmetry, not just noise magnitude,
+     is what actually breaks A1'.
 
 Run: .venv/bin/python -m experiments.e2_validity
 """
 
 from __future__ import annotations
 
+from dataclasses import replace
+
 import numpy as np
 
 from experiments.common import (
     CLINIC_DIFFICULTY,
     PREVALENCE,
+    World,
     banner,
     build_world,
     figure_path,
@@ -83,6 +94,14 @@ FIXED_ALPHA = 0.05
 # validity failure if the theory's mechanism-2-dominates-mechanism-1
 # prediction is right, rather than stopping at the point E4 happened to stop.
 HEAD_NOISE_GRID = [0.0, 0.06, 0.12, 0.25, 0.40, 0.60, 0.80, 1.00]
+# Calibration-time noise held at the default (a controlled bench setting);
+# test-time noise swept upward from it (the field). 0.12 is the symmetric
+# baseline (matches sweep D's default point); the rest push the asymmetry
+# well past what sweep D's SYMMETRIC sweep covered at its own endpoint (1.00),
+# since the structural argument for why symmetric noise didn't break A1'
+# explicitly does not apply once the two populations see different noise.
+HEAD_NOISE_CAL = 0.12
+HEAD_NOISE_TEST_GRID = [0.12, 0.25, 0.40, 0.60, 0.90, 1.20, 1.60, 2.00]
 
 
 def run_null_sessions(
@@ -312,12 +331,64 @@ def main() -> None:
               f"mechanism in theory_anytime_validity.md #6) but the noise level needed "
               f"to trigger it is at or beyond this grid.")
 
-    fig = make_figure(sweep_a, sweep_b, runs, head_noise_sweep)
+    # -- Sweep E: what if the noise ISN'T symmetric across the two populations? ---
+    print(f"\n[E] the residual A1' gap: crossing rate vs ASYMMETRIC head_noise "
+          f"(calibration fixed at {HEAD_NOISE_CAL:.2f}, test swept; alpha={FIXED_ALPHA}, "
+          f"STRATIFIED arm only)")
+    cal_world = build_world(head_noise=HEAD_NOISE_CAL)
+    asymmetry_sweep = []
+    for head_noise_test in HEAD_NOISE_TEST_GRID:
+        # Same separation/loss_scale/sigma/gamma/head_bias as calibration --
+        # only head_noise differs, so this isolates the confidence head's
+        # noise asymmetry from every other difference a "worse deployment
+        # site" could also introduce.
+        test_channel = replace(cal_world.channel, head_noise=head_noise_test)
+        test_world = World(
+            channel=test_channel, calibrator=cal_world.calibrator,
+            calibration_data=cal_world.calibration_data,
+            clean_auc=cal_world.clean_auc, clinic_auc_value=cal_world.clinic_auc,
+        )
+        out = run_null_sessions(
+            test_world, cal_world.calibrator, "stratified", BUDGET,
+            N_NULL_SESSIONS // 2, seed=500,
+        )
+        ev = out["evidence"]
+        k = int(np.sum(ev >= 1.0 / FIXED_ALPHA))
+        n = len(ev)
+        rate = k / n
+        lo, hi = wilson_lower(k, n), wilson_upper(k, n)
+        asymmetry_sweep.append({
+            "head_noise_cal": HEAD_NOISE_CAL,
+            "head_noise_test": head_noise_test,
+            "crossing_rate": rate,
+            "ci_lo": lo, "ci_hi": hi,
+            "violates": bool(lo > FIXED_ALPHA),
+        })
+        flag = "  VIOLATION" if asymmetry_sweep[-1]["violates"] else ""
+        print(f"  test_noise={head_noise_test:.2f} (cal={HEAD_NOISE_CAL:.2f})  "
+              f"rate={rate:.4f}  ci=[{lo:.4f}, {hi:.4f}]{flag}")
+    n_violations_e = sum(1 for r in asymmetry_sweep if r["violates"])
+    if n_violations_e:
+        first = next(r["head_noise_test"] for r in asymmetry_sweep if r["violates"])
+        print(f"  A1' breaks under asymmetric noise starting at test_noise={first:.2f} "
+              f"({n_violations_e}/{len(HEAD_NOISE_TEST_GRID)} grid points violate) -- "
+              f"confirms the residual gap named in theory_anytime_validity.md #6: the "
+              f"symmetric-noise argument does not extend to a confidence head that is "
+              f"specifically worse under deployment/retake-loop conditions than it was "
+              f"at calibration time.")
+    else:
+        print(f"  no violation up to test_noise={HEAD_NOISE_TEST_GRID[-1]:.2f} "
+              f"({HEAD_NOISE_TEST_GRID[-1]/HEAD_NOISE_CAL:.1f}x the calibration noise) -- "
+              f"A1' is more robust to this asymmetry than the structural argument alone "
+              f"would have predicted needing to check.")
+
+    fig = make_figure(sweep_a, sweep_b, runs, head_noise_sweep, asymmetry_sweep)
     print(f"\nfigure -> {fig}")
 
     save_table("e2_validity_alpha_sweep", sweep_a)
     save_table("e2_validity_budget_sweep", sweep_b)
     save_table("e2_validity_head_noise_sweep", head_noise_sweep)
+    save_table("e2_validity_head_noise_asymmetry_sweep", asymmetry_sweep)
     save_results(
         "e2_validity",
         {
@@ -328,6 +399,7 @@ def main() -> None:
             "budget_sweep": sweep_b,
             "scope_of_guarantee": scope,
             "head_noise_sweep": head_noise_sweep,
+            "head_noise_asymmetry_sweep": asymmetry_sweep,
             "mean_shots": {a: float(runs[a]["n_shots"].mean()) for a in arms},
             "figure": fig,
         },
@@ -335,7 +407,7 @@ def main() -> None:
     print("results -> results/e2_validity.json")
 
 
-def make_figure(sweep_a, sweep_b, runs, head_noise_sweep) -> str:
+def make_figure(sweep_a, sweep_b, runs, head_noise_sweep, asymmetry_sweep) -> str:
     import matplotlib
 
     matplotlib.use("Agg")
@@ -348,7 +420,7 @@ def make_figure(sweep_a, sweep_b, runs, head_noise_sweep) -> str:
         "best_shot": ("^--", "tab:red"),
         "greedy": ("v--", "tab:purple"),
     }
-    fig, axes = plt.subplots(1, 4, figsize=(19.5, 4.6))
+    fig, axes = plt.subplots(1, 5, figsize=(24, 4.6))
 
     ax = axes[0]
     alphas = [r["alpha"] for r in sweep_a]
@@ -406,6 +478,24 @@ def make_figure(sweep_a, sweep_b, runs, head_noise_sweep) -> str:
     ax.set_ylabel("false-conviction rate")
     ax.set_title("(d) the falsifiable A1' prediction:\nvalidity itself vs confidence-head noise")
     ax.legend(fontsize=8)
+    ax.grid(alpha=0.3)
+
+    ax = axes[4]
+    tn = [r["head_noise_test"] for r in asymmetry_sweep]
+    rates_e = [r["crossing_rate"] for r in asymmetry_sweep]
+    los_e = [r["ci_lo"] for r in asymmetry_sweep]
+    his_e = [r["ci_hi"] for r in asymmetry_sweep]
+    ax.axhline(FIXED_ALPHA, color="k", ls=":", lw=1.4, label=f"nominal alpha = {FIXED_ALPHA}")
+    ax.axvline(HEAD_NOISE_CAL, color="grey", ls="--", lw=1.0, label=f"symmetric (cal={HEAD_NOISE_CAL:.2f})")
+    ax.fill_between(tn, los_e, his_e, alpha=0.2, color="tab:purple", label="Wilson CI")
+    ax.plot(tn, rates_e, "o-", color="tab:purple", label="stratified")
+    for r in asymmetry_sweep:
+        if r["violates"]:
+            ax.plot(r["head_noise_test"], r["crossing_rate"], "x", color="tab:red", ms=12, mew=2.5, zorder=5)
+    ax.set_xlabel(f"test-time head_noise (calibration fixed at {HEAD_NOISE_CAL:.2f})")
+    ax.set_ylabel("false-conviction rate")
+    ax.set_title("(e) the residual gap:\nasymmetric calibration/deployment noise")
+    ax.legend(fontsize=7)
     ax.grid(alpha=0.3)
 
     fig.suptitle(

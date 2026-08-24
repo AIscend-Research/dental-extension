@@ -143,34 +143,62 @@ def main() -> None:
         print(f"  K={K}: {cells}")
 
     # -- C: the standards ladder -------------------------------------------
-    print("\n[C] where the burden becomes unmeetable (evidential_capture, LR evidence)")
+    # `confidence_threshold_selective` runs the same ladder as evidential_capture,
+    # not just evidential_capture. It was previously checked for guarantee
+    # violations only at the loose headline burden (docs/experiments_results.md:
+    # "not yet checked here at a strict standard for this specific arm") --
+    # E2's own pattern (naive methods look fine loose, fail strict) predicts it
+    # should violate as the standard tightens, since it peeks by construction
+    # (thresholds the raw score directly). Checking, not assuming.
+    print("\n[C] where the burden becomes unmeetable (evidential_capture + "
+          "confidence_threshold_selective, LR evidence)")
     ladder_rows = []
-    for label, burden in LADDER:
-        d = make_docket(
-            "ladder", n_cases=N_CASES // 2, prevalence=PREVALENCE, budget=HEADLINE_BUDGET,
-            burden=burden, clinic_difficulty=CLINIC_DIFFICULTY, seed=13,
+    for arm_name in ["evidential_capture", "confidence_threshold_selective"]:
+        for label, burden in LADDER:
+            d = make_docket(
+                "ladder", n_cases=N_CASES // 2, prevalence=PREVALENCE, budget=HEADLINE_BUDGET,
+                burden=burden, clinic_difficulty=CLINIC_DIFFICULTY, seed=13,
+            )
+            r = score_results(
+                arm_name,
+                run_docket(d, policy_by_name(arm_name), world.channel, lr_calibrator),
+                burden,
+            )
+            ladder_rows.append({
+                "arm": arm_name,
+                "standard": label,
+                "alpha_convict": burden.convict.alpha,
+                "alpha_discharge": burden.discharge.alpha,
+                "verdicts_per_capture": r.verdicts_per_capture,
+                "verdict_rate": r.verdict_rate,
+                "verdict_accuracy": r.verdict_accuracy,
+                "refer_rate": r.refer_rate,
+                "false_conviction_rate": r.false_conviction_rate,
+                "false_discharge_rate": r.false_discharge_rate,
+                "guaranteed": r.guaranteed,
+                "violated": r.convict_violation or r.discharge_violation,
+            })
+            flag = "  VIOLATION" if ladder_rows[-1]["violated"] else ""
+            print(
+                f"  [{arm_name:<28}] {label:<30} VPC {r.verdicts_per_capture:.3f} | decided "
+                f"{r.verdict_rate*100:5.1f}% | acc {r.verdict_accuracy:.3f} | escalated "
+                f"{r.refer_rate*100:5.1f}% | FCR {r.false_conviction_rate:.4f} | "
+                f"FDR {r.false_discharge_rate:.4f}{flag}"
+            )
+    n_cts_violations = sum(
+        1 for row in ladder_rows if row["arm"] == "confidence_threshold_selective" and row["violated"]
+    )
+    if n_cts_violations:
+        first = next(
+            row["standard"] for row in ladder_rows
+            if row["arm"] == "confidence_threshold_selective" and row["violated"]
         )
-        r = score_results(
-            "evidential_capture",
-            run_docket(d, policy_by_name("evidential_capture"), world.channel, lr_calibrator),
-            burden,
-        )
-        ladder_rows.append({
-            "standard": label,
-            "alpha_convict": burden.convict.alpha,
-            "alpha_discharge": burden.discharge.alpha,
-            "verdicts_per_capture": r.verdicts_per_capture,
-            "verdict_rate": r.verdict_rate,
-            "verdict_accuracy": r.verdict_accuracy,
-            "refer_rate": r.refer_rate,
-            "false_conviction_rate": r.false_conviction_rate,
-            "false_discharge_rate": r.false_discharge_rate,
-            "violated": r.convict_violation or r.discharge_violation,
-        })
-        print(
-            f"  {label:<30} VPC {r.verdicts_per_capture:.3f} | decided {r.verdict_rate*100:5.1f}% "
-            f"| acc {r.verdict_accuracy:.3f} | escalated {r.refer_rate*100:5.1f}%"
-        )
+        print(f"  confidence_threshold_selective violates starting at standard "
+              f"'{first}' ({n_cts_violations}/{len(LADDER)} rungs) -- confirms the predicted "
+              f"loose-fine/strict-fails signature for this specific arm.")
+    else:
+        print("  confidence_threshold_selective registered no violation anywhere on the "
+              "ladder tested -- the predicted failure did not appear at these standards.")
 
     fig = make_figure(headline, budget_rows, ladder_rows)
     print(f"\nfigure -> {fig}")
@@ -238,13 +266,17 @@ def make_figure(headline, budget_rows, ladder_rows) -> str:
     ax.legend(fontsize=7)
     ax.grid(alpha=0.3)
 
-    # (c) the ladder
+    # (c) the ladder -- evidential_capture only; confidence_threshold_selective's
+    # run through the same ladder is in results/e3_ladder.csv (the "arm" column)
+    # and results/e3_leaderboard.json, not plotted here to keep this panel's
+    # original reading unchanged.
     ax = axes[2]
-    labels = [r["standard"] for r in ladder_rows]
+    ec_ladder = [r for r in ladder_rows if r["arm"] == "evidential_capture"]
+    labels = [r["standard"] for r in ec_ladder]
     x = np.arange(len(labels))
-    ax.bar(x, [r["verdict_rate"] for r in ladder_rows], color="tab:blue", label="decided")
-    ax.bar(x, [r["refer_rate"] for r in ladder_rows],
-           bottom=[r["verdict_rate"] for r in ladder_rows], color="tab:grey", label="escalated")
+    ax.bar(x, [r["verdict_rate"] for r in ec_ladder], color="tab:blue", label="decided")
+    ax.bar(x, [r["refer_rate"] for r in ec_ladder],
+           bottom=[r["verdict_rate"] for r in ec_ladder], color="tab:grey", label="escalated")
     ax.set_xticks(x, [l.replace(" ", "\n") for l in labels], fontsize=6.5)
     ax.set_ylabel("fraction of cases")
     ax.set_title("(c) where a phone stops being admissible")

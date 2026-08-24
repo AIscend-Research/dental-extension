@@ -287,6 +287,72 @@
       "violates": false
     }
   ],
+  "head_noise_asymmetry_sweep": [
+    {
+      "head_noise_cal": 0.12,
+      "head_noise_test": 0.12,
+      "crossing_rate": 0.0006,
+      "ci_lo": 0.0002750097221404114,
+      "ci_hi": 0.0013085419406528096,
+      "violates": false
+    },
+    {
+      "head_noise_cal": 0.12,
+      "head_noise_test": 0.25,
+      "crossing_rate": 0.0003,
+      "ci_lo": 0.00010203035287762114,
+      "ci_hi": 0.0008817517174022601,
+      "violates": false
+    },
+    {
+      "head_noise_cal": 0.12,
+      "head_noise_test": 0.4,
+      "crossing_rate": 0.0003,
+      "ci_lo": 0.00010203035287762114,
+      "ci_hi": 0.0008817517174022601,
+      "violates": false
+    },
+    {
+      "head_noise_cal": 0.12,
+      "head_noise_test": 0.6,
+      "crossing_rate": 0.0002,
+      "ci_lo": 5.4847779209068104e-05,
+      "ci_hi": 0.0007290110935663664,
+      "violates": false
+    },
+    {
+      "head_noise_cal": 0.12,
+      "head_noise_test": 0.9,
+      "crossing_rate": 0.0001,
+      "ci_lo": 1.765221952685649e-05,
+      "ci_hi": 0.0005662834557441313,
+      "violates": false
+    },
+    {
+      "head_noise_cal": 0.12,
+      "head_noise_test": 1.2,
+      "crossing_rate": 0.0,
+      "ci_lo": 0.0,
+      "ci_hi": 0.00038401247776654115,
+      "violates": false
+    },
+    {
+      "head_noise_cal": 0.12,
+      "head_noise_test": 1.6,
+      "crossing_rate": 0.0,
+      "ci_lo": 0.0,
+      "ci_hi": 0.00038401247776654115,
+      "violates": false
+    },
+    {
+      "head_noise_cal": 0.12,
+      "head_noise_test": 2.0,
+      "crossing_rate": 0.0,
+      "ci_lo": 0.0,
+      "ci_hi": 0.00038401247776654115,
+      "violates": false
+    }
+  ],
   "mean_shots": {
     "stratified": 4.0,
     "likelihood_ratio": 4.0,
@@ -295,5 +361,5 @@
     "greedy": 2.141
   },
   "figure": "/Users/christopherhuang/Documents/GitHub/dental-extension/figures/e2_validity.png",
-  "generated_utc": "2026-08-23T18:55:13Z"
+  "generated_utc": "2026-08-23T22:09:32Z"
 }

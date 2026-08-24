@@ -266,7 +266,10 @@ larger budgets (K=6: 0.239 vs. 0.239 vs. 0.233; K=8: 0.249 vs. 0.248 vs.
 0.239 verdicts per capture) — imperfect information with a smarter rule
 beating perfect information with a naive one. **New non-evidential
 baselines**: a SelectiveNet-style raw-confidence threshold (single shot, no
-calibration) and, in a separate fairly-calibrated comparison (E9), burst
+calibration — its error rate does not move with the stated standard at all,
+since it never reads the burden, so it violates only once the ladder tightens
+past its one fixed rate, a cleanly different failure shape from multiplicity)
+and, in a separate fairly-calibrated comparison (E9), burst
 averaging against sequential wealth accumulation at equal capture cost —
 sequential accumulation is mildly ahead (0.142 vs. 0.132 VPC) but fused
 averaging is noticeably more accurate when it decides (0.931 vs. 0.847),
@@ -434,11 +437,11 @@ nominal bound. A structural argument in `docs/theory_anytime_validity.md` §6
 explains the high-noise end of that finding: the confidence head corrupts
 both the calibration and test populations' stratum assignment with the same
 unbiased noise kernel, so the predicted failure needed an asymmetry between
-the two populations that this design does not have. Whether a confidence
-head whose noise is *not* symmetric across calibration and deployment
-conditions could still break A1′ remains untested — a head that degrades
-specifically under retake-loop conditions it was not calibrated on is not a
-design this codebase builds.
+the two populations that this design does not have. That asymmetric case was
+then checked directly too: calibration noise fixed, test-time noise swept to
+16.7× it — no violation there either, though this second result is
+empirically robust without a comparably rigorous explanation, and is reported
+as an open question for future theoretical work rather than a closed gap.
 
 **DENTEX's own acknowledged limitations propagate.** Labels come from a
 single-review-pass protocol (a student annotator, corrected by one of three

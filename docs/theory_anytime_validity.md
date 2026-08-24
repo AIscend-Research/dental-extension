@@ -332,6 +332,35 @@ the predicted failure needed to be violated in order to appear, and that
 premise is a real property of this generative model, not an assumption
 smuggled in.
 
+**The asymmetric case, checked directly too (2026-08-23, E2 sweep E).** The
+gap just named -- a confidence head whose noise is *not* symmetric across
+calibration and test -- was checked, not left as a caveat. Calibration noise
+held fixed at 0.12; test-time (retake-loop/deployment) noise swept up to
+2.00, a 16.7x asymmetry, with separation/loss_scale/sigma/gamma/head_bias
+held identical across both so only the confidence head's noise differs.
+**No violation anywhere in that range either** -- the crossing rate again
+trends toward zero, not toward `alpha = 0.05`. `results/e2_validity.json:
+head_noise_asymmetry_sweep`, `figures/e2_validity.png` panel (e).
+
+This is a more surprising result than sweep D's, and it should be stated
+honestly as *less* explained. The limiting-case argument for sweep D relies
+specifically on the *same* noise kernel corrupting both populations, so that
+as noise grows, conditioning on the stratum becomes uninformative for both
+alike and the comparison collapses to a shared unconditional baseline; that
+premise does not hold here by construction (calibration noise is held fixed,
+low, and genuinely informative, while test noise grows toward
+uninformative). A plausible partial account: the raw equilibrium-shift
+property (E1) that ultimately does the work in the symmetric case is a
+property of the *policy's correction dynamics*, not of the confidence head at
+all, so a noisier test-time head degrades how well the stratification
+targets that improvement without necessarily erasing the improvement itself
+-- but this is an intuition, not a derivation, and unlike sweep D's finding
+it does not come with a limiting-case proof attached. Treat the asymmetric
+result as a robust empirical finding across the range tested, and a
+concrete, sharper open question for future theoretical work: is there an
+asymmetry magnitude, or a differently-shaped one (e.g. a systematic bias
+rather than added variance), where it does eventually break?
+
 **Summary of the reduction.** A1 is not proved outright for an arbitrary
 generative model or policy -- proving it in general would mean proving a
 distributional comparison that depends on magnitudes (`head_noise` vs.
@@ -340,14 +369,14 @@ that in general. What the argument above does establish, for the simulator
 and policies actually used here, is stronger than "reduced to a named
 assumption": A1 reduces *exactly* to (A1') via the Markov screening lemma,
 the specific failure mode that reduction predicted was checked directly
-across a wide `head_noise` range and did not occur, and there is now a
-structural explanation -- not just a numerical coincidence -- for why the
-common-noise-kernel design of this confidence head forecloses it. The
-remaining gap is narrower than before: whether (A1') can fail under a
-confidence head whose noise is *not* symmetric across the calibration and
-test populations (e.g. a head that degrades specifically under retake-loop
-conditions it was not calibrated on) -- a design this codebase does not build
-and therefore did not test.
+across a wide `head_noise` range (both symmetric and, further, asymmetric
+between calibration and test) and did not occur in either, and there is a
+structural explanation -- not just a numerical coincidence -- for the
+symmetric case specifically. The remaining gap is now a matter of theoretical
+completeness rather than an unchecked empirical worry: nothing found here
+constitutes a proof that (A1') holds in general, but the two most natural
+ways it was predicted to fail were both tested directly and neither
+occurred.
 
 ## 7. What is claimed
 
@@ -365,7 +394,10 @@ and therefore did not test.
    mechanistic account of when that condition should hold (genuine
    equilibrium-shifting corrections) versus fail (noise-driven stratum
    misclassification as `head_noise` grows) — a falsifiable prediction that
-   was then checked directly (E2 sweep D) across `head_noise` up to 1.00, 2.5x
-   past E4's original sweep, and did not occur; a structural argument (§6)
-   explains why the common-noise-kernel confidence head used throughout this
-   work forecloses the predicted failure at the high-noise limit.
+   was then checked directly two ways (§6): symmetric `head_noise` up to
+   1.00 (E2 sweep D, 2.5x past E4's original sweep — did not occur, with a
+   structural, limiting-case explanation for why), and, further, asymmetric
+   noise between calibration and deployment up to a 16.7x gap (E2 sweep E —
+   also did not occur, though this second result is empirically robust
+   without a comparably rigorous mechanistic account, and is named as an
+   open question rather than claimed as understood).

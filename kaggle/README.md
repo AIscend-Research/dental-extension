@@ -10,8 +10,9 @@ each notebook; the honest gaps are called out rather than papered over.
 
 1. **`00_setup_and_sanity_check.ipynb`** — installs the detector stack
    (detectron2 + HierarchicalDet), downloads and correctly converts the
-   backbone weights, confirms a real forward pass and training step on 2 real
-   DENTEX images. Run this first on any new Kaggle notebook/session; if
+   backbone weights, confirms a real forward pass on 2 real DENTEX images and
+   a training step on 1 (2 OOMs on a T4 during backward). Run this first on
+   any new Kaggle notebook/session; if
    something's going to break, it breaks here, cheaply, not 30 minutes into
    the real training run.
 2. **`01_train_baseline_detector.ipynb`** — the real training run (40k

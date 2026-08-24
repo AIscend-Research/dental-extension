@@ -240,5 +240,5 @@
   "targeting_gain_heuristic": 0.027711942020526625,
   "retained_fraction": 0.7460175294748891,
   "verdict": "ORDERING PARTIALLY SURVIVES -- targeting still helps with a scalar-only instrument, but noticeably less than with per-artifact type prediction. The head's type prediction is doing real, but not all, of the work.",
-  "generated_utc": "2026-08-23T17:29:33Z"
+  "generated_utc": "2026-08-23T23:15:07Z"
 }

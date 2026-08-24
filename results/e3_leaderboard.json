@@ -1064,6 +1064,7 @@
   ],
   "ladder": [
     {
+      "arm": "evidential_capture",
       "standard": "preponderance",
       "alpha_convict": 0.5,
       "alpha_discharge": 0.5,
@@ -1073,9 +1074,11 @@
       "refer_rate": 0.14949999999999997,
       "false_conviction_rate": 0.13420245398773006,
       "false_discharge_rate": 0.1235632183908046,
+      "guaranteed": true,
       "violated": false
     },
     {
+      "arm": "evidential_capture",
       "standard": "headline (prep / clear+conv)",
       "alpha_convict": 0.5,
       "alpha_discharge": 0.2,
@@ -1085,9 +1088,11 @@
       "refer_rate": 0.3345,
       "false_conviction_rate": 0.16180981595092025,
       "false_discharge_rate": 0.020114942528735632,
+      "guaranteed": true,
       "violated": false
     },
     {
+      "arm": "evidential_capture",
       "standard": "clear and convincing",
       "alpha_convict": 0.2,
       "alpha_discharge": 0.2,
@@ -1097,9 +1102,11 @@
       "refer_rate": 0.519,
       "false_conviction_rate": 0.023006134969325152,
       "false_discharge_rate": 0.02442528735632184,
+      "guaranteed": true,
       "violated": false
     },
     {
+      "arm": "evidential_capture",
       "standard": "clear+conv / beyond doubt",
       "alpha_convict": 0.2,
       "alpha_discharge": 0.05,
@@ -1109,9 +1116,11 @@
       "refer_rate": 0.736,
       "false_conviction_rate": 0.023006134969325152,
       "false_discharge_rate": 0.0028735632183908046,
+      "guaranteed": true,
       "violated": false
     },
     {
+      "arm": "evidential_capture",
       "standard": "beyond reasonable doubt",
       "alpha_convict": 0.05,
       "alpha_discharge": 0.05,
@@ -1121,9 +1130,11 @@
       "refer_rate": 0.8714999999999999,
       "false_conviction_rate": 0.0023006134969325155,
       "false_discharge_rate": 0.0028735632183908046,
+      "guaranteed": true,
       "violated": false
     },
     {
+      "arm": "evidential_capture",
       "standard": "near certainty",
       "alpha_convict": 0.01,
       "alpha_discharge": 0.01,
@@ -1133,9 +1144,94 @@
       "refer_rate": 0.9875,
       "false_conviction_rate": 0.0,
       "false_discharge_rate": 0.0,
+      "guaranteed": true,
       "violated": false
+    },
+    {
+      "arm": "confidence_threshold_selective",
+      "standard": "preponderance",
+      "alpha_convict": 0.5,
+      "alpha_discharge": 0.5,
+      "verdicts_per_capture": 0.293,
+      "verdict_rate": 0.293,
+      "verdict_accuracy": 0.8498293515358362,
+      "refer_rate": 0.7070000000000001,
+      "false_conviction_rate": 0.04294478527607362,
+      "false_discharge_rate": 0.04597701149425287,
+      "guaranteed": false,
+      "violated": false
+    },
+    {
+      "arm": "confidence_threshold_selective",
+      "standard": "headline (prep / clear+conv)",
+      "alpha_convict": 0.5,
+      "alpha_discharge": 0.2,
+      "verdicts_per_capture": 0.293,
+      "verdict_rate": 0.293,
+      "verdict_accuracy": 0.8498293515358362,
+      "refer_rate": 0.7070000000000001,
+      "false_conviction_rate": 0.04294478527607362,
+      "false_discharge_rate": 0.04597701149425287,
+      "guaranteed": false,
+      "violated": false
+    },
+    {
+      "arm": "confidence_threshold_selective",
+      "standard": "clear and convincing",
+      "alpha_convict": 0.2,
+      "alpha_discharge": 0.2,
+      "verdicts_per_capture": 0.293,
+      "verdict_rate": 0.293,
+      "verdict_accuracy": 0.8498293515358362,
+      "refer_rate": 0.7070000000000001,
+      "false_conviction_rate": 0.04294478527607362,
+      "false_discharge_rate": 0.04597701149425287,
+      "guaranteed": false,
+      "violated": false
+    },
+    {
+      "arm": "confidence_threshold_selective",
+      "standard": "clear+conv / beyond doubt",
+      "alpha_convict": 0.2,
+      "alpha_discharge": 0.05,
+      "verdicts_per_capture": 0.293,
+      "verdict_rate": 0.293,
+      "verdict_accuracy": 0.8498293515358362,
+      "refer_rate": 0.7070000000000001,
+      "false_conviction_rate": 0.04294478527607362,
+      "false_discharge_rate": 0.04597701149425287,
+      "guaranteed": false,
+      "violated": false
+    },
+    {
+      "arm": "confidence_threshold_selective",
+      "standard": "beyond reasonable doubt",
+      "alpha_convict": 0.05,
+      "alpha_discharge": 0.05,
+      "verdicts_per_capture": 0.293,
+      "verdict_rate": 0.293,
+      "verdict_accuracy": 0.8498293515358362,
+      "refer_rate": 0.7070000000000001,
+      "false_conviction_rate": 0.04294478527607362,
+      "false_discharge_rate": 0.04597701149425287,
+      "guaranteed": false,
+      "violated": false
+    },
+    {
+      "arm": "confidence_threshold_selective",
+      "standard": "near certainty",
+      "alpha_convict": 0.01,
+      "alpha_discharge": 0.01,
+      "verdicts_per_capture": 0.293,
+      "verdict_rate": 0.293,
+      "verdict_accuracy": 0.8498293515358362,
+      "refer_rate": 0.7070000000000001,
+      "false_conviction_rate": 0.04294478527607362,
+      "false_discharge_rate": 0.04597701149425287,
+      "guaranteed": false,
+      "violated": true
     }
   ],
   "figure": "/Users/christopherhuang/Documents/GitHub/dental-extension/figures/e3_leaderboard.png",
-  "generated_utc": "2026-08-23T16:51:50Z"
+  "generated_utc": "2026-08-23T22:10:52Z"
 }

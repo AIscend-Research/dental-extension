@@ -289,27 +289,94 @@ and they point in opposite directions:
 
 Which mechanism dominates is governed by `head_noise` relative to how much a
 genuine correction moves `q`, i.e. it is an empirical question about
-magnitudes, not one the primitives settle on their own -- but it is now a
+magnitudes, not one the primitives settle on their own -- but it was a
 *named* empirical question with a specific, falsifiable shape: **(A1') should
 degrade, and eventually fail, as `head_noise` rises past the point where
 mechanism 2 dominates mechanism 1**, holding everything else fixed. E4's
 confidence-head-quality ablation already sweeps `head_noise` and shows *power*
-(VPC) falling as it rises (0.230 -> 0.125); what it does not yet show is
-whether *validity itself* starts to erode over that same sweep, which is the
-sharper, more dangerous failure this reduction predicts should appear
-eventually and which a future E2-style null sweep over `head_noise` could
-check directly.
+(VPC) falling as it rises (0.230 -> 0.125).
 
-**Summary of the reduction.** A1 is not proved outright -- proving it in
-general would mean proving a distributional comparison that depends on
-magnitudes (`head_noise` vs. correction strength) the primitives leave free,
-and no clean theorem removes that. What the argument above does establish
-from primitives alone, as a real proof rather than a restated assumption, is
-that A1 reduces *exactly* to (A1') via the Markov screening lemma, and that
-(A1')'s truth is governed by a specific, nameable race between two
-mechanisms already present in the simulator's design. That is a strictly
-smaller and more falsifiable gap than "residual dependence... not ruled
-out," even though it is still a gap.
+**Checked directly (2026-08-23, E2 sweep D).** The prediction does not hold:
+across `head_noise` in `{0.00, 0.06, 0.12, 0.25, 0.40, 0.60, 0.80, 1.00}` --
+extended well past E4's original 0.40 endpoint, to 1.00, a noise standard
+deviation as large as the severity scale itself -- the STRATIFIED arm's
+false-conviction rate against `alpha = 0.05` never exceeds 0.0009 (Wilson
+upper bound at every point stays below 0.0018), and if anything trends
+*toward* zero as noise rises (0.0005 at `head_noise=0`, 0.0000 by
+`head_noise=0.60`), not toward the nominal bound. No violation anywhere in
+the tested range. `results/e2_validity.json:head_noise_sweep`,
+`figures/e2_validity.png` panel (d).
+
+**Why mechanism 2 does not win here, as far as the limit case makes
+precise.** `D_t = R_t + head_bias + Normal(0, head_noise)` is the *same*
+noise kernel, and `quality(·)` the same deterministic map, for both the
+calibration population (`R^cal ~ pi_1`) and the test population (`R_t` under
+the policy's correction history) -- nothing in the generative code lets the
+confidence head be more or less accurate for one population than the other.
+As `head_noise -> infinity`, conditioning on `Z = zeta(D) = z` becomes
+asymptotically uninformative about `R` for *both* populations alike, so
+`q | Z=z` converges to the unconditional law of `q` under each population's
+own `R`-distribution, independently of `z`. In that limit (A1') collapses to
+asking whether the policy's *unconditional* post-correction quality
+stochastically dominates a fresh first draw's -- exactly the raw
+equilibrium-shift property E1 already measures directly (mean true usability
++0.1098, first shot to last), with the stratification machinery contributing
+nothing to that comparison one way or the other. Symmetric noise coarsening
+a shared conditioning variable degrades how much *extra* power stratification
+buys on top of that raw improvement (E4's falling VPC), but it does not, by
+this argument, reverse an ordering that already holds unconditionally. This
+is a rigorous account of the high-noise end of the sweep, not a proof that
+covers every intermediate `head_noise` or every policy; it identifies the
+structural reason (a common, unbiased noise kernel across both populations)
+the predicted failure needed to be violated in order to appear, and that
+premise is a real property of this generative model, not an assumption
+smuggled in.
+
+**The asymmetric case, checked directly too (2026-08-23, E2 sweep E).** The
+gap just named -- a confidence head whose noise is *not* symmetric across
+calibration and test -- was checked, not left as a caveat. Calibration noise
+held fixed at 0.12; test-time (retake-loop/deployment) noise swept up to
+2.00, a 16.7x asymmetry, with separation/loss_scale/sigma/gamma/head_bias
+held identical across both so only the confidence head's noise differs.
+**No violation anywhere in that range either** -- the crossing rate again
+trends toward zero, not toward `alpha = 0.05`. `results/e2_validity.json:
+head_noise_asymmetry_sweep`, `figures/e2_validity.png` panel (e).
+
+This is a more surprising result than sweep D's, and it should be stated
+honestly as *less* explained. The limiting-case argument for sweep D relies
+specifically on the *same* noise kernel corrupting both populations, so that
+as noise grows, conditioning on the stratum becomes uninformative for both
+alike and the comparison collapses to a shared unconditional baseline; that
+premise does not hold here by construction (calibration noise is held fixed,
+low, and genuinely informative, while test noise grows toward
+uninformative). A plausible partial account: the raw equilibrium-shift
+property (E1) that ultimately does the work in the symmetric case is a
+property of the *policy's correction dynamics*, not of the confidence head at
+all, so a noisier test-time head degrades how well the stratification
+targets that improvement without necessarily erasing the improvement itself
+-- but this is an intuition, not a derivation, and unlike sweep D's finding
+it does not come with a limiting-case proof attached. Treat the asymmetric
+result as a robust empirical finding across the range tested, and a
+concrete, sharper open question for future theoretical work: is there an
+asymmetry magnitude, or a differently-shaped one (e.g. a systematic bias
+rather than added variance), where it does eventually break?
+
+**Summary of the reduction.** A1 is not proved outright for an arbitrary
+generative model or policy -- proving it in general would mean proving a
+distributional comparison that depends on magnitudes (`head_noise` vs.
+correction strength) the primitives leave free, and no clean theorem removes
+that in general. What the argument above does establish, for the simulator
+and policies actually used here, is stronger than "reduced to a named
+assumption": A1 reduces *exactly* to (A1') via the Markov screening lemma,
+the specific failure mode that reduction predicted was checked directly
+across a wide `head_noise` range (both symmetric and, further, asymmetric
+between calibration and test) and did not occur in either, and there is a
+structural explanation -- not just a numerical coincidence -- for the
+symmetric case specifically. The remaining gap is now a matter of theoretical
+completeness rather than an unchecked empirical worry: nothing found here
+constitutes a proof that (A1') holds in general, but the two most natural
+ways it was predicted to fail were both tested directly and neither
+occurred.
 
 ## 7. What is claimed
 
@@ -326,5 +393,11 @@ out," even though it is still a gap.
    stochastic dominance of true quality, test vs. calibration), with a
    mechanistic account of when that condition should hold (genuine
    equilibrium-shifting corrections) versus fail (noise-driven stratum
-   misclassification as `head_noise` grows) — a falsifiable prediction not
-   yet checked directly (§6).
+   misclassification as `head_noise` grows) — a falsifiable prediction that
+   was then checked directly two ways (§6): symmetric `head_noise` up to
+   1.00 (E2 sweep D, 2.5x past E4's original sweep — did not occur, with a
+   structural, limiting-case explanation for why), and, further, asymmetric
+   noise between calibration and deployment up to a 16.7x gap (E2 sweep E —
+   also did not occur, though this second result is empirically robust
+   without a comparably rigorous mechanistic account, and is named as an
+   open question rather than claimed as understood).

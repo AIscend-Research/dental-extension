@@ -97,5 +97,5 @@
   "stratification_gain_vpc": -0.0017500000000000016,
   "retake_gain_vpc": 0.06477259133818548,
   "scoping_note": "Not a reimplementation of Angelopoulos et al. 2022's conformal risk control algorithm -- see module docstring. This is the single-shot, unstratified conformal baseline that family of methods represents here.",
-  "generated_utc": "2026-08-23T17:30:00Z"
+  "generated_utc": "2026-08-23T23:15:33Z"
 }

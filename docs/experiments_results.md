@@ -83,6 +83,53 @@ cleaner shots and a sound tooth photographed cleanly scores low against a pool
 of dirtier shots. Stratification's case is weaker assumptions and a little
 power, not rescued coverage.
 
+**The A1′ falsifiable prediction, checked directly (sweep D, updated
+2026-08-23).** `docs/theory_anytime_validity.md` §6 predicted that A1′ (and
+hence validity itself, not just power) should degrade as `head_noise` rises
+past the point where noise-driven stratum misclassification dominates
+genuine correction. Swept `head_noise` over
+`{0.00, 0.06, 0.12, 0.25, 0.40, 0.60, 0.80, 1.00}` — extended 2.5× past E4's
+own power sweep, to a noise standard deviation as large as the severity scale
+itself — and measured the STRATIFIED arm's crossing rate at α = 0.05 directly
+(K = 4, 10 000 null sessions per point):
+
+| head_noise | 0.00 | 0.06 | 0.12 | 0.25 | 0.40 | 0.60 | 0.80 | 1.00 |
+|---|---|---|---|---|---|---|---|---|
+| crossing rate | 0.0005 | 0.0009 | 0.0003 | 0.0001 | 0.0001 | 0.0000 | 0.0000 | 0.0000 |
+
+No violation anywhere (Wilson upper bound never exceeds 0.0018). The rate
+trends *toward* zero as noise rises, not toward the 0.05 bound — the opposite
+of the predicted failure. Reason, worked through in
+`docs/theory_anytime_validity.md` §6: the confidence head applies the *same*
+unbiased noise kernel to both the calibration and test populations, so as
+`head_noise → ∞` conditioning on the predicted stratum becomes uninformative
+for both alike, and A1′ collapses to the raw equilibrium-shift property E1
+already measures directly (mean true usability +0.1098, first shot to last),
+independent of stratification. Noise degrades stratification's *added* power
+(E4's falling VPC) without reversing the ordering A1′ needs. This narrowed,
+rather than closed, the original gap to a confidence head whose noise is
+*asymmetric* between calibration and deployment conditions.
+
+**The asymmetric case, checked too (sweep E, same update).** Calibration
+noise held at 0.12 (the default); test-time noise swept up to 2.00 — a
+16.7× asymmetry — with every other reader parameter held identical so only
+the confidence head's noise differs between the two populations:
+
+| test-time head_noise | 0.12 | 0.25 | 0.40 | 0.60 | 0.90 | 1.20 | 1.60 | 2.00 |
+|---|---|---|---|---|---|---|---|---|
+| crossing rate | 0.0006 | 0.0003 | 0.0003 | 0.0002 | 0.0001 | 0.0000 | 0.0000 | 0.0000 |
+
+No violation here either. This result is more surprising than sweep D's and
+is stated as *less* explained: sweep D's structural argument specifically
+needs the same noise kernel on both populations, a premise this sweep
+deliberately breaks. `docs/theory_anytime_validity.md` §6 records a plausible
+partial account (the equilibrium-shift property is a fact about the policy's
+correction dynamics, not the confidence head, so a noisier test-time head
+should degrade *targeting* of that improvement without erasing the
+improvement itself) but is explicit that this is an intuition, not a proof —
+a sharper, still-open question for future theoretical work, not a claimed
+closure of the gap.
+
 ## E3 — The Docket leaderboard
 
 n = 4000 cases, K = 4, likelihood-ratio evidence. Updated 2026-08-14 with two
@@ -156,8 +203,25 @@ guarantee (`peeks=True`: thresholding the raw diagnosis score directly is,
 definitionally, conditioning on the quantity being tested) and none was
 found to be egregiously violated at this headline (loose) burden — consistent
 with E2's finding that naive methods look fine at loose standards and fail
-at strict ones, not yet checked here at a strict standard for this specific
-arm.
+at strict ones.
+
+**Checked at a strict standard (updated 2026-08-23): confirmed, and for a
+cleanly different reason than the other naive arms.** Ran
+`confidence_threshold_selective` through E3's full standards ladder
+alongside `evidential_capture` (§ "the standards ladder" below). Its VPC,
+decided-rate, accuracy, FCR, and FDR are **bit-for-bit identical across five
+of the six standards** and only register a violation at the strictest rung
+(near certainty). This is not a bug: `ConfidenceThresholdSelective.run()`
+(`src/bench/policies.py`) never reads `ctx.burden` at all — it thresholds
+`reading.score - 0.5` against a fixed constant, so its real-world error rate
+is one fixed number regardless of what standard of proof the docket asks
+for. The violation only appears once the nominal bound is pulled tighter
+than that fixed rate. This is a *different* failure mode from `best_shot`/
+`greedy`'s multiplicity story (§ E2): those arms' actual error rate grows as
+the retake budget grows; this arm's actual error rate never moves at all,
+and the ladder simply walks the goalposts past it. Both are naive-methods-
+look-fine-until-you-ask-for-more failures, but for structurally different
+reasons — worth keeping distinct rather than citing as one signature.
 
 **Budget.** Evidential capture rises monotonically with K (0.117 → 0.248 from
 K=1 to K=8); `fixed_retake` *peaks at K=3 and then declines*, because a policy

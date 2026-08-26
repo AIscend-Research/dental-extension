@@ -74,6 +74,18 @@ Everything below was confirmed by actually running the code, not inferred:
   comparison. `apply_degradations(..., boxes=...)` returns the boxes remapped
   through the same homography; notebook 01's mapper uses that path and drops
   boxes warped out of frame together with their class labels.
+- **detectron2's default checkpointing fills Kaggle's 20 GB disk and kills
+  the run** — confirmed on a real T4 ×2 session (failed after 8197s with
+  "Your notebook tried to use more disk space than is available", 20.94 GB
+  written). `DefaultTrainer`'s `PeriodicCheckpointer` has no retention cap,
+  and each checkpoint here is ~3.2 GB (282M params fp32 + AdamW optimizer
+  state), so at `CHECKPOINT_PERIOD=500` the `/kaggle/working` cap is hit
+  around iteration ~3000 — long before the disk-cheap part of a 40k-iteration
+  run. Fixed in notebook 01's `build_hooks`: `max_to_keep=2` on the
+  checkpointer hook. When resuming across sessions, copy only the newest
+  checkpoint (the one `last_checkpoint` names), not the whole directory.
+  Silver lining from that failed run: ~2.7s/iteration on the T4, i.e. ~30h
+  for the full 40k — the first real GPU throughput number.
 - **detectron2's own `get_detection_dataset_dicts()` needs a flat
   `"category_id"` field** for its internal class-histogram logging, which
   DENTEX's hierarchical `category_id_1/2/3` schema doesn't have — raises

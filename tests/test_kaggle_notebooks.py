@@ -39,7 +39,7 @@ def _ids(path):
 
 def test_there_are_notebooks_to_check():
     """Guards the glob itself -- an empty parametrize passes silently."""
-    assert len(NOTEBOOKS) == 4
+    assert len(NOTEBOOKS) == 6
 
 
 def code_cells(nb_path: Path) -> list[str]:

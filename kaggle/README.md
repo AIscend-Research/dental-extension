@@ -1,6 +1,27 @@
 # Kaggle notebooks
 
-Four notebooks, run in order. Each one's code was verified locally (macOS
+Two paths through this directory:
+
+- **Condensed path (recommended): `00` → `04` → `05`.** Two GPU sessions
+  total (~11h + ~5h). `04_train_all.ipynb` trains both detector arms *and*
+  the confidence head in one session, using a condensed recipe (10k
+  iterations with a real LR schedule — the upstream config's 40k never
+  anneals, its inherited `STEPS=(210000, 250000)` sit past the end of
+  training — plus Swin stages 0–2 frozen). `05_evaluate_all.ipynb` produces
+  the per-arm mAP/severity sweep, wires the real `DetectorChannel`, and runs
+  the E6-protocol Docket leaderboard with the real detector. Rationale,
+  budget math, and failure-recovery notes are in each notebook's header.
+  Kaggle allows one active GPU session at a time, so merging costs no
+  parallelism and saves the ~20-min setup per notebook.
+- **Original granular path: `00` → `01` (twice) → `02` → `03` (twice).** The
+  full 40k-iteration recipe, one concern per notebook, described below.
+  ~30h/arm at the measured 2.7 s/iter — multi-session with checkpoint/resume.
+
+Unlike 00–03, notebooks 04/05 have NOT been executed end to end (they need a
+GPU session by definition); they reuse 00–03's run-verified cells verbatim
+and state exactly which glue is new in their headers.
+
+Four original notebooks, run in order. Each one's code was verified locally (macOS
 arm64, CPU/MPS, no GPU — see `SETUP.md`) against the actual repo, actual
 DENTEX data, and actual pretrained weights before being written here — not
 guessed. What that verification did and didn't cover is stated explicitly in

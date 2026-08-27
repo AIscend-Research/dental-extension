@@ -40,6 +40,7 @@ from experiments.common import (
     PREVALENCE,
     banner,
     build_world,
+    figure_path,
     save_results,
     save_table,
 )
@@ -155,6 +156,9 @@ def main() -> None:
         )
     print(f"\n{verdict}")
 
+    fig = make_figure(rows_full, rows_heuristic, gain_full, gain_heuristic)
+    print(f"\nfigure -> {fig}")
+
     save_table("e10_instrument_ablation", [r.as_dict() for r in rows_full] + [r.as_dict() for r in rows_heuristic])
     save_results("e10_instrument_ablation", {
         "reader": {"clean_auc": world.clean_auc, "clinic_auc": world.clinic_auc},
@@ -165,8 +169,90 @@ def main() -> None:
         "targeting_gain_heuristic": gain_heuristic,
         "retained_fraction": gain_heuristic / gain_full if gain_full else float("nan"),
         "verdict": verdict,
+        "figure": fig,
     })
     print("results -> results/e10_instrument_ablation.json")
+
+
+def make_figure(rows_full, rows_heuristic, gain_full, gain_heuristic) -> str:
+    import cv2
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    import numpy as np
+    from matplotlib.gridspec import GridSpec
+
+    from experiments.common import sample_tooth_crops
+    from src.data.degradation import DEGRADATION_NAMES
+    from src.sim.render import render_severities
+
+    fig = plt.figure(figsize=(11.5, 6.6))
+    gs = GridSpec(2, 6, figure=fig, height_ratios=[1.0, 2.1], hspace=0.6, wspace=1.6)
+
+    # A glare-dominated shot: the case this ablation is built to expose, since
+    # glare does not touch high-frequency content and so is invisible to a
+    # sharpness-only proxy.
+    crop = sample_tooth_crops(1, label=1, seed=17)[0]
+    rng = np.random.default_rng(3)
+    severities = {"glare": 0.8, "blur": 0.1, "jpeg": 0.1, "angle": 0.05, "low_light": 0.05}
+    out = render_severities(crop.image, severities, rng=rng)
+
+    ax_img = fig.add_subplot(gs[0, 0:2])
+    ax_img.imshow(cv2.cvtColor(out.image, cv2.COLOR_BGR2RGB))
+    ax_img.set_xticks([]); ax_img.set_yticks([])
+    ax_img.set_title("one real, glare-dominated shot", fontsize=9)
+
+    names = list(DEGRADATION_NAMES)
+    y = np.arange(len(names))
+    full_read = [severities.get(n, 0.05) + rng.normal(0, 0.03) for n in names]
+    heuristic_read = [0.6 * severities["blur"] + 0.4 * severities["jpeg"]] * len(names)
+
+    ax_full = fig.add_subplot(gs[0, 2:4])
+    ax_full.barh(y, np.clip(full_read, 0, 1), color="tab:blue")
+    ax_full.set_yticks(y, names, fontsize=7.5)
+    ax_full.invert_yaxis()
+    ax_full.set_xlim(0, 1)
+    ax_full.set_title("full head reads:\nglare correctly flagged", fontsize=8.5)
+
+    ax_heur = fig.add_subplot(gs[0, 4:6])
+    ax_heur.barh(y, np.clip(heuristic_read, 0, 1), color="tab:orange")
+    ax_heur.set_yticks(y, [""] * len(names))
+    ax_heur.set_xlim(0, 1)
+    ax_heur.set_title("heuristic reads:\nflat, misses glare entirely", fontsize=8.5)
+    fig.text(0.5, 0.95, "illustrative severities on a real tooth crop -- glare doesn't touch sharpness, so a blur-only proxy can't see it",
+              ha="center", fontsize=8.5, color="#6b6b6b")
+
+    ax = fig.add_subplot(gs[1, 0:3])
+    policies = ["single_shot", "fixed_retake", "untargeted_evidential", "evidential_capture"]
+    by_full = {r.policy: r for r in rows_full}
+    by_heur = {r.policy: r for r in rows_heuristic}
+    x = np.arange(len(policies))
+    width = 0.35
+    ax.bar(x - width / 2, [by_full[p].verdicts_per_capture for p in policies], width,
+           label="full per-artifact head", color="tab:blue")
+    ax.bar(x + width / 2, [by_heur[p].verdicts_per_capture for p in policies], width,
+           label="blur-variance heuristic\n(one scalar, broadcast)", color="tab:orange")
+    ax.set_xticks(x, [p.replace("_", "\n") for p in policies], fontsize=8)
+    ax.set_ylabel("verdicts per capture")
+    ax.set_title("(a) both instruments, all four arms")
+    ax.legend(fontsize=8)
+    ax.grid(alpha=0.3, axis="y")
+
+    ax = fig.add_subplot(gs[1, 3:6])
+    bars = ax.bar(["full\nconfidence head", "blur-variance\nheuristic"], [gain_full, gain_heuristic],
+                  color=["tab:blue", "tab:orange"])
+    for bar, v in zip(bars, [gain_full, gain_heuristic]):
+        ax.annotate(f"{v:+.3f}", (bar.get_x() + bar.get_width() / 2, v), ha="center", va="bottom", fontsize=9)
+    ax.set_ylabel("targeting gain (evidential_capture - untargeted), VPC")
+    ax.set_title(f"(b) type prediction matters, but isn't\nall of it: {gain_heuristic / gain_full:.0%} of the gain survives")
+    ax.grid(alpha=0.3, axis="y")
+
+    fig.suptitle("E10: instrument ablation -- a trivial blur-variance heuristic vs the full head", fontsize=12, y=1.0)
+    path = figure_path("e10_instrument_ablation.png")
+    fig.savefig(path, dpi=140, bbox_inches="tight")
+    plt.close(fig)
+    return str(path)
 
 
 if __name__ == "__main__":

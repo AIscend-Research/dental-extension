@@ -119,6 +119,34 @@ def build_world(
 
 
 # ---------------------------------------------------------------------------
+# real tooth crops, for figures that want a photograph rather than a bar
+# ---------------------------------------------------------------------------
+
+_TOOTH_CROPS_CACHE: list | None = None
+
+
+def sample_tooth_crops(n: int = 1, label: int | None = None, seed: int = 0) -> list:
+    """A few real DENTEX tooth crops, for dressing a results figure with an
+    actual photograph instead of only bars. Loads the (small) validation
+    split once and caches it -- this is image I/O, not model fitting, so it
+    is cheap enough to call from inside a `make_figure`.
+
+    Args:
+        label: 1 = caries, 0 = sound, None = either.
+    """
+    global _TOOTH_CROPS_CACHE
+    from src.data.dentex_crops import load_tooth_crops
+
+    if _TOOTH_CROPS_CACHE is None:
+        _TOOTH_CROPS_CACHE = load_tooth_crops(task="caries_vs_other", crop_size=220, context=0.75)
+
+    pool = _TOOTH_CROPS_CACHE if label is None else [c for c in _TOOTH_CROPS_CACHE if c.label == label]
+    rng = np.random.default_rng(seed)
+    idx = rng.choice(len(pool), size=min(n, len(pool)), replace=False)
+    return [pool[i] for i in idx]
+
+
+# ---------------------------------------------------------------------------
 # output plumbing
 # ---------------------------------------------------------------------------
 

@@ -398,6 +398,93 @@ def figure_glare_geometry(crop) -> str:
     return str(path)
 
 
+def figure_tooth_gallery(crops, n_per_class: int = 12, seed: int = 7) -> str:
+    """A grid of real DENTEX tooth crops, sound and carious side by side,
+    with one clean/degraded pair to keep the gallery tied to the paper's
+    actual subject rather than reading as a plain dataset dump.
+    """
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    rng = np.random.default_rng(seed)
+    sound = [c for c in crops if c.label == 0]
+    carious = [c for c in crops if c.label == 1]
+    rng.shuffle(sound)
+    rng.shuffle(carious)
+    sound = sound[:n_per_class]
+    carious = carious[:n_per_class]
+    n = max(len(sound), len(carious))
+
+    fig, axes = plt.subplots(2, n, figsize=(1.55 * n, 3.5), facecolor=PAPER)
+    for row, (label_crops, colour, name) in enumerate(
+        [(sound, GOOD, "sound"), (carious, WARN, "caries")]
+    ):
+        for i in range(n):
+            ax = axes[row, i]
+            ax.set_xticks([]); ax.set_yticks([])
+            if i < len(label_crops):
+                ax.imshow(_rgb(label_crops[i].image))
+            for spine in ax.spines.values():
+                spine.set_edgecolor(colour); spine.set_linewidth(2.0)
+            if i == 0:
+                ax.set_ylabel(name, fontsize=13, color=colour, weight="bold",
+                              rotation=0, ha="right", va="center", labelpad=16)
+
+    fig.suptitle(
+        f"Real DENTEX teeth: {len(sound)} sound, {len(carious)} carious, from the held-out test crops",
+        fontsize=13, color=INK, y=1.01,
+    )
+    fig.tight_layout()
+    path = figure_path("q4_tooth_gallery.png")
+    fig.savefig(path, dpi=150, facecolor=PAPER, bbox_inches="tight")
+    plt.close(fig)
+    return str(path)
+
+
+def figure_tooth_before_after(crop, seed: int = 12) -> str:
+    """The same real tooth, clean and under each artifact at a clinic-grade
+    severity -- a crop-scale companion to q2's full-panoramic atlas, close
+    enough to read the enamel that the damage is legible at a glance.
+    """
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    names = list(DEGRADATION_NAMES)
+    fig, axes = plt.subplots(1, len(names) + 1, figsize=(2.4 * (len(names) + 1), 3.1), facecolor=PAPER)
+
+    ax = axes[0]
+    ax.imshow(_rgb(crop.image))
+    ax.set_xticks([]); ax.set_yticks([])
+    for spine in ax.spines.values():
+        spine.set_edgecolor(INK); spine.set_linewidth(1.6)
+    ax.set_title("clean crop", fontsize=10.5, color=INK, pad=6)
+
+    for i, name in enumerate(names):
+        rng = np.random.default_rng(seed)
+        out = render_severities(crop.image, {name: 0.7}, rng=rng)
+        ax = axes[i + 1]
+        ax.imshow(_rgb(out.image))
+        ax.set_xticks([]); ax.set_yticks([])
+        for spine in ax.spines.values():
+            spine.set_edgecolor(ACCENT); spine.set_linewidth(1.4)
+        ax.set_title(name, fontsize=10.5, color=ACCENT, pad=6)
+
+    truth = "caries" if crop.label == 1 else "sound"
+    fig.suptitle(
+        f"One real tooth (ground truth: {truth}), same photograph, five ways to ruin it",
+        fontsize=13.5, color=INK, y=1.04,
+    )
+    fig.tight_layout()
+    path = figure_path("q5_tooth_before_after.png")
+    fig.savefig(path, dpi=150, facecolor=PAPER, bbox_inches="tight")
+    plt.close(fig)
+    return str(path)
+
+
 def main() -> None:
     banner("E7 -- qualitative figures on real radiographs")
     rng = np.random.default_rng(0)
@@ -421,6 +508,10 @@ def main() -> None:
     print("  ->", figure_degradation_atlas())
     print("q3: glare geometry ...", flush=True)
     print("  ->", figure_glare_geometry(carious[0]))
+    print("q4: real tooth gallery ...", flush=True)
+    print("  ->", figure_tooth_gallery(test))
+    print("q5: one tooth, five ways to ruin it ...", flush=True)
+    print("  ->", figure_tooth_before_after(carious[0]))
 
 
 if __name__ == "__main__":

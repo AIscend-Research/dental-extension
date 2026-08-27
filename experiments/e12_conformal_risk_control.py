@@ -29,6 +29,7 @@ from experiments.common import (
     PREVALENCE,
     banner,
     build_world,
+    figure_path,
     save_results,
     save_table,
 )
@@ -89,6 +90,9 @@ def main() -> None:
         f"\nadding the retake loop on top (single-shot -> evidential_capture): {retake_gain:+.4f} VPC"
     )
 
+    fig = make_figure(rows, stratification_gain, retake_gain)
+    print(f"\nfigure -> {fig}")
+
     save_table("e12_conformal_risk_control", [r.as_dict() for r in rows])
     save_results("e12_conformal_risk_control", {
         "reader": {"clean_auc": world.clean_auc, "clinic_auc": world.clinic_auc},
@@ -101,8 +105,77 @@ def main() -> None:
             "control algorithm -- see module docstring. This is the single-shot, "
             "unstratified conformal baseline that family of methods represents here."
         ),
+        "figure": fig,
     })
     print("results -> results/e12_conformal_risk_control.json")
+
+
+def make_figure(rows, stratification_gain, retake_gain) -> str:
+    import cv2
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    import numpy as np
+    from matplotlib.gridspec import GridSpec
+
+    from experiments.common import sample_tooth_crops
+    from src.sim.render import render_severities
+
+    fig = plt.figure(figsize=(11.5, 6.6))
+    gs = GridSpec(2, 5, figure=fig, height_ratios=[1.0, 2.1], hspace=0.6, wspace=0.15)
+
+    crop = sample_tooth_crops(1, label=0, seed=33)[0]
+    rng = np.random.default_rng(8)
+    single_out = render_severities(crop.image, {"blur": 0.4, "glare": 0.3}, rng=rng)
+    ax_single = fig.add_subplot(gs[0, 0])
+    ax_single.imshow(cv2.cvtColor(single_out.image, cv2.COLOR_BGR2RGB))
+    ax_single.set_xticks([]); ax_single.set_yticks([])
+    for spine in ax_single.spines.values():
+        spine.set_edgecolor("tab:grey"); spine.set_linewidth(2.0)
+    ax_single.set_title("single_shot:\none look, decide now", fontsize=8.5, color="tab:grey")
+
+    for i in range(4):
+        rng = np.random.default_rng(40 + i)
+        severity = max(0.55 - 0.15 * i, 0.1)
+        out = render_severities(crop.image, {"blur": severity, "glare": max(severity - 0.1, 0.0)}, rng=rng)
+        ax = fig.add_subplot(gs[0, i + 1])
+        ax.imshow(cv2.cvtColor(out.image, cv2.COLOR_BGR2RGB))
+        ax.set_xticks([]); ax.set_yticks([])
+        for spine in ax.spines.values():
+            spine.set_edgecolor("tab:blue"); spine.set_linewidth(1.6)
+        ax.set_title(f"retake\nshot {i + 1}", fontsize=8.5, color="tab:blue")
+    fig.text(0.5, 0.945, "the same real tooth: one look vs evidential_capture's retake loop, quality improving shot by shot until the burden is met",
+              ha="center", fontsize=8.5, color="#6b6b6b")
+
+    ax = fig.add_subplot(gs[1, 0:2])
+    labels = ["conformal-risk-control\nstyle (marginal)", "single_shot\n(stratified)", "evidential_capture\n(stratified, retake)"]
+    vpc = [r.verdicts_per_capture for r in rows]
+    bars = ax.bar(labels, vpc, color=["tab:grey", "tab:orange", "tab:blue"])
+    for bar, v in zip(bars, vpc):
+        ax.annotate(f"{v:.3f}", (bar.get_x() + bar.get_width() / 2, v), ha="center", va="bottom", fontsize=9)
+    ax.set_ylabel("verdicts per capture")
+    ax.set_title("(a) the three arms")
+    ax.grid(alpha=0.3, axis="y")
+
+    ax = fig.add_subplot(gs[1, 2:5])
+    base = rows[0].verdicts_per_capture
+    strat = base + stratification_gain
+    final = strat + retake_gain
+    ax.bar(["marginal\n(baseline)"], [base], color="tab:grey")
+    ax.bar(["+ stratification"], [stratification_gain], bottom=[base], color="tab:orange")
+    ax.bar(["+ retake loop"], [retake_gain], bottom=[strat], color="tab:blue")
+    ax.annotate(f"{stratification_gain:+.4f}", (1, base + stratification_gain / 2), ha="center", fontsize=8)
+    ax.annotate(f"{retake_gain:+.4f}", (2, strat + retake_gain / 2), ha="center", fontsize=8)
+    ax.set_ylabel("verdicts per capture")
+    ax.set_title("(b) where the gain comes from:\nstratification alone buys ~nothing, retaking does")
+    ax.grid(alpha=0.3, axis="y")
+
+    fig.suptitle("E12: a conformal-risk-control-style baseline on the leaderboard", fontsize=12, y=1.0)
+    path = figure_path("e12_conformal_risk_control.png")
+    fig.savefig(path, dpi=140, bbox_inches="tight")
+    plt.close(fig)
+    return str(path)
 
 
 if __name__ == "__main__":

@@ -41,6 +41,7 @@ from experiments.common import (
     PREVALENCE,
     banner,
     build_world,
+    figure_path,
     save_results,
     save_table,
 )
@@ -155,6 +156,9 @@ def main() -> None:
         f"({sequential.verdicts_per_capture:.3f} vs {burst_fair.verdicts_per_capture:.3f})"
     )
 
+    fig = make_figure(sequential, burst_mismatched, burst_fair, mismatch_cost, fusion_gap)
+    print(f"\nfigure -> {fig}")
+
     save_table("e9_burst_vs_sequential", [r.as_dict() for r in rows])
     save_results("e9_burst_vs_sequential", {
         "reader": {"clean_auc": world.clean_auc, "clinic_auc": world.clinic_auc},
@@ -164,8 +168,78 @@ def main() -> None:
         "burst_own_null": burst_fair.as_dict(),
         "calibration_mismatch_cost_vpc": mismatch_cost,
         "fusion_vs_sequential_gap_vpc": fusion_gap,
+        "figure": fig,
     })
     print("results -> results/e9_burst_vs_sequential.json")
+
+
+def make_figure(sequential, burst_mismatched, burst_fair, mismatch_cost, fusion_gap) -> str:
+    import cv2
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    import numpy as np
+    from matplotlib.gridspec import GridSpec
+
+    from experiments.common import sample_tooth_crops
+    from src.sim.render import render_severities
+
+    fig = plt.figure(figsize=(11, 6.4))
+    outer = GridSpec(2, 1, figure=fig, height_ratios=[1.0, 2.1], hspace=0.55)
+    gs_top = outer[0].subgridspec(1, 4, wspace=0.15)
+    gs_bottom = outer[1].subgridspec(1, 2, wspace=0.6)
+
+    crop = sample_tooth_crops(1, label=1, seed=9)[0]
+    for i in range(4):
+        ax = fig.add_subplot(gs_top[0, i])
+        rng = np.random.default_rng(100 + i)
+        severities = {name: float(rng.uniform(0.15, 0.7)) for name in ("blur", "glare", "angle", "low_light")}
+        out = render_severities(crop.image, severities, rng=rng)
+        ax.imshow(cv2.cvtColor(out.image, cv2.COLOR_BGR2RGB))
+        ax.set_xticks([]); ax.set_yticks([])
+        ax.set_title(f"shot {i + 1}", fontsize=9)
+        for spine in ax.spines.values():
+            spine.set_edgecolor("#9aa0a6")
+    fig.text(0.5, 0.945, "one real tooth, K=4 untargeted shots -- sequential bets on each in turn; burst fusion averages them first",
+              ha="center", fontsize=9.5, color="#6b6b6b")
+
+    ax = fig.add_subplot(gs_bottom[0, 0])
+    rows = [sequential, burst_mismatched, burst_fair]
+    labels = ["sequential\n(wealth process)", "burst fusion\n(wrong null)", "burst fusion\n(own null)"]
+    colors = ["tab:blue", "tab:red", "tab:orange"]
+    vpc = [r.verdicts_per_capture for r in rows]
+    bars = ax.bar(labels, vpc, color=colors)
+    for bar, v in zip(bars, vpc):
+        ax.annotate(f"{v:.3f}", (bar.get_x() + bar.get_width() / 2, v), ha="center", va="bottom", fontsize=9)
+    ax.annotate(
+        "", xy=(1, burst_fair.verdicts_per_capture), xytext=(1, burst_mismatched.verdicts_per_capture),
+        arrowprops=dict(arrowstyle="<->", color="tab:red", lw=1.4),
+    )
+    ax.text(1.08, (burst_mismatched.verdicts_per_capture + burst_fair.verdicts_per_capture) / 2,
+            f"calibration\nmismatch cost\n{mismatch_cost:+.3f} VPC", fontsize=8, color="tab:red", va="center")
+    ax.set_ylabel("verdicts per capture")
+    ax.set_title("(a) fusing K shots: testing the fused\nstatistic against the wrong null cripples it")
+    ax.grid(alpha=0.3, axis="y")
+
+    ax = fig.add_subplot(gs_bottom[0, 1])
+    fair_rows = [sequential, burst_fair]
+    x = np.arange(len(fair_rows))
+    width = 0.35
+    b1 = ax.bar(x - width / 2, [r.verdicts_per_capture for r in fair_rows], width, label="verdicts per capture", color="tab:blue")
+    ax2 = ax.twinx()
+    b2 = ax2.bar(x + width / 2, [r.verdict_accuracy for r in fair_rows], width, label="accuracy", color="tab:green")
+    ax.set_xticks(x, ["sequential\n(wealth process)", "burst fusion\n(own null)"])
+    ax.set_ylabel("verdicts per capture", color="tab:blue")
+    ax2.set_ylabel("accuracy on rendered verdicts", color="tab:green")
+    ax.set_title(f"(b) fairly calibrated: sequential ahead by\n{fusion_gap:.3f} VPC, fusion more accurate when it decides")
+    ax.legend(handles=[b1, b2], loc="upper center", fontsize=8)
+
+    fig.suptitle("E9: burst fusion vs sequential wealth accumulation, both fairly calibrated", fontsize=12, y=1.0)
+    path = figure_path("e9_burst_vs_sequential.png")
+    fig.savefig(path, dpi=140, bbox_inches="tight")
+    plt.close(fig)
+    return str(path)
 
 
 if __name__ == "__main__":

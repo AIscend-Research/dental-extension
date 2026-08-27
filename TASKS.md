@@ -3,9 +3,13 @@
 > **Status update — the project pivoted to evidential capture.** The roadmap
 > below is the original application plan (train HierarchicalDet, make it robust,
 > add a confidence head). It is still accurate about that track, and the GPU
-> training run is still not done. But the paper's contribution is now the
-> framework/theory/benchmark described in the README, which is complete and
-> fully evaluated: see [docs/experiments_results.md](docs/experiments_results.md).
+> training run was attempted (`kaggle/04_train_all.ipynb`) but did not
+> converge within a single 12h Kaggle session's ~10k-iteration budget — see
+> the compute-budget finding in
+> [docs/experiments_results.md](docs/experiments_results.md)'s E6 section.
+> But the paper's contribution is now the framework/theory/benchmark
+> described in the README, which is complete and fully evaluated: see
+> [docs/experiments_results.md](docs/experiments_results.md).
 >
 > What that changes about the roadmap:
 >
@@ -23,11 +27,15 @@
 >   framework is model-agnostic and is demonstrated on an anchored analytic
 >   reader and on a real learned reader over DENTEX crops. A trained
 >   HierarchicalDet would slot in as another `DiagnosticChannel`.
-> - **The one thing that still genuinely needs more data**: validating
->   `SIGNAL_LOSS_WEIGHTS` (which artifacts destroy the most diagnostic signal).
->   E6 attempted it and was inconclusive — the public 50-radiograph split is
->   too small for the fine-grained task (AUC 0.481) and too easy on the coarse
->   one (0.986). This needs the full 11GB DENTEX training split.
+> - **`SIGNAL_LOSS_WEIGHTS` is still unvalidated, but data size is no longer
+>   the open question.** E6 was re-run on the full ~700-radiograph training
+>   split (up from the 50-radiograph public split) and is still
+>   inconclusive: fine-grained AUC moved from chance (0.481) to just short of
+>   interpretable (0.596, bar 0.60). That points at the linear hand-feature
+>   reader itself as a co-binding constraint, not sample size alone — a
+>   stronger real backbone is the more promising next step, contingent on
+>   the GPU-training-budget issue above, not on more data through this
+>   pipeline.
 
 The point of the scaffold is that people are not all blocked on the same thing.
 Below, each workstream says what it depends on. Anything marked "no detector

@@ -409,11 +409,14 @@ but did not converge within the ~10k-iteration budget a single 12h Kaggle
 GPU session allows (vs. the paper's 40k): the disease-classification head's
 bias stayed at its focal-loss initialization value across all six head
 stages in both training arms, and the more heavily degraded arm produced no
-detections at all. This is a compute-budget finding, not evidence against
-the approach — it remains the more promising path, contingent on more
-training budget than one session provides. The magnitudes, not the
-taxonomy or the dynamics, are the weakest link in the parameter table (see
-`docs/simulator_grounding.md`).
+detections at all. That pattern is consistent with insufficient training
+rather than a data or code defect — the eval loop's box-coordinate scaling
+was checked against the DiffusionDet source and is correct — but a live
+forward-pass check would be needed to fully rule out other causes. This
+remains a plausible path in principle, contingent on more training budget
+than one session provides, not a settled negative result. The magnitudes,
+not the taxonomy or the dynamics, are the weakest link in the parameter
+table (see `docs/simulator_grounding.md`).
 
 **The bound is loose.** Nothing here claims tightness. At α = 0.5 the
 conformal arm's empirical crossing rate is 0.075 against a nominal bound of

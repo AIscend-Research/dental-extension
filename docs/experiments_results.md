@@ -298,9 +298,22 @@ chance to just short of interpretable, not past it:
   (`src/models/real_channel.py`, chosen deliberately for low variance on a
   small split — see that module's docstring) as a co-binding constraint
   alongside sample size, not sample size alone. A stronger real backbone
-  (the Kaggle-trained detector, once it exists) is now the more promising
-  path to resolving this than more data through this same linear reader
-  would be.
+  was the more promising path to resolving this than more data through this
+  same linear reader — attempted (`kaggle/04_train_all.ipynb`,
+  `05_evaluate_all.ipynb`), but inconclusive: DiffusionDet fine-tuned for
+  the condensed 10k-iteration budget (vs. the paper's 40k) that fits
+  Kaggle's single 12h session produced a detector whose
+  disease-classification head had not moved from its focal-loss
+  initialization (bias ≈ −4.6 across all six head stages, both arms — the
+  standard `-log(99)` prior, not a learned value) and which detected
+  nothing at all from the more heavily degraded (`robustness`) arm. That
+  pattern is consistent with insufficient training rather than a data or
+  code defect — the eval loop's box-coordinate scaling was traced against
+  the actual DiffusionDet source and is correct — but a live forward-pass
+  check would be needed to fully rule out other causes before treating this
+  as settled. This backbone remains a plausible path in principle,
+  contingent on more training budget than a single Kaggle session
+  provides.
 - *Caries+Deep vs Impacted+Periapical* (coarse, 3529 teeth from 705
   radiographs): **AUC 0.729**, down sharply from 0.986 on the small split.
   The full split's class balance is also far more skewed on this task
